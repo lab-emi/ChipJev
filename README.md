@@ -7,6 +7,12 @@
 
 **Ultrafast circuit design with a System One model and open-source EDA.**
 
+> **[Watch the live circuit demo →](https://lab-emi.github.io/ChipJev/)**
+> One click rebuilds ChipJev's largest published SKY130 final design in xschem,
+> runs fresh ngspice simulations, and streams the circuit and measured responses.
+> The demo uses a fixed published design; it does not repeat the topology search.
+> [Run or deploy the demo](deploy/chipjev/README.md).
+
 Source code, recorded experiments and reproducible circuit-design tools. The manuscript is maintained separately.
 
 > ChipJev's typed decisions run the [**Laya**](https://github.com/NandhaKishorM/laya) decision

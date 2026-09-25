@@ -44,3 +44,12 @@ reconstructed in `src/chipjev/analogcoder_pro/helper.py` from the paper's descri
 xschem, ngspice, the SKY130 models (via the pinned AnalogGym archive), PyTorch, Triton (the
 fused Thompson-sampling kernels), Optuna and the Hugging Face libraries are used as external
 dependencies under their own licenses; none of their source is included here.
+
+## Live demo schematic symbols
+
+`scripts/setup-demo.sh` downloads two unmodified SKY130 xschem symbols from
+[StefanSchippers/xschem_sky130](https://github.com/StefanSchippers/xschem_sky130),
+revision `fef70fad3804d1c298c70f78de769825d7dfea19`. These symbols are Copyright
+2021 Stefan Frederik Schippers, Apache-2.0. Their notices and the repository
+license are retained under the ignored `.tools/xschem/` installation directory.
+No third-party symbol source is redistributed as part of the website.

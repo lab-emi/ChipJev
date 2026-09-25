@@ -1,0 +1,2 @@
+# Separate from the frozen research lockfile. Install after uv sync --extra research.
+aiohttp==3.14.3

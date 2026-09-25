@@ -1,0 +1,8 @@
+# Replace the tunnel ID after `cloudflared tunnel create chipjev-demo`.
+# Credentials are injected into the tunnel service, never into the EDA service.
+tunnel: REPLACE_WITH_CHIPJEV_TUNNEL_UUID
+ingress:
+  - hostname: api.chipjev.com
+    path: ^/api/.*
+    service: http://127.0.0.1:18766
+  - service: http_status:404

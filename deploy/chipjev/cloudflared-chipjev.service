@@ -1,0 +1,24 @@
+[Unit]
+Description=ChipJev outbound HTTPS tunnel
+After=network-online.target chipjev-demo.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=true
+LoadCredential=tunnel.json:/etc/chipjev-demo/tunnel.json
+ExecStart=/usr/local/bin/cloudflared --no-autoupdate tunnel --config /etc/chipjev-demo/cloudflared.yml --protocol http2 --credentials-file %d/tunnel.json run
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+CapabilityBoundingSet=
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryMax=256M
+TasksMax=32
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

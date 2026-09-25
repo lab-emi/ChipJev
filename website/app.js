@@ -1,0 +1,229 @@
+const $ = (id) => document.getElementById(id);
+const runButton = $("run");
+const stageNames = ["building", "netlisting", "simulating", "checking"];
+let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false;
+let startTime = 0, timer, result, finished = false, expanded = false;
+const runKey = "chipjev-live-run-v1";
+
+function saveRun(value) {
+  try { value ? sessionStorage.setItem(runKey, value) : sessionStorage.removeItem(runKey); } catch { /* Storage is optional. */ }
+}
+function readRun() { try { return sessionStorage.getItem(runKey); } catch { return null; } }
+function button(label, disabled = false) { runButton.querySelector("span").textContent = label; runButton.disabled = disabled; }
+function error(message) { $("error").textContent = message; $("error").hidden = !message; }
+function badge(text, style = "") { $("run-state").textContent = text; $("run-state").className = `state-badge ${style}`; }
+function reset() {
+  error(""); result = null; lastEvent = 0; reconnects = 0; finished = false;
+  $("downloads").hidden = true; $("progress").value = 0;
+  $("screen-note").hidden = true; $("verification").className = "verification";
+  $("verification").textContent = "Measurements appear after simulation.";
+  $("result-note").textContent = "Plots and measurements come from the current ngspice run.";
+  for (const [key, unit] of [["gain", "dB"], ["gbw", "MHz"], ["pm", "°"], ["power", "mW"]]) setMetric(key, null, unit);
+  for (const node of document.querySelectorAll(".stages li")) node.className = "";
+  for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"]]) {
+    const p = document.createElement("p"); p.textContent = text; $(key).replaceChildren(p);
+  }
+}
+
+async function request(path, options = {}) {
+  const response = await fetch(`${api}${path}`, { ...options, credentials: "omit", cache: "no-store", signal: AbortSignal.timeout(10000) });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "The simulation service is not ready. Please retry shortly.");
+  return data;
+}
+
+async function health() {
+  try {
+    const state = await request("/api/health");
+    $("availability").textContent = state.active_run ? "A run is in progress · click to watch live" : "Service online · one click to start";
+    return true;
+  } catch {
+    $("availability").textContent = "Live service unavailable · click to retry";
+    return false;
+  }
+}
+
+function setMetric(key, value, unit) {
+  const small = document.createElement("small"); small.textContent = unit;
+  $(key).replaceChildren(document.createTextNode(Number.isFinite(value) ? value.toFixed(2) : "—"), small);
+}
+
+function showResult(data) {
+  result = data;
+  setMetric("gain", data.metrics.gain_db, "dB");
+  setMetric("gbw", data.metrics.gbw_mhz, "MHz");
+  setMetric("pm", data.metrics.pm_deg, "°");
+  setMetric("power", data.metrics.power_uw / 1000, "mW");
+  const checks = Object.values(data.checks);
+  $("verification").textContent = data.valid ? `${checks.filter(Boolean).length}/${checks.length} checks passed · netlist verified` : "Qualification failed; inspect the downloaded results.";
+  $("verification").className = `verification ${data.valid ? "success" : ""}`;
+  $("result-note").textContent = `Fresh run · strict verification ${data.wall_seconds.toFixed(2)} s · demo ${data.demo_seconds.toFixed(2)} s including display pacing.`;
+}
+
+function complete(ok) {
+  finished = true; running = false; clearInterval(timer);
+  $("live-dot").classList.remove("active");
+  $("stream-label").textContent = ok ? "RUN COMPLETE" : "RUN STOPPED";
+  $("frame-note").textContent = ok ? "Final frame from this live xschem session" : "Last received xschem frame";
+  button("Run again");
+  if (result) {
+    $("elapsed").textContent = `${result.demo_seconds.toFixed(2)} s`;
+    badge(result.valid ? "Verified" : "Unqualified", result.valid ? "success" : "failed");
+  } else if (!ok) badge("Stopped", "failed");
+  if (ok && result) {
+    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"]]) {
+      const link = $(`download-${id}`); link.href = `${api}/api/runs/${runId}/artifacts/${name}`; link.download = name;
+    }
+    $("downloads").hidden = false;
+    $("availability").textContent = "Run complete · 15-second cooldown before restarting";
+  }
+  saveRun(null);
+}
+
+function event(data) {
+  if (data.type === "finished") { complete(data.status === "complete"); return; }
+  if (data.id && data.id <= lastEvent) return;
+  lastEvent = data.id || lastEvent;
+  if (data.elapsed) startTime = performance.now() - data.elapsed * 1000;
+  if (data.type === "stage") {
+    $("run-message").textContent = data.message; $("progress").value = data.progress;
+    const index = stageNames.indexOf(data.stage);
+    for (const [i, node] of [...document.querySelectorAll(".stages li")].entries()) {
+      node.className = ["complete", "unqualified"].includes(data.stage) || i < index ? "done" : i === index ? "active" : "";
+    }
+    badge(data.stage === "complete" ? "Verified" : data.stage === "unqualified" ? "Unqualified" : "Running", data.stage === "complete" ? "success" : "");
+  } else if (data.type === "waveforms") drawWaveforms(data);
+  else if (data.type === "result") showResult(data);
+  else if (data.type === "error") { error(data.message); complete(false); }
+}
+
+function connect() {
+  const url = new URL(`${api}/api/runs/${runId}/live`); url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  socket = new WebSocket(url); socket.binaryType = "blob";
+  socket.onopen = () => { $("availability").textContent = "Connected to a live xschem session"; };
+  socket.onmessage = ({ data }) => {
+    if (data instanceof Blob) {
+      const previous = frameURL; frameURL = URL.createObjectURL(data); $("frame").src = frameURL;
+      $("frame").alt = "Live xschem screen from the current circuit simulation";
+      if (previous) URL.revokeObjectURL(previous);
+      $("stream-label").textContent = "LIVE XSCHEM"; $("live-dot").classList.add("active");
+      $("frame-note").textContent = "Live capture · private virtual display · view-only";
+    } else { try { event(JSON.parse(data)); } catch { error("A stream message could not be read. Reconnect to the run."); } }
+  };
+  socket.onclose = () => {
+    if (finished || !running) return;
+    $("live-dot").classList.remove("active"); $("stream-label").textContent = "RECONNECTING";
+    if (++reconnects <= 3) {
+      $("availability").textContent = "Connection interrupted · reconnecting to this run…";
+      setTimeout(() => { if (!finished && running) connect(); }, Math.min(1000 * 2 ** reconnects, 8000));
+    } else {
+      error("The live connection was interrupted. The simulation may still be running; click Reconnect to recover it.");
+      clearInterval(timer); running = false; button("Reconnect to run");
+      $("availability").textContent = "Live connection lost"; badge("Disconnected", "failed");
+    }
+  };
+}
+
+async function launch() {
+  if (!api || running) return;
+  button("Connecting…", true); error("");
+  try {
+    if (runId && !finished && lastEvent) {
+      const state = await request(`/api/runs/${runId}`);
+      if (["running", "complete"].includes(state.status)) { reconnects = 0; begin(); return; }
+    }
+    const response = await request("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    reset(); runId = response.id; saveRun(runId);
+    $("run-message").textContent = response.joined ? "Joining the shared live run already in progress…" : "Starting a fresh circuit simulation…";
+    begin();
+  } catch (err) {
+    error(err instanceof TypeError ? "The live service could not be reached. Please retry shortly. The reference capture remains available below." : err.message);
+    button("Retry live simulation");
+    $("availability").textContent = "Waiting for the simulation service";
+    if (err.message.includes("expired")) { runId = null; lastEvent = 0; saveRun(null); }
+  }
+}
+function begin() {
+  running = true; finished = false; startTime = performance.now();
+  button("Simulation running…", true); badge("Starting");
+  clearInterval(timer);
+  timer = setInterval(() => { $("elapsed").textContent = `${((performance.now() - startTime) / 1000).toFixed(1)} s`; }, 100);
+  connect();
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function svgNode(name, attrs = {}, text) {
+  const node = document.createElementNS(NS, name);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function chart(container, title, xLabel, yLabel, xDomain, yDomain, xTicks, series, rightLabel) {
+  const W = 600, H = 260, L = 52, R = rightLabel ? 52 : 20, T = 18, B = 45;
+  const width = W - L - R, height = H - T - B;
+  const sx = (x) => L + (x - xDomain[0]) / (xDomain[1] - xDomain[0]) * width;
+  const sy = (y, domain = yDomain) => T + height - (y - domain[0]) / (domain[1] - domain[0]) * height;
+  const svg = svgNode("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": title });
+  const rightDomain = rightLabel ? series.find((line) => line.domain).domain : null;
+  svg.append(svgNode("title", {}, title));
+  const textStyle = { fill: "#697c8e", "font-size": 11, "font-family": "Arial, sans-serif" };
+  for (let i = 0; i <= 4; i++) {
+    const value = yDomain[0] + i * (yDomain[1] - yDomain[0]) / 4, y = sy(value);
+    svg.append(svgNode("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: "#e9eef3", "stroke-width": 1 }));
+    svg.append(svgNode("text", { x: L - 9, y: y + 4, "text-anchor": "end", ...textStyle }, String(Math.round(value))));
+    if (rightLabel) svg.append(svgNode("text", { x: W - R + 9, y: y + 4, ...textStyle }, String(Math.round(rightDomain[0] + i * (rightDomain[1] - rightDomain[0]) / 4))));
+  }
+  for (const [value, label] of xTicks) {
+    svg.append(svgNode("line", { x1: sx(value), y1: T, x2: sx(value), y2: H - B, stroke: "#eef2f6" }));
+    svg.append(svgNode("text", { x: sx(value), y: H - B + 19, "text-anchor": "middle", ...textStyle }, label));
+  }
+  for (const line of series) {
+    const points = line.x.map((x, i) => `${i ? "L" : "M"}${sx(x).toFixed(2)},${sy(line.y[i], line.domain).toFixed(2)}`).join(" ");
+    svg.append(svgNode("path", { d: points, fill: "none", stroke: line.color, "stroke-width": 2, "stroke-linejoin": "round", ...(line.dash ? { "stroke-dasharray": "5 4" } : {}) }));
+  }
+  svg.append(svgNode("text", { x: L + width / 2, y: H - 4, "text-anchor": "middle", ...textStyle }, xLabel));
+  svg.append(svgNode("text", { x: L, y: 9, ...textStyle, "font-size": 10 }, yLabel));
+  if (rightLabel) svg.append(svgNode("text", { x: W - R, y: 9, "text-anchor": "end", ...textStyle, "font-size": 10 }, rightLabel));
+  $(container).replaceChildren(svg);
+}
+function drawWaveforms(data) {
+  const frequency = data.frequency_hz.map(Math.log10);
+  const gainMin = Math.floor(Math.min(...data.gain_db) / 20) * 20;
+  const gainMax = Math.ceil(Math.max(...data.gain_db) / 20) * 20;
+  const phaseDomain = [Math.floor(Math.min(...data.phase_deg) / 90) * 90, Math.ceil(Math.max(...data.phase_deg) / 90) * 90];
+  chart("ac-plot", "Measured open-loop gain and phase versus frequency", "Frequency (Hz)", "Gain (dB)", [0, 11], [gainMin, gainMax], [[0, "1"], [3, "1k"], [6, "1M"], [9, "1G"], [11, "100G"]], [
+    { x: frequency, y: data.gain_db, color: "#087ebd" },
+    { x: frequency, y: data.phase_deg, color: "#8b88b7", domain: phaseDomain, dash: true },
+  ], "Phase (°)");
+  const waves = data.steps.filter((step) => step.waveform);
+  if (!waves.length) { $("step-plot").querySelector("p").textContent = "Closed-loop qualification did not produce a waveform"; return; }
+  const times = waves.flatMap((step) => step.waveform.t_us), low = Math.min(...times), high = Math.max(...times);
+  const amplitude = Math.max(12, Math.ceil(Math.max(...waves.flatMap((step) => step.waveform.delta_mv.map(Math.abs))) / 2) * 2);
+  const ticks = Array.from({ length: 5 }, (_, i) => { const n = i * high / 4; return [n, n.toFixed(1)]; });
+  chart("step-plot", "Measured positive and negative 10 millivolt unity-buffer step responses", "Time after input step (µs)", "Output change (mV)", [low, high], [-amplitude, amplitude], ticks,
+    waves.map((step) => ({ x: step.waveform.t_us, y: step.waveform.delta_mv, color: step.direction > 0 ? "#087ebd" : "#de892f" })));
+}
+
+runButton.addEventListener("click", launch);
+$("expand").addEventListener("click", async () => {
+  const viewer = document.querySelector(".viewer");
+  if (document.fullscreenElement) { await document.exitFullscreen(); return; }
+  if (viewer.requestFullscreen) { try { await viewer.requestFullscreen(); return; } catch { /* Embedded browsers may disallow fullscreen. */ } }
+  expanded = !expanded; viewer.classList.toggle("expanded", expanded);
+  $("expand").setAttribute("aria-label", expanded ? "Exit expanded view" : "Expand live circuit view");
+});
+document.addEventListener("keydown", (event) => { if (event.key === "Escape" && expanded) { expanded = false; document.querySelector(".viewer").classList.remove("expanded"); } });
+window.addEventListener("pagehide", () => { running = false; clearInterval(timer); socket?.close(); if (frameURL) URL.revokeObjectURL(frameURL); });
+
+try {
+  const config = await fetch("config.json", { cache: "no-store" }).then((response) => { if (!response.ok) throw new Error("Missing demo configuration"); return response.json(); });
+  const local = ["localhost", "127.0.0.1"].includes(location.hostname);
+  api = local ? location.origin : new URL(config.apiBase).origin;
+  if (!local && !api.startsWith("https://")) throw new Error("The demo API must use HTTPS.");
+  await health();
+  const previous = readRun();
+  if (previous && /^[0-9a-f]{32}$/.test(previous)) {
+    try { await request(`/api/runs/${previous}`); reset(); runId = previous; begin(); }
+    catch { saveRun(null); }
+  }
+} catch { error("The demo configuration could not be loaded. Please reload this page."); button("Demo unavailable", true); }
