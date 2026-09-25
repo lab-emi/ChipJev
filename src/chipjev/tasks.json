@@ -1,0 +1,89 @@
+{
+ "description": "AnalogCoder-Pro unified topology-generation-and-optimization tasks (Table VII): {single-stage, multi-stage} x {amplifier, op-amp} x {max gain, max GBW, max FoM = GBW*CL/P}; VDD 1.2 V, CL 100 pF (attached).",
+ "tasks": [
+  {
+   "id": "amp1-gain",
+   "cls": "amp1",
+   "target": "gain",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "amp1-gbw",
+   "cls": "amp1",
+   "target": "gbw",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "amp1-fom",
+   "cls": "amp1",
+   "target": "fom",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "opamp1-gain",
+   "cls": "opamp1",
+   "target": "gain",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "opamp1-gbw",
+   "cls": "opamp1",
+   "target": "gbw",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "opamp1-fom",
+   "cls": "opamp1",
+   "target": "fom",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "ampN-gain",
+   "cls": "ampN",
+   "target": "gain",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "ampN-gbw",
+   "cls": "ampN",
+   "target": "gbw",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "ampN-fom",
+   "cls": "ampN",
+   "target": "fom",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "opampN-gain",
+   "cls": "opampN",
+   "target": "gain",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "opampN-gbw",
+   "cls": "opampN",
+   "target": "gbw",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  },
+  {
+   "id": "opampN-fom",
+   "cls": "opampN",
+   "target": "fom",
+   "vdd": 1.2,
+   "load_pf": 100.0
+  }
+ ]
+}

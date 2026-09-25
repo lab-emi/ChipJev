@@ -1,0 +1,21 @@
+** sch_path: /home/cgao/git/ChipJev-Dev/experiments/topo-v4/xschem/sky130-opampN-fom.sch
+**.subckt sky130-opampN-fom
+XM1 t1 s1t 0 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=2.4075 nf=1 ad=0.698175 as=0.698175 pd=5.395 ps=5.395 nrd=0.120457
++ nrs=0.120457 sa=0 sb=0 sd=0 mult=1
+XM2 x1 inp t1 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=32.4567 nf=1 ad=9.41243 as=9.41243 pd=65.4933 ps=65.4933 nrd=0.00893499
++ nrs=0.00893499 sa=0 sb=0 sd=0 mult=1
+XM3 o1 inn t1 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=32.4567 nf=1 ad=9.41243 as=9.41243 pd=65.4933 ps=65.4933 nrd=0.00893499
++ nrs=0.00893499 sa=0 sb=0 sd=0 mult=1
+XM4 x1 x1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.178333 W=4.95767 nf=1 ad=1.43772 as=1.43772 pd=10.4953 ps=10.4953 nrd=0.0584953
++ nrs=0.0584953 sa=0 sb=0 sd=0 mult=1
+XM5 o1 x1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.178333 W=4.95767 nf=1 ad=1.43772 as=1.43772 pd=10.4953 ps=10.4953 nrd=0.0584953
++ nrs=0.0584953 sa=0 sb=0 sd=0 mult=1
+XM6 out o1 0 0 sky130_fd_pr__nfet_01v8 L=0.503333 W=44.4443 nf=1 ad=12.8889 as=12.8889 pd=89.4687 ps=89.4687 nrd=0.00652502
++ nrs=0.00652502 sa=0 sb=0 sd=0 mult=1
+XM7 out s2ld vdd vdd sky130_fd_pr__pfet_01v8 L=0.503333 W=12.08 nf=1 ad=3.5032 as=3.5032 pd=24.74 ps=24.74 nrd=0.0240066
++ nrs=0.0240066 sa=0 sb=0 sd=0 mult=1
+VDD vdd 0 1.8
+V_S1T s1t 0 1.085
+V_S2LD s2ld 0 0.435
+**.ends
+.end

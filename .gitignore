@@ -1,0 +1,37 @@
+# Python and the locked environment (scripts/setup.sh rebuilds .venv with uv)
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Local tools installed by the setup scripts: ngspice 47, the PDK, AnalogCoder-Pro
+/.tools/
+
+# Run outputs, the rebuilt frozen code (runs/frozen) and build caches
+/runs/
+
+# Optional source snapshots are supplied locally for exact experiment reruns
+/reproduce/frozen-code.tar.gz
+/experiments/ptm45/frozen-source.tar.gz
+/experiments/sky130-system-two/frozen-source.tar.gz
+
+# Local development notes, never published
+/notes/
+
+# Secrets, editor and OS settings
+.env
+.env.*
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

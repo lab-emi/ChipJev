@@ -1,0 +1,32 @@
+{
+ "files": {
+  "frozen-source.tar.gz": "1bbeed881cae4faa4d5cbe80566b1b2465f3b7901329b26802134c2351d04b0a",
+  "protocol.json": "ed2f435312bb1778d112f3cb1bb6c91bf0c73f2ae91440e3612e822f71e12490",
+  "system2b/protocol.json": "fd36167330c4c4477e96b207cf52491d9523b2a5091a09cdd57baee9d726e4cd",
+  "xschem/roundtrip.json": "6a4cd03b3ce35db4e7a1da9eb1034a542750c0018caf1526be720a475e21968f",
+  "xschem/sky130-amp1-fom.sch": "86dd3636bb4d85d6831e192d31945b56c3dc9031b4f4ae5e975416c2df321529",
+  "xschem/sky130-amp1-fom.spice": "0a220c0f777434534a7a5b0c2d9e60a4513848013318f82dd30e01114928718f",
+  "xschem/sky130-amp1-gain.sch": "de25916cb2d71fef41dc392ad763e79426e7ae661ff210549b187795adfed133",
+  "xschem/sky130-amp1-gain.spice": "1cbda3a231c5aa58618e54d2a9114e0b94b0c62b934f71aca7883052a6b134b0",
+  "xschem/sky130-amp1-gbw.sch": "3b463d6d214ce185f4ccb4123d4c4262a75af6c4be9a57f38235f277800a7356",
+  "xschem/sky130-amp1-gbw.spice": "9aa64dd6c08c74b35d63adca86d18923b57129e58f6a700166665a7bcbf7d4c6",
+  "xschem/sky130-ampN-fom.sch": "69d96118505f117b31b6f5974b17f31c6301b40ab5887a1520bfc176b7f3b6ec",
+  "xschem/sky130-ampN-fom.spice": "79c560111222f9d57c51b0d8b7fd284ae64a66272a50feb03c0acfb7d48b9896",
+  "xschem/sky130-ampN-gain.sch": "8ffc4ce491486e3c94609f623e2f6f4fe84b9a7946d467edc478f65f441c9121",
+  "xschem/sky130-ampN-gain.spice": "5a94e7f2c235b6b858f1b252fa876e5bbaab7cc23fb7fcf3dd63aec3c2d1242b",
+  "xschem/sky130-ampN-gbw.sch": "2f27cbb46ab476e1593830496da6387de4b1fa89079856ee286b4f7e1a4f2b9b",
+  "xschem/sky130-ampN-gbw.spice": "4f9ec8b855e3a183473a94b391e6b42433fbf4eb43a99d45f0f9dab5ba03db79",
+  "xschem/sky130-opamp1-fom.sch": "28075f79a4dc08a04a6795707b68b27eb232fe7bdcebf48dc153f17645f38a6c",
+  "xschem/sky130-opamp1-fom.spice": "89f8415c99af57d5d30644e606fdba0e35104a18f50dd7be5747d632603267e1",
+  "xschem/sky130-opamp1-gain.sch": "e6f42ba5b06892b788980efe717f4b2409ace4876e86be94022af7b04c52994d",
+  "xschem/sky130-opamp1-gain.spice": "9cc4ac17e26ae8b803e692e5fdeb5e000870099c0d498a626f52b1255287b93b",
+  "xschem/sky130-opamp1-gbw.sch": "aa30fdf6bb1575a1e0e29b3059e28bded6c6e572389c2abe6cc7ab88edc2e9c4",
+  "xschem/sky130-opamp1-gbw.spice": "76dd4bedbfd50e4d49f963f1dd8f032de4472ab566ad8db1710d45b2504f9035",
+  "xschem/sky130-opampN-fom.sch": "657d3aca01ee7ceff1d9ce0d4c8ff847fc54edda35d13bdc277dc442ce216357",
+  "xschem/sky130-opampN-fom.spice": "bd092883d6a4e77578fd23315e3b83770051433448150f62e3a5a61276021c7c",
+  "xschem/sky130-opampN-gain.sch": "765b5588391f03ac133fffb162e109c12bba6c409df44d719f87c1a2dca45167",
+  "xschem/sky130-opampN-gain.spice": "3e913817a42ba885baba2063bc6f8c582abf25dee0233e61f314414b675a2d7b",
+  "xschem/sky130-opampN-gbw.sch": "a76ef3169a8eaea8474fa2bed805c25675bac4b9785a38d17bb755508de34db1",
+  "xschem/sky130-opampN-gbw.spice": "59b0abcf1820a138f251a7a3d074f9d68c218f4070a03fd285a8215bef299ea3"
+ }
+}

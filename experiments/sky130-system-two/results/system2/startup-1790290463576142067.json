@@ -1,0 +1,17 @@
+{
+  "technology": "ptm45",
+  "workers_seconds": 3.276468525000382,
+  "warmup_seconds": 4.203491350999684,
+  "typed_load_seconds": 2.160692174998985,
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "time": "2026-09-25T00:54:23+0200"
+}

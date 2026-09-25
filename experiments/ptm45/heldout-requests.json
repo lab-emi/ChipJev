@@ -1,0 +1,608 @@
+{
+ "generator": "openai/gpt-4.1-mini",
+ "generated": "2026-09-24T18:11:32+0200",
+ "temperature": 0.9,
+ "purpose": "held-out natural-language requests for typed parsing (never used for training)",
+ "requests": [
+  {
+   "request": "Design a single-stage single-ended amplifier optimized for maximum DC gain with a 1.8V supply.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Create a single-input, one-gain-stage analog amplifier targeting the highest possible low-frequency voltage gain.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Generate a high-gain single-ended amplifier circuit for minimal-frequency operation, focusing on gain maximization.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Please provide a single-stage amplifier with a single-ended input in a 65nm process, prioritizing max DC voltage gain.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "I need a simple, one-stage analog amplifier with a single-ended input that achieves the greatest DC gain achievable.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a single-gain-stage amplifier with a single-ended input, optimized for maximum low-frequency gain and driving a 5pF load.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Build a single-ended input, single-stage amplifier aiming for top DC voltage gain performance under a 3.3V power supply.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Develop a single-stage, one-input amplifier with the primary goal of maximizing the DC voltage gain in standard CMOS tech.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Request: single-ended amplifier, single gain stage only, designed for peak DC gain without regard to bandwidth.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Construct a one-stage amplifier with a single-ended input, focusing exclusively on maximizing DC voltage gain in 0.18\u00b5m CMOS.",
+   "cls": "amp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a single-stage single-ended input amplifier with maximized gain-bandwidth product.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Create a one-gain-stage amp featuring a single-ended input, optimized for highest GBW.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Generate a single-ended input single-stage amplifier maximizing GBW for a 1.8V supply.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Provide a single-stage, single-ended amplifier design in 65nm tech with focus on max gain-bandwidth product.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Develop a single gain stage amplifier with a single-ended input and large bandwidth gain product.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a single-ended input amplifier stage aiming to maximize gain-bandwidth product under 10pF load.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Build a single-stage amplifier with one input node that achieves the highest possible GBW.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Create a single-ended input single-stage amp optimized for gain-bandwidth product in 0.35um CMOS.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a single gain stage amplifier with single-ended input targeting maximum gain\u00d7bandwidth.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Generate a single-stage single-ended amplifier focused on pushing the gain-bandwidth product to its limit.",
+   "cls": "amp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a single-stage amplifier with a single-ended input aiming to maximize FoM = GBW \u00d7 load capacitance / power consumption.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Create a one-gain-stage single-ended input amplifier optimized for highest figure of merit defined as GBW times load cap over power.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Generate a single-input, one-stage analog amplifier maximizing the FoM calculated by GBW multiplied by load C divided by power.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Provide a single-stage, single-ended input amplifier topology that maximizes the figure of merit FoM = GBW \u00d7 Cload / power under a 1.8 V supply.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Optimize a single-stage amplifier circuit with one input to achieve maximum FoM, where FoM = GBW\u00b7C_load / power dissipation, assuming a 10 pF load.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Develop a single-ended input amplifier with a single gain stage targeting maximal figure of merit, GBW times load capacitance over power use.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Design a one-stage, single-ended input amplifier in 65nm CMOS technology to maximize FoM = GBW \u00d7 load cap / power.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Construct a single gain stage amplifier with one input terminal, focusing on maximizing the figure of merit defined as GBW times load capacitance divided by power.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Implement a single-ended input single-stage amplifier to maximize the FoM calculated by gain-bandwidth product multiplied by load capacitance and divided by power consumption.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Please synthesize a single input amplifier with one gain stage that maximizes the figure of merit: GBW multiplied by load capacitance over power.",
+   "cls": "amp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Design a single-stage OTA with a differential input pair optimized for maximum DC gain in 180nm CMOS.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Create a one-gain-stage op-amp featuring a differential input transistor pair, targeting the highest possible low-frequency voltage gain.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Generate a single-stage differential input OTA aiming to maximize DC voltage gain with a 1.8 V supply voltage constraint.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "I need a single-stage op-amp design with a differential input pair that achieves ultra-high low-frequency gain, suitable for integration in 65nm tech.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Build a single-stage OTA with a differential input stage, focusing on maximizing DC gain while driving a 1 pF capacitive load.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Please provide an analog single-gain-stage op-amp circuit using a differential input pair that maximizes DC voltage gain.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Devise a differential-input one-stage OTA that maximizes the low-frequency voltage gain with minimal transistor count.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Looking for a single-stage op-amp design incorporating a differential input pair to achieve the highest DC gain possible.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a single-gain-stage OTA featuring a differential input pair optimized for maximum voltage gain at DC, assuming a 3.3 V supply.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Provide a one-stage differential input OTA circuit with emphasis on maximizing low-frequency gain; technology node and load not specified.",
+   "cls": "opamp1",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a single-stage OTA with a differential input pair optimized for maximum gain-bandwidth product.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Please create a high-GBW single-stage op-amp featuring a differential pair input and one gain stage.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Generate a one-gain-stage OTA that uses a differential input transistor pair and prioritizes peak GBW performance.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "I need a single-stage op-amp with differential inputs designed to maximize the gain-bandwidth product under 1.8 V supply.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Build a differential input, single-stage OTA targeting the highest achievable GBW in a 65 nm CMOS process.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Provide a schematic for a single-stage op-amp with differential input pair, optimized for maximum GBW driving a 1 pF capacitive load.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Create a single gain stage OTA with differential input aiming to maximize gain-bandwidth performance.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a low-voltage single-stage op-amp with differential pair input, focusing on maximizing GBW.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Develop a single-stage OTA with a differential input transistor pair, emphasizing the largest possible gain-bandwidth product.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Please produce a differential-input single-stage op-amp that achieves the best gain-bandwidth product given typical 3.3 V CMOS constraints.",
+   "cls": "opamp1",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a single-stage OTA with a differential input pair optimized to maximize FoM = GBW \u00d7 Cload / power, targeting a 1.8 V supply and 5 pF load.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Create a one-gain-stage op-amp featuring a differential pair input aimed at maximizing the figure of merit defined as GBW times load capacitance divided by power consumption.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Generate a single-stage amplifier with differential inputs, focusing on maximizing GBW \u00d7 load capacitor over power for improved FoM in 65 nm CMOS.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Provide a high-performance single-stage OTA design with a differential input pair, optimized for the highest possible figure of merit FoM = GBW \u00d7 Cload / power.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Sketch a single-stage differential-input op-amp intended to maximize the FoM, where FoM equals gain-bandwidth product multiplied by load cap and divided by power dissipation.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "I need a single-gain-stage OTA with a differential input pair in 130 nm technology that maximizes FoM = GBW \u00d7 Cload / Power under 1.5 V supply constraints.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Formulate a single-stage differential input amplifier optimized for peak figure of merit, calculated as the product of bandwidth and load capacitance over power.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Build an OTA with a single gain stage and differential inputs, prioritizing maximization of FoM defined as GBW times load capacitance divided by power usage.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Please develop a differential pair-based single-stage op-amp maximizing the figure of merit GBW \u00d7 load capacitance / power, targeting low-voltage operation.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Construct a single-stage differential input OTA design that aims to maximize the FoM = GBW \u00d7 Cload / power for enhanced efficiency and speed.",
+   "cls": "opamp1",
+   "objective": "fom"
+  },
+  {
+   "request": "Design a multi-stage single-ended amplifier optimized for maximum DC gain, preferably using at least two cascaded gain stages.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Generate a two-stage cascaded amplifier with a single-ended input that achieves the highest possible low-frequency voltage gain.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Create a multi-stage amplifier with single-ended input in 65nm CMOS technology, focusing on maximizing DC voltage gain across cascaded stages.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Provide a design for a cascaded, single-ended amplifier with minimum two gain blocks, aiming to maximize the low-frequency gain for a 1.8 V supply.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "I need a multi-stage amplifier circuit, single-ended input, that maximizes DC gain, and can drive a capacitive load of 5 pF without stability issues.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Please synthesize a single-ended, two-or-more stage amplifier that achieves ultra-high DC gain with cascaded transconductance stages.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Build a multi-stage amplifier with single-ended input and cascaded gain stages targeting maximum DC voltage gain at low frequencies.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Draft a single-ended input amplifier with at least two cascaded gain stages, optimized for the highest achievable DC gain in a 0.35 \u03bcm process.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Construct a cascaded, multi-stage single-ended amplifier design focusing primarily on maximizing the DC gain, ignoring bandwidth constraints.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Generate a high-gain, single-ended multi-stage amplifier where the goal is to cascade multiple stages to maximize the low-frequency voltage gain.",
+   "cls": "ampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a multi-stage amplifier with single-ended input and at least two cascaded gain stages optimized for maximum GBW.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Create a two-stage single-ended amplifier that achieves the highest possible gain-bandwidth product in a 65nm CMOS process.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "I need a cascaded amplifier with single-ended input, focusing on maximizing gain-bandwidth product under a 1.8V supply.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Generate a multi-stage op-amp with single-ended input, optimized for peak GBW performance driving a 5pF load capacitor.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Please design a two or more stage single-ended amplifier circuit to obtain maximum gain-bandwidth product, no specific tech constraints.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Develop a single-ended input multi-stage amplifier capable of delivering maximum GBW, considering a 3-stage cascade and 1.2V supply.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Build a multi-stage amplifier topology with single-ended input aiming to push the GBW to its upper limit, targeting a 10pF load.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Provide a design for a cascaded single-ended input amplifier optimizing the gain-bandwidth product for high-frequency analog front-ends.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Construct a two-stage or more single-ended amplifier that maximizes the GBW in a 0.18\u00b5m CMOS tech node environment.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Draft a multi-stage single-ended input amplifier designed to maximize the gain-bandwidth product, assuming no load and standard 1.5V supplies.",
+   "cls": "ampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a multi-stage amplifier with a single-ended input and at least two cascaded gain stages that maximizes the FoM defined as GBW times load capacitance over power consumption.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Create a two-stage or more single-ended input amplifier optimized for maximum figure of merit FoM = GBW \u00d7 C_load / power in a 65nm process.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "I need a multi-stage single-ended amplifier with a minimum of two gain stages to maximize the figure of merit FoM = GBW multiplied by load capacitance divided by power.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Generate a two-or-more-stage single-ended input amplifier targeting the highest possible FoM where FoM = GBW \u00d7 C_load / power, assuming a 1.8 V supply and 10 pF load.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Develop a cascaded gain stage amplifier with single-ended input that optimizes FoM given by GBW times load capacitance over power dissipation, preferably for low-voltage operation.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Please provide a design for a multi-stage amplifier with single-ended input, ensuring that the FoM (GBW \u00d7 C_load / power) is maximized, considering a 5 pF capacitive load.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Sketch a single-ended input amplifier with at least two cascaded stages that achieves the highest figure of merit defined as GBW \u00d7 load capacitance divided by power usage.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Construct a multi-stage analog amplifier, single-ended input, with two or more gain stages, optimized to maximize FoM = GBW \u00d7 C_load / Power, suitable for integration in 90nm CMOS.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Design a cascaded single-ended input amplifier with multiple gain stages focused on maximizing the figure of merit (GBW times load capacitance over power consumption).",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Generate a single-ended multi-stage amplifier with two or more cascaded gain stages optimized for maximum FoM, where FoM is GBW multiplied by load capacitance divided by power, and assume a 3.3 V supply.",
+   "cls": "ampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Design a multi-stage operational amplifier featuring a differential input pair optimized for maximum DC gain in a 180nm CMOS process.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Generate a two-stage op-amp with a differential input transistor pair aimed at achieving the highest possible low-frequency voltage gain.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Create a multi-stage amplifier circuit using a differential pair at the input, prioritizing ultra-high DC gain performance.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Please provide a schematic for a multi-stage op-amp with a differential input stage designed to maximize DC gain, assuming a 3.3V supply and 10pF load capacitance.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "I need a multi-stage op-amp incorporating a differential input pair optimized for peak low-frequency voltage gain in a 65nm technology node.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Build a multi-stage operational amplifier with at least two gain stages starting with a differential input, targeting the largest DC voltage gain achievable.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Develop an analog op-amp circuit with multiple gain stages and a differential input pair, focusing on maximizing the static voltage gain under a 1.8V supply.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a high-gain multi-stage operational amplifier featuring a differential pair input stage, optimized for low-frequency gain enhancement.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Construct a multi-stage op-amp with differential input transistors aiming to push the DC gain to the highest level possible, considering a capacitive load of 5pF.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Please sketch a multi-stage op-amp with a differential input configuration, emphasizing maximum DC voltage gain without specific load or supply constraints.",
+   "cls": "opampN",
+   "objective": "gain"
+  },
+  {
+   "request": "Design a multi-stage operational amplifier with a differential input pair optimized for maximum gain-bandwidth product, targeting a 1V supply and 1pF load.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Create a two-stage op amp featuring a differential input that maximizes GBW in a 65nm CMOS process.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "I need a multi-stage op-amp circuit with differential inputs and at least two gain stages, focusing on achieving the highest possible gain-bandwidth product.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Please generate a schematic for a multi-stage op amp with a differential input transistor pair, optimized for peak GBW performance.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Develop a high GBW multi-stage operational amplifier with a differential input pair, suitable for driving a 2pF capacitive load at 1.8V supply voltage.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Model a multi-stage op amp including a differential input stage, with two or more gain stages, designed to maximize the gain-bandwidth product.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Build a multi-stage amplifier with differential inputs, optimized to push the gain-bandwidth product to its maximum in a 0.18\u00b5m technology node.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Provide a multi-stage op-amp design that incorporates a differential input pair and focuses on maximizing the gain-bandwidth product without specific load constraints.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a multi-stage op amp with at least two gain stages and a differential input that achieves the highest GBW under a 1.2V supply and 0.5pF load.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Generate a multi-stage operational amplifier circuit featuring a differential input pair, optimized specifically to maximize the gain-bandwidth product in standard CMOS.",
+   "cls": "opampN",
+   "objective": "gbw"
+  },
+  {
+   "request": "Design a multi-stage operational amplifier with at least two gain stages and a differential input pair optimized to maximize FoM defined as GBW times load capacitance over power.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Create a two-stage or greater op-amp featuring a differential input transistor pair that achieves the highest possible figure of merit (GBW \u00d7 Cload / power).",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Provide a schematic for a multi-stage op amp with differential input and dual or more gain stages, optimized for maximum FoM = GBW multiplied by load capacitance divided by power consumption.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Generate a multi-stage op-amp design using a differential input pair that maximizes the figure of merit FoM = GBW*Cload/Pwr, preferably operating at 1.2 V supply and driving a 5 pF load in 65nm CMOS.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "I need a two-or-more stage amplifier with differential inputs that maximizes the ratio of gain-bandwidth product times output capacitance over power dissipation for an analog IC design.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Sketch a multi-stage op-amp circuit with a differential input pair and multiple gain stages targeting peak FoM = GBW \u00d7 load capacitor / power usage, suitable for a 3.3 V supply voltage.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Design a low-power, multi-stage op amp with differential input transistors and at least two gain stages to maximize GBW multiplied by load cap divided by power in a 90nm process.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Develop a multi-stage operational amplifier with differential pair input stage, minimum two gain stages, focusing on maximizing FoM = (GBW \u00d7 Cload) / power.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Create a differential-input, multi-stage (two or more stages) op-amp optimized for maximum figure of merit defined as GBW times load capacitance over power consumption.",
+   "cls": "opampN",
+   "objective": "fom"
+  },
+  {
+   "request": "Please generate a multi-stage amplifier circuit with a differential input pair and multiple gain blocks to maximize the figure of merit (GBW \u00d7 load capacitance) / power for high-efficiency analog design.",
+   "cls": "opampN",
+   "objective": "fom"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+** sch_path: /home/cgao/git/ChipJev-Dev/experiments/topo-v4/xschem/sky130-amp1-fom.sch
+**.subckt sky130-amp1-fom
+XM1 out in 0 0 sky130_fd_pr__nfet_01v8 L=2.01667 W=274.267 nf=6 ad=39.7687 as=53.0249 pd=276.007 ps=368.009 nrd=0.00105737
++ nrs=0.00105737 sa=0 sb=0 sd=0 mult=1
+XM2 out in vdd vdd sky130_fd_pr__pfet_01v8 L=2.01667 W=20.3683 nf=1 ad=5.90682 as=5.90682 pd=41.3167 ps=41.3167 nrd=0.0142378
++ nrs=0.0142378 sa=0 sb=0 sd=0 mult=1
+VDD vdd 0 1.8
+**.ends
+.end

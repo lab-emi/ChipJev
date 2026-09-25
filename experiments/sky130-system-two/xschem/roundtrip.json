@@ -1,0 +1,1086 @@
+{
+ "checked": 135,
+ "equivalent": 135,
+ "runs": [
+  {
+   "task": "sky130-amp1-fom",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "random8",
+   "seed": 0,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "random8",
+   "seed": 1,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "random8",
+   "seed": 2,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "random8",
+   "seed": 3,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "random8",
+   "seed": 4,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-fom",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "random8",
+   "seed": 0,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "random8",
+   "seed": 1,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "random8",
+   "seed": 2,
+   "topology": "cas_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "random8",
+   "seed": 3,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "random8",
+   "seed": 4,
+   "topology": "cas_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "inv_cas",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gain",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "random8",
+   "seed": 0,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "random8",
+   "seed": 1,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "random8",
+   "seed": 2,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "random8",
+   "seed": 3,
+   "topology": "inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "random8",
+   "seed": 4,
+   "topology": "cs_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "cs_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-amp1-gbw",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "cas_n+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "random8",
+   "seed": 4,
+   "topology": "inv+cs_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-fom",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "inv+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "cs_n+cas_n+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "cs_n+cas_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "inv+cas_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "inv_cas+cs_n+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "inv+cas_p+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "random8",
+   "seed": 4,
+   "topology": "inv+cs_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "inv+inv+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "inv+inv",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "cs_n+inv+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "cs_n+inv+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gain",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "inv+cas_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "cs_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "cs_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "cs_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "inv+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "cs_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "random8",
+   "seed": 4,
+   "topology": "inv+cs_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "cs_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "cs_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "inv+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "cs_n+inv+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-ampN-gbw",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "cs_n+cs_n+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "tele_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "tele_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "tele_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "tele_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "random8",
+   "seed": 1,
+   "topology": "tele_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "random8",
+   "seed": 2,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-fom",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "random8",
+   "seed": 1,
+   "topology": "tele_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "random8",
+   "seed": 2,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gain",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "random8",
+   "seed": 1,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "random8",
+   "seed": 2,
+   "topology": "tele_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "tpe8",
+   "seed": 0,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "tpe8",
+   "seed": 2,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opamp1-gbw",
+   "method": "tpe8",
+   "seed": 4,
+   "topology": "ota5_p",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "ota5_n+cs_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "cmota_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "ota5_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "ota5_p+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "ota5_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "ota5_n+inv+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-fom",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "ota5_n+inv+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "ota5_p+cs_p+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "ota5_p+cas_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "cmota_n+inv_cas+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "ota5_p+cs_n+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "cmota_n+cs_n+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "ota5_n+inv+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gain",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "ota5_n+inv+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "chipjev",
+   "seed": 0,
+   "topology": "ota5_n+cs_p+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "chipjev",
+   "seed": 1,
+   "topology": "ota5_n+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "chipjev",
+   "seed": 2,
+   "topology": "ota5_n+inv+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "chipjev",
+   "seed": 3,
+   "topology": "ota5_n+inv+cs_n",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "chipjev",
+   "seed": 4,
+   "topology": "ota5_p+cas_n+miller_rz",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "tpe8",
+   "seed": 1,
+   "topology": "ota5_n+inv+miller",
+   "equivalent": true,
+   "problems": []
+  },
+  {
+   "task": "sky130-opampN-gbw",
+   "method": "tpe8",
+   "seed": 3,
+   "topology": "ota5_n+inv+miller_rz",
+   "equivalent": true,
+   "problems": []
+  }
+ ]
+}

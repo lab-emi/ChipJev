@@ -1,0 +1,17 @@
+{
+  "technology": "sky130",
+  "workers_seconds": 3.0637280560004,
+  "warmup_seconds": 3.9549727400008123,
+  "typed_load_seconds": 2.1242741089990886,
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "time": "2026-09-24T23:48:09+0200"
+}

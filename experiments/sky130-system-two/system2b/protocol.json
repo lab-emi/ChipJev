@@ -1,0 +1,2218 @@
+{
+  "version": "topo-v4-system2b",
+  "frozen": "2026-09-24T23:50:02+0200",
+  "topo_v4_protocol_sha256": "ed2f435312bb1778d112f3cb1bb6c91bf0c73f2ae91440e3612e822f71e12490",
+  "code_hashes": {
+    ".tools/pdk/sky130_pdk/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__mismatch.corner.spice": "24a3b29d7d7f26f99098811c31eb5497950a3aed520ab83768a96f35467fe818",
+    ".tools/pdk/sky130_pdk/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__tt.corner.spice": "0c03b2e5727c414942f1d2b27e19a68724fb84be90b2c73b361ad41779311130",
+    ".tools/pdk/sky130_pdk/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__tt.pm3.spice": "459eca963a134574cf7c842ad6d3814e7e0752bfb5de8e581c2f483534b5ad06",
+    ".tools/pdk/sky130_pdk/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__mismatch.corner.spice": "f4d560668712678ea60641de923fce7691e64acda951949f840986837c31741a",
+    ".tools/pdk/sky130_pdk/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__tt.corner.spice": "641d251a08bf9ddcfc67ba4bd4698ae1978d09447eb6ebf90055fdf3d21917ab",
+    ".tools/pdk/sky130_pdk/libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__tt.pm3.spice": "c943246ce012ea3db2777e3f4633ddccdfee7c8f1bf4dca79af9f7ff17b3d51f",
+    ".tools/pdk/sky130_pdk/libs.tech/ngspice/parameters/lod.spice": "6200b50c14eebb68d8009ca68e452d4c045e2d25d7438ee417c155883527fd7c",
+    "experiments/topo-v1/tasks-test.json": "f1149ce63626b3cf5e0e9d5db325080a9d12476242e555d7fa4bd59acf319885",
+    "experiments/topo-v4/PROTOCOL.md": "ae8750f74ac9e7e68dcd63de7952eb316f01e425c3f224dd7ebf48dcaf48cb0f",
+    "scripts/topo-v4-run.py": "2344194251e03565ad27ead98917c6db10025586d9f655bdd83ffcd26d6a1841",
+    "src/chipjev/laya_torch.py": "d15285ec4060e4676c11dbd3918c8191d6fc6c03fa1b4b93bf6a95faf1b2d615",
+    "src/chipjev/research/pdk.py": "18506060e70d972c10e13638321de96cc0c6c884c5ea912eada1304acf66a778",
+    "src/chipjev/rt/kernels.py": "a30bf296016c844b85476b5da039f9f154fb3da5ddf5a8f902147d2eb4fc2187",
+    "src/chipjev/rt/surrogate.py": "6ab9bfc59f39bb30e9356410b32a4553ad075b93924271db3c974494b0b97ced",
+    "src/chipjev_topo/__init__.py": "1135cc36a755b19d6279f9c93c7af9e476283797ca938754ce0e225f2dbcbdb5",
+    "src/chipjev_topo/baselines.py": "8caedc81de2c4cce5d5055ca8d488955ae8e7a96c3de76cf19393c1155a6c624",
+    "src/chipjev_topo/bench.py": "a3a38ff274a3329e68d6b181bb8f00c8de54e2e41299f832251b699df48e3aa3",
+    "src/chipjev_topo/gp.py": "bcc833cf207c7c8c9c5ff19eccb1ff7f10f1f546d54806859534ecda450a5f8f",
+    "src/chipjev_topo/grammar.py": "e95f0d8ba8ea0003eca6be82162f9d28f521fb6e573413463d004b5acd455f33",
+    "src/chipjev_topo/kernels.py": "c39906c53e9d359f90dce60e37b3178fb16f54cbe6468e0bdb3670a7e9fe624d",
+    "src/chipjev_topo/models/ptm45hp.pm": "9ab66a7bc4a547b2f869ceaec03f0a73d90db95cf0a9bb6c581b5a31b2edc2b9",
+    "src/chipjev_topo/provenance.py": "e8c97b420d947ba356d9fb3cd92c5da699a3644da7247e50838513b1747b7eb8",
+    "src/chipjev_topo/published.py": "9f2637ca281135d9693ea19d86ce312602ab5a858a259410e8d5de190dcf1ba4",
+    "src/chipjev_topo/search.py": "42977c2fc5b0f8df7dff6615f00fde3319bec0f6fc742e4659e7db9436b7ff4c",
+    "src/chipjev_topo/space.py": "ec111899599147e1ebf0d34ef956e46be268135a101193b6e764c420a5d642b4",
+    "src/chipjev_topo_v2/__init__.py": "30bde4fc079825c992e803c722e3fe543776f070fd15177159f12ef8f7720260",
+    "src/chipjev_topo_v2/baselines.py": "641d36f3e434deffb2148dc8d6f780417a5a297d8338948b607591c3003377e9",
+    "src/chipjev_topo_v2/bench.py": "29b2fa93e043d507e161cab79bb0cb9848dd19d9a7cd33ce7fe84065454b1e32",
+    "src/chipjev_topo_v2/qualification.py": "67792b2284390289a749ca7bda1b62dae1a60c8642dbe7c1f816566f95ff7c0a",
+    "src/chipjev_topo_v2/search.py": "754790ab20bc11d694e55f5146b1b40f38e688f26b92ac12240a33edda848641",
+    "src/chipjev_topo_v2/space.py": "8de10b5818ffcb35094660e11aab1829080bbd9afab8c3cf525b333670f0e78f",
+    "src/chipjev_topo_v3/__init__.py": "bcbf4a0ec139a3429884b9b511dc3aeb92bca1545cb07d689b8c1b9c3051943d",
+    "src/chipjev_topo_v3/acpro.py": "901bd1c42adf8d8dfc2770bb8481afd5700ad60d7544d543880b756849d29cab",
+    "src/chipjev_topo_v3/finetune.py": "933ef71a579a94710f4dadcdcadef61b1e87b30b26f3f2fec7eb76406254d1b2",
+    "src/chipjev_topo_v3/netlist.py": "2a7d9c48d941bb13a4d7a7cd32375e50a1fc26b9e1f0328086aed651fabce32b",
+    "src/chipjev_topo_v3/robustness.py": "759d5541a972b63fd491a25b17eecaf9a111005158a15d7a7b984ccd1812e070",
+    "src/chipjev_topo_v3/search.py": "4768a91b8731bb3354495fc288b748c75f7efef4c948c724f9b3168b34388425",
+    "src/chipjev_topo_v3/space.py": "bea5b9400d46838f32c91d859a862d7f8e753f5ca7fec572839ef175b215f2d4",
+    "src/chipjev_topo_v3/typed.py": "a92175eae7ca7676dedd9e08f91f430a0a4999367e60d6f262ba05494c771ecb",
+    "src/chipjev_topo_v4/__init__.py": "1dc706383f35edf04c6332b7a0e7787f2ba662fd48be6e63727cc44aad9cdc14",
+    "src/chipjev_topo_v4/bench.py": "48a10a25599da78d08f826a98d1e5ca5e5b3e3b0bb84bcc597e744e242a76fdd",
+    "src/chipjev_topo_v4/search.py": "23bead5bce7c2fa38068f4df6acc4e2592d167fa860ad9539320a251ea3e430d",
+    "src/chipjev_topo_v4/sky130.py": "abb261ea1ef14d13f36f135d7b76c666b761785688686f7df4d2079015fb2ecd",
+    "src/chipjev_topo_v4/system2.py": "9d0855f9db08502a09a1e964332b3182a08faf8f7ff4a73a72466880eb33774c",
+    "uv.lock": "403686c84582360beb3558ab218c69250d24476e38ca35a59f288a9aabaf2226",
+    "src/chipjev/topo_system2.py": "53dfdc2d605cc409dabbe504c85bdb4eeda43d522e99391c800a8fe23bfed90f",
+    "scripts/topo-v4-system2b.py": "df7ea189470313296b4a074a4da5b5eb39df6d65c44a04a705685df103cef7dd",
+    "experiments/topo-v4/system2b/PROTOCOL.md": "405e63bba738ea2a4955a401d3162b7217ec38b5090ca40ddda42d34a3531b23"
+  },
+  "prompt": "You are an expert analog integrated-circuit designer. Answer the typed design questions below for this design request.\n\nRequest: {state}\n\nFor every question, give a probability for every listed option: numbers between 0 and 1 that sum to 1 for that question. Answer with one JSON object and nothing else, in the form {{\"<question id>\": {{\"<option id>\": <probability>, ...}}, ...}}, where the question ids and option ids are the words before the colons below.\n\n{questions}",
+  "jobs": [
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      2
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "amp1-gain",
+        "cls": "amp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      4
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      4
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "opampN-gain",
+        "cls": "opampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-gain",
+        "cls": "opamp1",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "amp1-gbw",
+        "cls": "amp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      4
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      3
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "ampN-gbw",
+        "cls": "ampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      1
+    ],
+    [
+      {
+        "id": "opamp1-fom",
+        "cls": "opamp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev",
+      1
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      2
+    ],
+    [
+      {
+        "id": "ampN-gain",
+        "cls": "ampN",
+        "target": "gain",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "opamp1-gbw",
+        "cls": "opamp1",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "amp1-fom",
+        "cls": "amp1",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      0
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-gpt5mini",
+      3
+    ],
+    [
+      {
+        "id": "opampN-gbw",
+        "cls": "opampN",
+        "target": "gbw",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      0
+    ],
+    [
+      {
+        "id": "ampN-fom",
+        "cls": "ampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      2
+    ],
+    [
+      {
+        "id": "opampN-fom",
+        "cls": "opampN",
+        "target": "fom",
+        "vdd": 1.2,
+        "load_pf": 100.0,
+        "technology": "ptm45"
+      },
+      "chipjev-deepseek",
+      3
+    ]
+  ]
+}

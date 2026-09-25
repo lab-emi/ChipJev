@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: >-
+  This metadata describes the ChipJev software repository. Its typed decisions run the Laya
+  decision model through a PyTorch port of Laya-MLX; please also cite Laya and Laya-MLX
+  (listed under references).
+type: software
+title: "ChipJev"
+authors:
+  - given-names: Chang
+    family-names: Gao
+    email: Chang.Gao@tudelft.nl
+    affiliation: Delft University of Technology
+  - given-names: Qinyu
+    family-names: Chen
+    affiliation: Leiden University
+repository-code: "https://github.com/lab-emi/ChipJev"
+license: MIT
+keywords:
+  - circuit design
+  - electronic design automation
+  - System One models
+  - typed decisions
+  - Bayesian optimization
+  - GPU acceleration
+  - open-source EDA
+references:
+  - type: software
+    title: "Laya: Multilingual, Non-Autoregressive Typed Decision Engine"
+    authors:
+      - name: Convai Innovations and Laya contributors
+    repository-code: "https://github.com/NandhaKishorM/laya"
+    commit: 6a5819129eb220570792e417e49723d697efd76f
+    license: Apache-2.0
+    year: 2026
+    notes: "The typed decision model behind ChipJev's System One decisions."
+  - type: software
+    title: "Laya-MLX: Native MLX Runtime for Typed Decision Models"
+    authors:
+      - name: Laya-MLX contributors
+    repository-code: "https://github.com/mizorewww/laya-mlx"
+    version: 0.1.0
+    commit: fc1df62828a3fedf4d8229fdac1cbd85f1cdf337
+    license: Apache-2.0
+    year: 2026
+    notes: "src/chipjev/decisions/laya_torch.py is a PyTorch port of Laya-MLX."
+  - type: generic
+    title: "laya-multilingual-mlx"
+    authors:
+      - name: aac6fef
+    url: "https://huggingface.co/aac6fef/laya-multilingual-mlx"
+    commit: f2b4faf51023039425946074e2cf1361d2db11d5
+    license: Apache-2.0
+    year: 2026
+    notes: >-
+      MLX FP16 conversion of convaiinnovations/laya-multilingual; ChipJev fine-tunes 35M of
+      its parameters.

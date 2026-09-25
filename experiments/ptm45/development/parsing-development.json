@@ -1,0 +1,109 @@
+{
+ "weights": {
+  "path": "/home/cgao/git/ChipJev-Dev/runs/topo-v3-dev/typed/typed-decisions.pt",
+  "sha256": "f5df4faaeb1e2721657e5200293f7667ca525b8f86c1c8d3c3ab14193baeb8d5"
+ },
+ "correct": 11,
+ "count": 12,
+ "class_correct": 12,
+ "objective_correct": 11,
+ "median_ms": 16.15901500053951,
+ "rows": [
+  {
+   "request": "Design a two-stage op-amp with the highest possible open-loop gain.",
+   "class": "opampN",
+   "objective": "gain",
+   "parsed_class": "opampN",
+   "parsed_objective": "gain",
+   "correct": true
+  },
+  {
+   "request": "I need a single transistor-stage amplifier (single-ended input) that maximizes the gain-bandwidth product.",
+   "class": "amp1",
+   "objective": "gbw",
+   "parsed_class": "amp1",
+   "parsed_objective": "gbw",
+   "correct": true
+  },
+  {
+   "request": "Please build a differential-input amplifier with one gain stage and the best GBW per unit power.",
+   "class": "opamp1",
+   "objective": "fom",
+   "parsed_class": "opamp1",
+   "parsed_objective": "gbw",
+   "correct": false
+  },
+  {
+   "request": "Create a cascade of several amplifying stages with a single input that achieves the largest FoM = GBW*CL/P.",
+   "class": "ampN",
+   "objective": "fom",
+   "parsed_class": "ampN",
+   "parsed_objective": "fom",
+   "correct": true
+  },
+  {
+   "request": "Give me a one-stage operational transconductance amplifier with maximum DC gain.",
+   "class": "opamp1",
+   "objective": "gain",
+   "parsed_class": "opamp1",
+   "parsed_objective": "gain",
+   "correct": true
+  },
+  {
+   "request": "Build an amplifier made of three cascaded common-source-like stages, single-ended, for maximum bandwidth times gain.",
+   "class": "ampN",
+   "objective": "gbw",
+   "parsed_class": "ampN",
+   "parsed_objective": "gbw",
+   "correct": true
+  },
+  {
+   "request": "A fully differential-input, multi-stage operational amplifier optimized for power efficiency (GBW times load over power).",
+   "class": "opampN",
+   "objective": "fom",
+   "parsed_class": "opampN",
+   "parsed_objective": "fom",
+   "correct": true
+  },
+  {
+   "request": "Single-ended one-stage amplifier, target: largest possible voltage gain.",
+   "class": "amp1",
+   "objective": "gain",
+   "parsed_class": "amp1",
+   "parsed_objective": "gain",
+   "correct": true
+  },
+  {
+   "request": "An op amp with an input differential pair followed by a second gain stage; maximize the gain-bandwidth product.",
+   "class": "opampN",
+   "objective": "gbw",
+   "parsed_class": "opampN",
+   "parsed_objective": "gbw",
+   "correct": true
+  },
+  {
+   "request": "Design a simple amplifier with one stage and a single input to maximize efficiency, i.e. GBW*CL/Power.",
+   "class": "amp1",
+   "objective": "fom",
+   "parsed_class": "amp1",
+   "parsed_objective": "fom",
+   "correct": true
+  },
+  {
+   "request": "Multi-stage single-input voltage amplifier with the highest low-frequency gain.",
+   "class": "ampN",
+   "objective": "gain",
+   "parsed_class": "ampN",
+   "parsed_objective": "gain",
+   "correct": true
+  },
+  {
+   "request": "Single-stage op-amp (inputs Vinp and Vinn) with maximum unity-gain bandwidth product.",
+   "class": "opamp1",
+   "objective": "gbw",
+   "parsed_class": "opamp1",
+   "parsed_objective": "gbw",
+   "correct": true
+  }
+ ]
+}

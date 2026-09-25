@@ -1,0 +1,15 @@
+** sch_path: /home/cgao/git/ChipJev-Dev/experiments/topo-v4/xschem/sky130-ampN-gbw.sch
+**.subckt sky130-ampN-gbw
+XM1 o1 in 0 0 sky130_fd_pr__nfet_01v8 L=0.252333 W=126.167 nf=3 ad=24.3922 as=24.3922 pd=169.382 ps=169.382 nrd=0.00229855
++ nrs=0.00229855 sa=0 sb=0 sd=0 mult=1
+XM2 o1 s1ld vdd vdd sky130_fd_pr__pfet_01v8 L=0.252333 W=52.99 nf=2 ad=7.68355 as=15.3671 pd=53.57 ps=107.14 nrd=0.00547273
++ nrs=0.00547273 sa=0 sb=0 sd=0 mult=1
+XM3 out o1 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=75 nf=2 ad=10.875 as=21.75 pd=75.58 ps=151.16 nrd=0.00386667 nrs=0.00386667 sa=0
++ sb=0 sd=0 mult=1
+XM4 out s2ld vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=48.6 nf=1 ad=14.094 as=14.094 pd=97.78 ps=97.78 nrd=0.00596708
++ nrs=0.00596708 sa=0 sb=0 sd=0 mult=1
+VDD vdd 0 1.8
+V_S1LD s1ld 0 0.1025
+V_S2LD s2ld 0 0.2775
+**.ends
+.end

@@ -1,0 +1,20 @@
+** sch_path: /home/cgao/git/ChipJev-Dev/experiments/topo-v4/xschem/sky130-ampN-gain.sch
+**.subckt sky130-ampN-gain
+XM1 o1 in 0 0 sky130_fd_pr__nfet_01v8 L=0.6 W=2.202 nf=1 ad=0.63858 as=0.63858 pd=4.984 ps=4.984 nrd=0.131698 nrs=0.131698 sa=0
++ sb=0 sd=0 mult=1
+XM2 o1 s1ld vdd vdd sky130_fd_pr__pfet_01v8 L=0.6 W=6.06 nf=1 ad=1.7574 as=1.7574 pd=12.7 ps=12.7 nrd=0.0478548 nrs=0.0478548 sa=0
++ sb=0 sd=0 mult=1
+XM3 s2a o1 0 0 sky130_fd_pr__nfet_01v8 L=1.69667 W=30.54 nf=1 ad=8.8566 as=8.8566 pd=61.66 ps=61.66 nrd=0.00949574 nrs=0.00949574
++ sa=0 sb=0 sd=0 mult=1
+XM4 out s2cn s2a 0 sky130_fd_pr__nfet_01v8 L=1.69667 W=412.29 nf=9 ad=66.4245 as=66.4245 pd=461 ps=461 nrd=0.000703388
++ nrs=0.000703388 sa=0 sb=0 sd=0 mult=1
+XM5 out s2ld vdd vdd sky130_fd_pr__pfet_01v8 L=1.69667 W=40.72 nf=1 ad=11.8088 as=11.8088 pd=82.02 ps=82.02 nrd=0.00712181
++ nrs=0.00712181 sa=0 sb=0 sd=0 mult=1
+R6 out cz 2110
+C7 cz o1 1.77e-13
+VDD vdd 0 1.8
+V_S1LD s1ld 0 0.1725
+V_S2CN s2cn 0 1.085
+V_S2LD s2ld 0 0.68
+**.ends
+.end

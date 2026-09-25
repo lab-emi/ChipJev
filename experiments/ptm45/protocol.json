@@ -1,0 +1,3185 @@
+{
+  "version": "topo-v3",
+  "frozen": "2026-09-24T18:31:23+0200",
+  "code_hashes": {
+    "experiments/topo-v1/tasks-test.json": "f1149ce63626b3cf5e0e9d5db325080a9d12476242e555d7fa4bd59acf319885",
+    "experiments/topo-v3/PROTOCOL.md": "106a99f7146c6aa2369c34ddc72d9ca2580d45d6f7560d0a97dadd541498d694",
+    "experiments/topo-v3/development/labels.json": "0d3c4ab50773d5a4e71e18e50993c7b3b8a12956302417d7ce76846082d3d14d",
+    "experiments/topo-v3/heldout-requests.json": "b33447194b3363755ca5b936facc1f6b533cce1c2b2cbb28e17a2822d4b7069c",
+    "scripts/acpro-llm-run.py": "65d2c90b94987410ff252922e92e52b46fca3747404ac017fc4c2ef754aeb2f6",
+    "scripts/topo-v3-dev.py": "22c93a9be55dd19d751225c992534730c85bcdefa53f8d77c0d9727777e81e50",
+    "scripts/topo-v3-run.py": "3edf2ca8fdf92f775ad7974533ece8cd6fae1f84fb9bf74501b08008266236e5",
+    "src/chipjev/laya_torch.py": "d15285ec4060e4676c11dbd3918c8191d6fc6c03fa1b4b93bf6a95faf1b2d615",
+    "src/chipjev/rt/kernels.py": "a30bf296016c844b85476b5da039f9f154fb3da5ddf5a8f902147d2eb4fc2187",
+    "src/chipjev/rt/surrogate.py": "6ab9bfc59f39bb30e9356410b32a4553ad075b93924271db3c974494b0b97ced",
+    "src/chipjev_topo/__init__.py": "1135cc36a755b19d6279f9c93c7af9e476283797ca938754ce0e225f2dbcbdb5",
+    "src/chipjev_topo/baselines.py": "8caedc81de2c4cce5d5055ca8d488955ae8e7a96c3de76cf19393c1155a6c624",
+    "src/chipjev_topo/bench.py": "a3a38ff274a3329e68d6b181bb8f00c8de54e2e41299f832251b699df48e3aa3",
+    "src/chipjev_topo/gp.py": "bcc833cf207c7c8c9c5ff19eccb1ff7f10f1f546d54806859534ecda450a5f8f",
+    "src/chipjev_topo/grammar.py": "e95f0d8ba8ea0003eca6be82162f9d28f521fb6e573413463d004b5acd455f33",
+    "src/chipjev_topo/kernels.py": "c39906c53e9d359f90dce60e37b3178fb16f54cbe6468e0bdb3670a7e9fe624d",
+    "src/chipjev_topo/models/ptm45hp.pm": "9ab66a7bc4a547b2f869ceaec03f0a73d90db95cf0a9bb6c581b5a31b2edc2b9",
+    "src/chipjev_topo/provenance.py": "e8c97b420d947ba356d9fb3cd92c5da699a3644da7247e50838513b1747b7eb8",
+    "src/chipjev_topo/published.py": "9f2637ca281135d9693ea19d86ce312602ab5a858a259410e8d5de190dcf1ba4",
+    "src/chipjev_topo/search.py": "42977c2fc5b0f8df7dff6615f00fde3319bec0f6fc742e4659e7db9436b7ff4c",
+    "src/chipjev_topo/space.py": "ec111899599147e1ebf0d34ef956e46be268135a101193b6e764c420a5d642b4",
+    "src/chipjev_topo_v2/__init__.py": "30bde4fc079825c992e803c722e3fe543776f070fd15177159f12ef8f7720260",
+    "src/chipjev_topo_v2/baselines.py": "641d36f3e434deffb2148dc8d6f780417a5a297d8338948b607591c3003377e9",
+    "src/chipjev_topo_v2/bench.py": "29b2fa93e043d507e161cab79bb0cb9848dd19d9a7cd33ce7fe84065454b1e32",
+    "src/chipjev_topo_v2/qualification.py": "67792b2284390289a749ca7bda1b62dae1a60c8642dbe7c1f816566f95ff7c0a",
+    "src/chipjev_topo_v2/search.py": "754790ab20bc11d694e55f5146b1b40f38e688f26b92ac12240a33edda848641",
+    "src/chipjev_topo_v2/space.py": "8de10b5818ffcb35094660e11aab1829080bbd9afab8c3cf525b333670f0e78f",
+    "src/chipjev_topo_v3/__init__.py": "bcbf4a0ec139a3429884b9b511dc3aeb92bca1545cb07d689b8c1b9c3051943d",
+    "src/chipjev_topo_v3/acpro.py": "901bd1c42adf8d8dfc2770bb8481afd5700ad60d7544d543880b756849d29cab",
+    "src/chipjev_topo_v3/finetune.py": "933ef71a579a94710f4dadcdcadef61b1e87b30b26f3f2fec7eb76406254d1b2",
+    "src/chipjev_topo_v3/netlist.py": "2a7d9c48d941bb13a4d7a7cd32375e50a1fc26b9e1f0328086aed651fabce32b",
+    "src/chipjev_topo_v3/robustness.py": "759d5541a972b63fd491a25b17eecaf9a111005158a15d7a7b984ccd1812e070",
+    "src/chipjev_topo_v3/search.py": "4768a91b8731bb3354495fc288b748c75f7efef4c948c724f9b3168b34388425",
+    "src/chipjev_topo_v3/space.py": "bea5b9400d46838f32c91d859a862d7f8e753f5ca7fec572839ef175b215f2d4",
+    "src/chipjev_topo_v3/typed.py": "a92175eae7ca7676dedd9e08f91f430a0a4999367e60d6f262ba05494c771ecb",
+    "uv.lock": "403686c84582360beb3558ab218c69250d24476e38ca35a59f288a9aabaf2226"
+  },
+  "typed_weights": "runs/topo-v3-dev/typed/typed-decisions.pt",
+  "typed_weights_sha256": "f5df4faaeb1e2721657e5200293f7667ca525b8f86c1c8d3c3ab14193baeb8d5",
+  "runtime": {
+    "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.39",
+    "architecture": "x86_64",
+    "processor": "AMD Ryzen 9 7950X 16-Core Processor",
+    "logical_cpus": 32,
+    "memory_bytes": 134153621504,
+    "python": "3.13.12",
+    "packages": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "scikit-learn": "1.9.1",
+      "torch": "2.14.0+cu130",
+      "optuna": "4.9.0",
+      "transformers": "5.17.0",
+      "tokenizers": "0.23.2",
+      "safetensors": "0.8.0",
+      "huggingface-hub": "1.32.0",
+      "mlx": null,
+      "mlx-lm": null,
+      "laya-mlx": null
+    },
+    "accelerator": {
+      "type": "cuda",
+      "name": "NVIDIA GeForce RTX 4090",
+      "cuda": "13.0",
+      "memory_bytes": 25250627584
+    },
+    "tools": {
+      "xschem": "XSCHEM V3.4.8RC\nCopyright (C) 1998-2024 Stefan Schippers\n\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+      "ngspice": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Sep 24 15:36:15 UTC 2026\n******"
+    },
+    "git_commit": "dddeefb0136b8387242affc42604a108230a0c66",
+    "git_dirty": true,
+    "code_hashes": {
+      "src/chipjev/__init__.py": "5230d2cb330acaecc6c0424ad132699b951b4c1848338789430dd476b0b6967a",
+      "src/chipjev/circuit.py": "58d896c0d79e8858f9ccc1c81c69cf4097d8160929113e0577083ddc9c4ec796",
+      "src/chipjev/cli.py": "54aff705764aef854b59f17f1b4feb5aa9bef92d4c9666e756a0b7e1056be061",
+      "src/chipjev/laya_torch.py": "d15285ec4060e4676c11dbd3918c8191d6fc6c03fa1b4b93bf6a95faf1b2d615",
+      "src/chipjev/policy.py": "0c2c030f9e8d1308a64dc22c202f8b5f42a277f0a7eabb0d046baa2248466559",
+      "src/chipjev/research/__init__.py": "25bcdbccc7c73a935262e79686c97428b5d255af3af462dd35fa79a316efb918",
+      "src/chipjev/research/__main__.py": "e367f8606d9d541ef20583c9770258f2496c4c2ddd3dd817eb4ed2f02613eb37",
+      "src/chipjev/research/benchmark.py": "81cf71073436aa46d958f2a42a2dc5ce08e2ae0758b6e9a1727e028a75f8c9ed",
+      "src/chipjev/research/circuits.py": "513befe4778dec37c41a58df5f671ca633841709e41f72b3ae1c01c1f50b31e1",
+      "src/chipjev/research/companion.py": "9f330cca23a18063274dd2b9dfc3b8d7dfff2357a366fa557fc455c1d981afb9",
+      "src/chipjev/research/controllers.py": "c6a57da940e4a08e4c7ee9b6c97e64939cf78116533cc18eb2e96b1b0a52158d",
+      "src/chipjev/research/engine.py": "4dddf0408da9fda96083affad41a125ea264bdf5f781adc5da469aa4caaa7a88",
+      "src/chipjev/research/followup.py": "a59013ea9c783b21743b230e489a8f811b16ddbf2e903a31bfda3274103821d1",
+      "src/chipjev/research/followup_reporting.py": "28dcd39c5281c706ecc8cbda2c8baa9ae63c32df3d4b8d4ed3c241aabd2a9aa1",
+      "src/chipjev/research/measure.py": "1abcfd406dd469d70055c16e99411aadffc3337d7eeafb1bc8214b788cb04148",
+      "src/chipjev/research/numerics.py": "7c51c69762686273a973193caaff8d40324fa97bbcfe12954881e28c44cfa692",
+      "src/chipjev/research/pdk.py": "18506060e70d972c10e13638321de96cc0c6c884c5ea912eada1304acf66a778",
+      "src/chipjev/research/provenance.py": "caf535a1e34fbb894ecbf24b8f217b81fcc921337f9240f28e4feeba175307de",
+      "src/chipjev/research/reporting.py": "2fc2501ab6aa896816cfbf7113f63dee24f478c2c29224210087dae2fb1f9b93",
+      "src/chipjev/research/schema.py": "8da94f14551a697bafe9748c32455ec403c9fe0b86df89c7508f3e0165de8d19",
+      "src/chipjev/rt/__init__.py": "c2c9592d760ef5639c7701431928fdbb75683ebcd0084c9d2d9050b88b3683f8",
+      "src/chipjev/rt/agents.py": "819bac1497e72e946d4ecca3d6b862abbb8aeb0d08f1124d6794282781bc7a9c",
+      "src/chipjev/rt/baselines.py": "2b30e36e426c407f077d64973891fa1ca407e21cbbff24b12854af52f34d3c15",
+      "src/chipjev/rt/emulate.py": "3928386b77d772df9c3bd11297835c8bc34b82b0adf44c739d4fc1e880be495f",
+      "src/chipjev/rt/executor.py": "80515778fed029049f25e67bce7c4a10386859349097253c26f031b045443ada",
+      "src/chipjev/rt/kernels.py": "a30bf296016c844b85476b5da039f9f154fb3da5ddf5a8f902147d2eb4fc2187",
+      "src/chipjev/rt/problem.py": "4c5ac0d842ec8c4ffccb0f4fbf60cef610747500297c6336b50e6282a85bc0b4",
+      "src/chipjev/rt/provenance.py": "b5d4c4293533874dd05ea7971938d8be12e066cd1d7842d67155370e3ddf574a",
+      "src/chipjev/rt/search.py": "1c6011171c3fe20ba32b882563cc3dc78e50525dbcbd6d92e6ad69bb1299d6bd",
+      "src/chipjev/rt/surrogate.py": "6ab9bfc59f39bb30e9356410b32a4553ad075b93924271db3c974494b0b97ced",
+      "src/chipjev/runner.py": "51bf5002c46504d4b7805c5ef3e6295939bd30859592f50b21d3399f22a70d79",
+      "src/chipjev/server.py": "bd9e2f499d1dab91120563eb14415bd3498dea25be81b2e38b1322663fab65c8",
+      "src/chipjev/simulation.py": "1e54955936c10a3cce486fd2fc3d8adf3a8100fb7a7bd6955183107e47c366d0",
+      "src/chipjev/waveforms.py": "076bbe8a0b7377e1424b148bf1b0df26a10cad22b5f03f3f3a91957119d52631",
+      "src/chipjev/xschem.py": "41e8aa770afaaff369a07449d3366c5ade1267cd4c31bc048f924f23928c626c",
+      "uv.lock": "403686c84582360beb3558ab218c69250d24476e38ca35a59f288a9aabaf2226",
+      "pyproject.toml": "a4365df86189c349d4a82f677c60cf899cf50a41803b4cd4e487cd9d116d1b7e",
+      "scripts/rt-atlas.py": "40257165b1ebca68a93d8618cff68d49cd40cff75b06fb1eb8dac076dbafff91",
+      "scripts/rt-tasks.py": "b12f5e3d03ff7f3a08b6c60aa6863f6ee85146508cae9d0dd986bd9d547de8f2",
+      "scripts/rt-optima.py": "f4d4728ccd27d66afef37d3159b29135481bc1d1c31a17149cc157aaf3125f92",
+      "scripts/rt-run.py": "3e0a5bb5ec9a51fa14bfce541f263e190f77d74e57dcfb5b48baf5db87f5a98c",
+      "scripts/rt-latency.py": "d1ed1f77d82e39f160fca93357252f90b24b98caedac60fc50614483e904895e",
+      "scripts/rt-laya-parity.py": "31fb240d37d213fddcc49cda247b794440004466003bb26f566850d6ed7fd36d",
+      "experiments/rt-v3/tasks-dev.json": "5111ac2241beb4b18d79c10ac9c339596418141a828b688b41d00ed0869f4c59",
+      "experiments/rt-v3/tasks-test.json": "d63c7e3d71c412f991a0fcd7aa459f46bd227464ee61504b154f59d53d4b916b"
+    },
+    "code_sha256": "3eec860b405fd0f7cb44e00ccda9cbd86baad9a0cdc614afa0da8ef40f465833",
+    "measurement_version": "2026-09-21.3",
+    "pdk_archive_sha256": "bc46a070e6c8c217e61e97355ed2ab3f029706a99b5053a80860cd98963e1ce8"
+  },
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "settings": {
+    "batch": 8,
+    "rounds": 128,
+    "exploit": 1,
+    "exploit_final": null,
+    "random_pool": 2048,
+    "local_pool": 8192,
+    "top_k": 8,
+    "per_topology": 1,
+    "depth": 0,
+    "perturb": 0,
+    "mutations": 2,
+    "jump": 0.25,
+    "changes": [
+      4
+    ],
+    "gp_steps_first": 60,
+    "gp_steps": 15,
+    "refit_every": 4,
+    "threads": 8,
+    "fit_points": 256,
+    "max_points": 512,
+    "features": 1024,
+    "verify_top": 2,
+    "device": null,
+    "dtype": null,
+    "seed": 0,
+    "surrogate": true,
+    "constraint_model": true,
+    "carry_sizes": true,
+    "roles": true,
+    "typed_starts": 4,
+    "prior_mix": 0.5,
+    "notes": {}
+  },
+  "acpro_statements": {
+    "51": "Design a single-stage amplifier topology that maximizes voltage gain (preventing positive feedback).",
+    "52": "Design a single-stage opamp topology that maximizes voltage gain (preventing positive feedback).",
+    "53": "Design a multi-stage amplifier topology that maximizes voltage gain (preventing positive feedback).",
+    "54": "Design a multi-stage opamp topology that maximizes voltage gain (preventing positive feedback).",
+    "55": "Design a single-stage amplifier topology that maximizes Gain-Bandwidth Product (GBW) (preventing positive feedback).",
+    "56": "Design a single-stage opamp topology that maximizes Gain-Bandwidth Product (GBW) (preventing positive feedback).",
+    "57": "Design a multi-stage amplifier topology that maximizes Gain-Bandwidth Product (GBW) (preventing positive feedback).",
+    "58": "Design a multi-stage opamp topology that maximizes Gain-Bandwidth Product (GBW) (preventing positive feedback).",
+    "59": "Design a single-stage amplifier topology that maximizes GBW/Power (FoM) (preventing positive feedback).",
+    "60": "Design a single-stage opamp topology that maximizes GBW/Power (FoM) (preventing positive feedback).",
+    "61": "Design a multi-stage amplifier topology that maximizes GBW/Power (FoM) (preventing positive feedback).",
+    "62": "Design a multi-stage opamp topology that maximizes GBW/Power (FoM) (preventing positive feedback)."
+  },
+  "jobs": {
+    "main": [
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gain",
+          "cls": "opamp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        0
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-gain",
+          "cls": "amp1",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        4
+      ],
+      [
+        {
+          "id": "opamp1-fom",
+          "cls": "opamp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        2
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        1
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "opamp1-gbw",
+          "cls": "opamp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "tpe8",
+        3
+      ],
+      [
+        {
+          "id": "amp1-fom",
+          "cls": "amp1",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev",
+        2
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gbw",
+          "cls": "ampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        4
+      ],
+      [
+        {
+          "id": "amp1-gbw",
+          "cls": "amp1",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gbw",
+          "cls": "opampN",
+          "target": "gbw",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "random8",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "chipjev-v2",
+        1
+      ]
+    ],
+    "ablation": [
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        3
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        1
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        0
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        0
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        3
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        3
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        2
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        3
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        1
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        2
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        2
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        4
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        0
+      ],
+      [
+        {
+          "id": "opampN-gain",
+          "cls": "opampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        0
+      ],
+      [
+        {
+          "id": "ampN-gain",
+          "cls": "ampN",
+          "target": "gain",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        4
+      ],
+      [
+        {
+          "id": "opampN-fom",
+          "cls": "opampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        1
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "cpu-acquisition",
+        0
+      ],
+      [
+        {
+          "id": "ampN-fom",
+          "cls": "ampN",
+          "target": "fom",
+          "vdd": 1.2,
+          "load_pf": 100.0
+        },
+        "scrambled-roles",
+        1
+      ]
+    ]
+  }
+}
