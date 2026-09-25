@@ -23,6 +23,7 @@ from pathlib import Path
 from aiohttp import web
 
 from chipjev import xschem
+from chipjev.layout.magic import readiness as layout_readiness
 from chipjev.paths import ROOT, ngspice
 from chipjev.simulation.pdk import model_root
 from demo.examples import DEFAULT_EXAMPLE, EXAMPLES
@@ -31,7 +32,11 @@ from demo.runtime import inspect_runtime
 FIXTURE = json.loads((ROOT / "demo/fixtures/sky130-opamp.json").read_text())
 ARTIFACTS = {"circuit.sch": "text/plain", "circuit.spice": "text/plain",
              "result.json": "application/json", "plots.png": "image/png",
-             "decisions.json": "application/json", "search.json": "application/json"}
+             "decisions.json": "application/json", "search.json": "application/json",
+             "layout.svg": "image/svg+xml", "layout.mag": "text/plain",
+             "layout.gds": "application/octet-stream", "pex.spice": "text/plain",
+             "physical.json": "application/json", "drc.txt": "text/plain", "lvs.log": "text/plain",
+             "physical-evidence.zip": "application/zip"}
 DEFAULT_ORIGINS = {"https://chipjev.com", "https://www.chipjev.com",
                    "https://lab-emi.github.io"}
 RUN_TTL = 600
@@ -94,11 +99,11 @@ class Service:
             missing.append("SKY130 models")
         if self.runtime_check is None:
             self.compute, self.runtime_check = inspect_runtime(self.device)
-        return missing + self.runtime_check
+        return missing + layout_readiness() + self.runtime_check
 
     def publish(self, run, event):
         # At most two events per search round plus the bounded phase events.
-        if len(run.events) >= 240:
+        if len(run.events) >= 400:
             raise RuntimeError("Worker exceeded the event limit")
         run.events.append({**event, "id": len(run.events) + 1,
                            "elapsed": round(time.monotonic() - run.created, 3)})

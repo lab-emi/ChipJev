@@ -87,6 +87,29 @@ def _slug(text):
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:48] or "request"
 
 
+def layout_command(args):
+    from .circuits.published import lookup
+    from .layout.flow import complete
+
+    opener = gzip.open if args.input.suffix == ".gz" else open
+    with opener(args.input, "rt") as stream:
+        record = json.load(stream)
+    technology = record.get("technology", "")
+    if not technology.startswith("sky130"):
+        raise ValueError("Physical synthesis requires a SKY130 result, not PTM sizing")
+    selected = record.get("best") or record
+    topology = lookup(record["cls"], selected["topology"])
+    result = complete(topology, selected["values"], args.output,
+                      vdd=record.get("vdd", 1.8), load_pf=record.get("load_pf", 100),
+                      max_candidates=0 if args.no_recovery else 48,
+                      observer=lambda name, data: print(name, flush=True))
+    print(json.dumps({"valid": result["valid"], "layout_seconds": result["layout"]["layout_seconds"],
+                      "physical_seconds": result["total_seconds"],
+                      "drc_errors": result["layout"]["drc_errors"], "lvs": result["lvs"]["passed"],
+                      "postlayout": result["postlayout"]["metrics"], "output": str(args.output)}, indent=2))
+    return 0 if result["valid"] else 1
+
+
 def design(args):
     from .circuits.published import lookup
     from .search.evaluator import Evaluator
@@ -217,6 +240,12 @@ def main(argv=None):
 
     p = sub.add_parser("tasks", help="AnalogCoder-Pro's twelve benchmark tasks")
     p.set_defaults(run=tasks_command)
+
+    p = sub.add_parser("layout", help="SKY130 Magic layout, LVS, RC extraction and ngspice post-layout verification")
+    p.add_argument("input", type=Path, help="SKY130 result.json or result.json.gz")
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--no-recovery", action="store_true", help="verify the supplied sizing without refinement")
+    p.set_defaults(run=layout_command)
 
     args = parser.parse_args(argv)
     tools = ROOT / ".tools/bin"

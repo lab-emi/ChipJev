@@ -10,7 +10,9 @@
 > **[Watch the live circuit demo →](https://chipjev.com/)**
 > Choose a SKY130 design prompt. Each run executes Laya typed decisions and fresh
 > topology/sizing search, streams the connected circuit in xschem, and measures it
-> with ngspice. CUDA accelerates Laya and acquisition; the site reports the actual
+> with ngspice, generates a real Magic/GDS layout, extracts distributed RC, and
+> verifies its post-layout function and performance. CUDA accelerates Laya and
+> acquisition; the site reports the actual
 > device, phase timings, waveforms and qualification. The default prompt requires
 > a complex two-stage op-amp with at least 13 MOSFETs.
 > [Run or deploy the demo](deploy/chipjev/README.md).
@@ -40,7 +42,8 @@ typed probabilistic decisions out, in one parallel pass) to circuit design:
 
 ## Results
 
-All results come from frozen, preregistered studies and are regenerated from the archived
+The schematic benchmark results below come from frozen, preregistered studies
+and are regenerated from the archived
 evidence by one command ([Reproduce the experiments](#reproduce-the-experiments)).
 
 - **Versus AnalogCoder-Pro** ([PTM 45 nm study](experiments/ptm45/README.md): AnalogCoder-Pro's
@@ -57,6 +60,11 @@ evidence by one command ([Reproduce the experiments](#reproduce-the-experiments)
 - **System One versus System Two** ([same study](experiments/sky130-system-two/README.md)). Laya answers a
   request's typed questions in **9.8 ms**; DeepSeek-V3 and GPT-5-mini answering the same
   questions take 8.0 s and 16 s (**820–1,600× slower**) and give no better designs.
+
+The separate [physical demonstration](experiments/layout/README.md) adds Magic DRC, Netgen LVS,
+distributed RC PEX and strict post-layout ngspice for the three live prompts.
+[Measured timings and evidence](experiments/layout/report/README.md) distinguish final-layout
+time, the full physical flow including recovery, and the entire live run.
 
 ## Repository layout
 
@@ -170,6 +178,18 @@ full record (`result.json.gz`) to `runs/designs/`:
 
 Searches on a GPU are not bit-reproducible under a seed (background hyperparameter refits,
 GPU arithmetic), so single runs vary; the paper reports medians over five seeds.
+
+**Generate and verify a physical layout.** Install the local pinned Magic with
+`bash scripts/setup-layout.sh` (requires LVS Netgen and the build dependencies described
+in [the physical flow](experiments/layout/README.md)), then:
+
+```bash
+.venv/bin/chipjev layout runs/designs/opampN-gbw-sky130-s0/result.json.gz --output runs/physical
+```
+
+The output contains native Magic, GDSII, DRC/LVS reports, the actual RC-extracted netlist,
+strict post-layout measurements and every bounded recovery attempt. A failed result exits
+with a nonzero status. The CLI requires a SKY130 result; PTM sizing is not silently converted.
 
 ## Reproduce the experiments
 

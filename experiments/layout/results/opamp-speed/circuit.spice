@@ -1,0 +1,26 @@
+** sch_path: /home/cgao/git/ChipJev/runs/layout-preview/8f8c20c0e1215a63d9fee6d7103a35ae/circuit.sch
+**.subckt circuit
+VDD vdd 0 1.8
+XM1 t1 s1t 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=6.42 nf=1 ad=1.8618 as=1.8618 pd=13.42 ps=13.42 nrd=0.0451713 nrs=0.0451713 sa=0
++ sb=0 sd=0 mult=1
+XM2 x1 inp t1 0 sky130_fd_pr__nfet_01v8 L=0.15 W=56.1 nf=2 ad=8.1345 as=16.269 pd=56.68 ps=113.36 nrd=0.00516934 nrs=0.00516934
++ sa=0 sb=0 sd=0 mult=1
+XM3 o1 inn t1 0 sky130_fd_pr__nfet_01v8 L=0.15 W=56.1 nf=2 ad=8.1345 as=16.269 pd=56.68 ps=113.36 nrd=0.00516934 nrs=0.00516934
++ sa=0 sb=0 sd=0 mult=1
+XM4 x1 x1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4.17 nf=1 ad=1.2093 as=1.2093 pd=8.92 ps=8.92 nrd=0.0695444 nrs=0.0695444 sa=0
++ sb=0 sd=0 mult=1
+XM5 o1 x1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=4.17 nf=1 ad=1.2093 as=1.2093 pd=8.92 ps=8.92 nrd=0.0695444 nrs=0.0695444 sa=0
++ sb=0 sd=0 mult=1
+XM6 s2a o1 0 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=0.42 nf=1 ad=0.1218 as=0.1218 pd=1.42 ps=1.42 nrd=0.690476 nrs=0.690476 sa=0
++ sb=0 sd=0 mult=1
+XM7 out s2cn s2a 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=89.1667 nf=2 ad=12.9292 as=25.8583 pd=89.7467 ps=179.493 nrd=0.00325234
++ nrs=0.00325234 sa=0 sb=0 sd=0 mult=1
+XM8 out s2cp s2c vdd sky130_fd_pr__pfet_01v8 L=0.178333 W=1.16808 nf=1 ad=0.338744 as=0.338744 pd=2.91617 ps=2.91617 nrd=0.24827
++ nrs=0.24827 sa=0 sb=0 sd=0 mult=1
+XM9 s2c o1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.178333 W=32.4567 nf=1 ad=9.41243 as=9.41243 pd=65.4933 ps=65.4933 nrd=0.00893499
++ nrs=0.00893499 sa=0 sb=0 sd=0 mult=1
+V_S1T s1t 0 0.735
+V_S2CN s2cn 0 1.015
+V_S2CP s2cp 0 0.2775
+**.ends
+.end

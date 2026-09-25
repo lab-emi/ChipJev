@@ -15,6 +15,7 @@ uv python install 3.13
 uv sync --frozen --python 3.13 --extra research --extra rt
 uv pip install --python .venv/bin/python --require-hashes -r demo/requirements.lock
 .venv/bin/python -m chipjev.simulation.pdk
+bash scripts/setup-layout.sh
 export HF_HOME="$demo_root/.tools/huggingface"
 .venv/bin/python - <<'PYMODEL'
 from huggingface_hub import snapshot_download

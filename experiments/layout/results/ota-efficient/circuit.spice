@@ -1,0 +1,16 @@
+** sch_path: /home/cgao/git/ChipJev/runs/layout-preview/b0d04fadc4a7a80842af1e567ab10c33/circuit.sch
+**.subckt circuit
+VDD vdd 0 1.8
+XM1 t1 s1t vdd vdd sky130_fd_pr__pfet_01v8 L=1.69667 W=112.15 nf=3 ad=21.6823 as=21.6823 pd=150.693 ps=150.693 nrd=0.00258583
++ nrs=0.00258583 sa=0 sb=0 sd=0 mult=1
+XM2 x1 inp t1 vdd sky130_fd_pr__pfet_01v8 L=1.69667 W=848.333 nf=17 ad=130.244 as=130.244 pd=903.455 ps=903.455 nrd=0.000341847
++ nrs=0.000341847 sa=0 sb=0 sd=0 mult=1
+XM3 out inn t1 vdd sky130_fd_pr__pfet_01v8 L=1.69667 W=848.333 nf=17 ad=130.244 as=130.244 pd=903.455 ps=903.455 nrd=0.000341847
++ nrs=0.000341847 sa=0 sb=0 sd=0 mult=1
+XM4 x1 x1 0 0 sky130_fd_pr__nfet_01v8 L=1.69667 W=26.468 nf=1 ad=7.67572 as=7.67572 pd=53.516 ps=53.516 nrd=0.0109566
++ nrs=0.0109566 sa=0 sb=0 sd=0 mult=1
+XM5 out x1 0 0 sky130_fd_pr__nfet_01v8 L=1.69667 W=26.468 nf=1 ad=7.67572 as=7.67572 pd=53.516 ps=53.516 nrd=0.0109566
++ nrs=0.0109566 sa=0 sb=0 sd=0 mult=1
+V_S1T s1t 0 0.6975
+**.ends
+.end

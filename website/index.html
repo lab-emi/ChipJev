@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Design SKY130 analog circuits with ChipJev and Laya. Explore live circuit search, xschem schematics, and ngspice simulation from EMI Lab at TU Delft.">
+  <meta name="description" content="Design SKY130 analog circuits with ChipJev and Laya. Explore live schematic search, automated Magic layout, RC extraction and ngspice post-layout verification from EMI Lab at TU Delft.">
   <meta name="theme-color" content="#071a31">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self' https://versions-involvement-press-saves.trycloudflare.com wss://versions-involvement-press-saves.trycloudflare.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>ChipJev — AI Analog Circuit Design with Open-Source EDA</title>
@@ -28,7 +28,7 @@
   <main>
     <section class="intro wrap" aria-labelledby="title">
       <div><p class="eyebrow">CHIPJEV / OPEN CIRCUIT DESIGN</p><h1 id="title">Watch a circuit <em>come to life.</em></h1>
-      <p class="lead">Choose a design prompt. Laya makes the decisions; ChipJev searches the circuit.<br class="desktop-break"> Watch real topology, real wires, and real simulation — live.</p></div>
+      <p class="lead">Choose a design prompt. Laya makes the decisions; ChipJev searches the circuit.<br class="desktop-break"> Watch the schematic become a physical layout, then verify its extracted circuit.</p></div>
       <div class="launch"><div class="launch-action"><button id="run" class="button primary" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5 16 10 6 16.5Z"/></svg><span>Start design</span></button><output id="button-timer" class="button-timer" role="timer" aria-live="off" hidden>0.0 s</output></div><p id="availability" role="status">Connecting to the design service…</p></div>
       <div class="prompt-selector">
         <fieldset id="examples"><legend>01 / CHOOSE A DESIGN PROMPT</legend>
@@ -46,27 +46,30 @@
       <div class="demo-heading"><div class="spec-title"><span class="spec-index">01</span><h2 id="circuit-title">SKY130 two-stage op-amp</h2><span class="tech-tag">130 nm</span></div><p class="spec-meta" id="topology-note">A fresh topology and sizing search on every run</p></div>
       <div class="studio">
         <div class="viewer">
-          <div class="viewer-bar"><div><span id="live-dot" class="status-dot"></span><span id="stream-label">REFERENCE CAPTURE</span></div><span class="mono">xschem / ngspice</span><button id="expand" class="icon-button" type="button" aria-label="Expand live circuit view" title="Expand view">⛶</button></div>
-          <div id="screen" class="screen"><img id="frame" src="assets/circuit-preview.jpg" width="1440" height="900" alt="Wired SKY130 op-amp in xschem: differential input pair, connected current-mirror branches, cascoded output stage and Miller feedback loop"><div id="screen-note" class="screen-note"><span>REAL TOOLS. REAL CONNECTIONS.</span><p>Choose a prompt, then start a fresh design.</p></div></div>
+          <div class="viewer-bar"><div><span id="live-dot" class="status-dot"></span><span id="stream-label">REFERENCE CAPTURE</span></div><span class="mono">xschem / Magic / ngspice</span><button id="expand" class="icon-button" type="button" aria-label="Expand live circuit view" title="Expand view">⛶</button></div>
+          <div class="view-switch" aria-label="Circuit view"><button id="view-schematic" type="button" aria-pressed="true">Schematic</button><button id="view-layout" type="button" aria-pressed="false" disabled>Physical layout</button></div><div id="screen" class="screen"><img id="layout-frame" alt="The generated SKY130 physical layout, rendered from its Magic geometry" hidden><img id="frame" src="assets/circuit-preview.jpg" width="1440" height="900" alt="Wired SKY130 op-amp in xschem: differential input pair, connected current-mirror branches, cascoded output stage and Miller feedback loop"><div id="screen-note" class="screen-note"><span>REAL TOOLS. REAL CONNECTIONS.</span><p>Choose a prompt, then start a fresh design.</p></div></div>
           <div class="viewer-footer"><span id="frame-note">Idle reference capture · replaced by the live session on start</span><span id="elapsed" class="mono">— s</span></div>
         </div>
         <aside class="run-panel" aria-label="Simulation progress and measurements">
           <div class="panel-title"><h3>This run</h3><span id="run-state" class="state-badge">Ready</span></div>
           <div class="run-timing" aria-label="Run timing">
             <div class="total-timing"><span>Total elapsed</span><output id="total-timer" role="timer" aria-live="off">0.00<small>s</small></output></div>
-            <div class="phase-timing"><div><span>Laya</span><output id="laya-timer">—</output></div><div><span>Design search</span><output id="build-timer">—</output></div><div><span>Final simulation</span><output id="simulation-timer">—</output></div></div>
+            <div class="phase-timing"><div><span>Laya</span><output id="laya-timer">—</output></div><div><span>Design search</span><output id="build-timer">—</output></div><div><span>Schematic sim</span><output id="simulation-timer">—</output></div><div><span>Layout + DRC</span><output id="layout-timer">—</output></div><div><span>LVS + RC extraction</span><output id="pex-timer">—</output></div><div><span>Post-layout + refinement</span><output id="postlayout-timer">—</output></div></div>
             <p id="timing-note">From your click to the measured result. Search includes candidate simulations.</p>
           </div>
           <ol class="stages" id="stages">
             <li data-stage="deciding"><span class="step-number">1</span><div><strong>Laya reads your prompt</strong><small id="laya-note">Typed decisions → topology probabilities</small></div></li>
-            <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + transistor sizing</small></div></li>
+            <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + sizing + RC screening</small></div></li>
             <li data-stage="netlisting"><span class="step-number">3</span><div><strong>Check every connection</strong><small>xschem netlist and geometry verification</small></div></li>
-            <li data-stage="simulating"><span class="step-number">4</span><div><strong>Run final ngspice checks</strong><small>AC sweep and closed-loop steps</small></div></li>
-            <li data-stage="checking"><span class="step-number">5</span><div><strong>Measure the response</strong><small>Gain, stability and settling</small></div></li>
+            <li data-stage="simulating"><span class="step-number">4</span><div><strong>Verify the schematic</strong><small>AC sweep and closed-loop steps</small></div></li>
+            <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small>SKY130 PCells, routing and Magic DRC</small></div></li>
+            <li data-stage="extracting"><span class="step-number">6</span><div><strong>Extract the real circuit</strong><small>Netgen LVS + Magic distributed RC</small></div></li>
+            <li data-stage="postsimulating"><span class="step-number">7</span><div><strong>Verify after layout</strong><small>ngspice AC and closed-loop steps</small></div></li>
+            <li data-stage="checking"><span class="step-number">8</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
           </ol>
           <progress id="progress" value="0" max="100" aria-label="Run progress"></progress>
           <p id="run-message" class="run-message" role="status">Choose a prompt to start a fresh design.</p>
-          <div class="metrics" aria-label="Measured circuit performance">
+          <div class="metrics" aria-label="Measured post-layout circuit performance">
             <div><span>DC gain</span><strong id="gain">—<small>dB</small></strong></div>
             <div><span>Gain-bandwidth</span><strong id="gbw">—<small>MHz</small></strong></div>
             <div><span>Phase margin</span><strong id="pm">—<small>°</small></strong></div>
@@ -78,19 +81,26 @@
       <p id="error" class="error" role="alert" hidden></p>
       <div class="demo-caption"><p><span class="caption-label">Follow the connections</span> Each frame shows an actual search candidate in xschem. Wire crossings connect only at junctions. The final schematic must pass a device-by-device connectivity check before its response is reported.</p><span class="view-only">View-only · No installation</span></div>
 
-      <div class="plots" aria-label="Live simulation results">
+      <div class="response-heading"><h3>Schematic simulation</h3><p>Before physical implementation</p></div><div class="plots" aria-label="Schematic simulation results">
         <figure class="plot-card"><figcaption><div><span class="eyebrow">FREQUENCY DOMAIN</span><h3>Open-loop response</h3></div><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="ac-plot"><p>Waiting for the AC sweep</p></div></figure>
         <figure class="plot-card"><figcaption><div><span class="eyebrow">TIME DOMAIN</span><h3>Unity-buffer response</h3></div><span class="plot-key"><i></i>+10 mV <i class="negative"></i>−10 mV</span></figcaption><div class="plot-area" id="step-plot"><p>Waiting for the closed-loop steps</p></div></figure>
       </div>
-      <div class="result-bottom"><p id="result-note">Plots and measurements come from the current ngspice run.</p><div id="downloads" class="downloads" hidden><span>Download this run</span><a id="download-sch">Schematic ↓</a><a id="download-spice">SPICE ↓</a><a id="download-json">Results ↓</a><a id="download-decisions">Laya decisions ↓</a><a id="download-search">Search trace ↓</a></div></div>
+      <section class="physical-results" aria-labelledby="physical-title">
+        <div class="response-heading"><h3 id="physical-title">After physical layout</h3><p id="physical-status" role="status">DRC, LVS and extracted measurements appear here.</p></div>
+        <div class="physical-facts" aria-label="Physical verification"><div><span>Magic DRC</span><strong id="drc-result">—</strong></div><div><span>Netgen LVS</span><strong id="lvs-result">—</strong></div><div><span>Extracted R / C</span><strong id="pex-result">—</strong></div><div><span>Layout area</span><strong id="area-result">—</strong></div></div>
+        <div class="comparison-scroll"><table class="comparison"><caption>Schematic and RC post-layout performance at SKY130 TT, 1.8 V, 100 pF</caption><thead><tr><th scope="col">Measurement</th><th scope="col">Schematic</th><th scope="col">After RC extraction</th><th scope="col">Change</th></tr></thead><tbody id="comparison-body"><tr><td colspan="4">Start a design to measure both circuits.</td></tr></tbody></table></div>
+        <div class="plots" aria-label="Post-layout simulation results"><figure class="plot-card"><figcaption><h3>Extracted open-loop response</h3><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="post-ac-plot"><p>Waiting for the extracted AC sweep</p></div></figure><figure class="plot-card"><figcaption><h3>Extracted unity-buffer response</h3><span class="plot-key"><i></i>+10 mV <i class="negative"></i>−10 mV</span></figcaption><div class="plot-area" id="post-step-plot"><p>Waiting for the extracted closed-loop steps</p></div></figure></div>
+        <p class="physical-scope">Nominal block verification. Supply, gate-bias sources and the 100 pF load are external. Dimensions are snapped to the PDK grid. DRC and LVS do not establish fabrication signoff or PVT yield.</p>
+      </section>
+      <div class="result-bottom"><p id="result-note">Plots and measurements come from the current ngspice run.</p><div id="downloads" class="downloads" hidden><span>Download this run</span><a id="download-sch">Schematic ↓</a><a id="download-spice">SPICE ↓</a><a id="download-json">Results ↓</a><a id="download-decisions">Laya decisions ↓</a><a id="download-search">Search trace ↓</a><a id="download-mag">Magic layout ↓</a><a id="download-gds">GDSII ↓</a><a id="download-pex">RC netlist ↓</a><a id="download-physical">Physical results ↓</a><a id="download-evidence">DRC, LVS &amp; simulation evidence ↓</a></div></div>
     </section>
 
     <section id="method" class="method wrap" aria-labelledby="method-title">
       <div class="method-intro"><p class="eyebrow">BEHIND THE DEMO</p><h2 id="method-title">Fast decisions.<br>Measured circuits.</h2><p>ChipJev combines a System One decision model, joint topology and sizing search, and open-source EDA.</p><a href="https://github.com/lab-emi/ChipJev#results">Explore the research and results <span aria-hidden="true">↗</span></a></div>
       <div class="method-details">
         <article><span class="method-number">01 / DECIDE</span><h3>Your prompt becomes typed decisions.</h3><p>Every click runs the fine-tuned Laya model. Its probabilities guide the search over the circuit grammar, constrained to the number of stages in your selected prompt. The actual device and inference time are shown above.</p></article>
-        <article><span class="method-number">02 / DESIGN</span><h3>Search topology and sizing together.</h3><p>Laya and Bayesian search use CUDA when the GPU backend is connected. Eight ngspice CPU workers measure real candidate circuits. This bounded demo stops at the first strictly verified design, or reports that its search budget was exhausted.</p></article>
-        <article><span class="method-number">03 / VERIFY</span><h3>Open the circuit. Inspect the evidence.</h3><p>Download the current run’s Laya decisions, search trace, wired schematic, SPICE netlist and measurements. Every run starts from the selected prompt. The idle preview is a reference capture; live results come from new computations.</p><a href="https://github.com/lab-emi/ChipJev/tree/main/demo">Inspect the live pipeline ↗</a></article>
+        <article><span class="method-number">02 / DESIGN</span><h3>Search topology and sizing together.</h3><p>Laya and Bayesian search use CUDA when the GPU backend is connected. Eight ngspice CPU workers measure real candidate circuits. Gain and OTA prompts reserve modest search margins. Strict candidates undergo real PEX screening before the search accepts them. A bounded sizing refinement can repair a failed post-layout check; every attempt is recorded.</p></article>
+        <article><span class="method-number">03 / VERIFY</span><h3>From schematic to verified physical layout.</h3><p>Download the current run’s Laya decisions, search trace, wired schematic, Magic layout, GDSII, extracted RC netlist and both sets of measurements. Every run starts from the selected prompt. The idle preview is a reference capture; live results come from new computations.</p><a href="https://github.com/lab-emi/ChipJev/tree/main/demo">Inspect the live pipeline ↗</a></article>
       </div>
     </section>
   </main>

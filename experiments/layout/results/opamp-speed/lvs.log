@@ -1,0 +1,65 @@
+
+Circuit 1 cell sky130_fd_pr__nfet_01v8 and Circuit 2 cell sky130_fd_pr__nfet_01v8 are black boxes.
+Warning: Equate pins:  cell sky130_fd_pr__nfet_01v8 is a placeholder, treated as a black box.
+Warning: Equate pins:  cell sky130_fd_pr__nfet_01v8 is a placeholder, treated as a black box.
+
+Subcircuit pins:
+Circuit 1: sky130_fd_pr__nfet_01v8         |Circuit 2: sky130_fd_pr__nfet_01v8         
+-------------------------------------------|-------------------------------------------
+1                                          |1                                          
+2                                          |2                                          
+3                                          |3                                          
+4                                          |4                                          
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes sky130_fd_pr__nfet_01v8 and sky130_fd_pr__nfet_01v8 are equivalent.
+
+Circuit 1 cell sky130_fd_pr__pfet_01v8 and Circuit 2 cell sky130_fd_pr__pfet_01v8 are black boxes.
+Warning: Equate pins:  cell sky130_fd_pr__pfet_01v8 is a placeholder, treated as a black box.
+Warning: Equate pins:  cell sky130_fd_pr__pfet_01v8 is a placeholder, treated as a black box.
+
+Subcircuit pins:
+Circuit 1: sky130_fd_pr__pfet_01v8         |Circuit 2: sky130_fd_pr__pfet_01v8         
+-------------------------------------------|-------------------------------------------
+1                                          |1                                          
+2                                          |2                                          
+3                                          |3                                          
+4                                          |4                                          
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes sky130_fd_pr__pfet_01v8 and sky130_fd_pr__pfet_01v8 are equivalent.
+
+Class layout (0):  Merged 3 parallel devices.
+Class layout (1):  Merged 3 parallel devices.
+Subcircuit summary:
+Circuit 1: layout                          |Circuit 2: layout                          
+-------------------------------------------|-------------------------------------------
+sky130_fd_pr__nfet_01v8 (8->5)             |sky130_fd_pr__nfet_01v8 (8->5)             
+sky130_fd_pr__pfet_01v8 (4)                |sky130_fd_pr__pfet_01v8 (4)                
+Number of devices: 9                       |Number of devices: 9                       
+Number of nets: 13                         |Number of nets: 13                         
+---------------------------------------------------------------------------------------
+Netlists match uniquely.
+
+Subcircuit pins:
+Circuit 1: layout                          |Circuit 2: layout                          
+-------------------------------------------|-------------------------------------------
+x1                                         |x1                                         
+o1                                         |o1                                         
+s2a                                        |s2a                                        
+out                                        |out                                        
+s2c                                        |s2c                                        
+vss                                        |vss                                        
+vdd                                        |vdd                                        
+s1t                                        |s1t                                        
+inn                                        |inn                                        
+inp                                        |inp                                        
+s2cn                                       |s2cn                                       
+s2cp                                       |s2cp                                       
+t1                                         |t1                                         
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes layout and layout are equivalent.
+
+Final result: Circuits match uniquely.
+.

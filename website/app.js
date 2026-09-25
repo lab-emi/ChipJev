@@ -1,12 +1,13 @@
 import { RunClock } from "./run-clock.mjs";
 const $ = (id) => document.getElementById(id);
 const runButton = $("run");
-const stageNames = ["deciding", "searching", "netlisting", "simulating", "checking"];
+const stageNames = ["deciding", "searching", "netlisting", "simulating", "layout", "extracting", "postsimulating", "checking"];
 const clock = new RunClock();
 let examples = [];
 let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false;
 let timer, result, finished = false, expanded = false;
-const runKey = "chipjev-live-run-v2";
+const runKey = "chipjev-live-run-v3";
+let layoutURL;
 
 function saveRun(value) {
   try { value ? sessionStorage.setItem(runKey, value) : sessionStorage.removeItem(runKey); } catch { /* Storage is optional. */ }
@@ -28,7 +29,7 @@ function renderTime() {
   $("elapsed").textContent = `${value.total.toFixed(2)} s`;
   const small = document.createElement("small"); small.textContent = "s";
   $("total-timer").replaceChildren(document.createTextNode(value.total.toFixed(2)), small);
-  for (const [id, phase] of [["laya-timer", "laya"], ["build-timer", "search"], ["simulation-timer", "simulation"]]) {
+  for (const [id, phase] of [["laya-timer", "laya"], ["build-timer", "search"], ["simulation-timer", "simulation"], ["layout-timer", "layout"], ["pex-timer", "pex"], ["postlayout-timer", "postlayout"]]) {
     $(id).textContent = phases[phase] === undefined ? "—" : `${phases[phase].toFixed(2)} s`;
   }
 }
@@ -36,7 +37,20 @@ function startClock() {
   $("button-timer").hidden = false;
   clearInterval(timer); renderTime(); timer = setInterval(renderTime, 100);
 }
+function setView(layout) {
+  $("frame").hidden = layout; $("layout-frame").hidden = !layout;
+  $("view-schematic").setAttribute("aria-pressed", String(!layout));
+  $("view-layout").setAttribute("aria-pressed", String(layout));
+  if (layout) $("frame-note").textContent = "Exact physical geometry · PDK devices, contacts and routed metal";
+  else if (finished) $("frame-note").textContent = "Final frame from this live xschem session";
+}
 function reset() {
+  setView(false); $("view-layout").disabled = true;
+  if (layoutURL) { URL.revokeObjectURL(layoutURL); layoutURL = null; }
+  $("layout-frame").removeAttribute("src");
+  for (const id of ["drc-result", "lvs-result", "pex-result", "area-result"]) $(id).textContent = "—";
+  $("physical-status").textContent = "DRC, LVS and extracted measurements appear here.";
+  const row = document.createElement("tr"), cell = document.createElement("td"); cell.colSpan = 4; cell.textContent = "Start a design to measure both circuits."; row.append(cell); $("comparison-body").replaceChildren(row);
   clock.reset(); renderTime();
   $("laya-decisions").hidden = true; $("laya-decisions").replaceChildren();
   $("laya-note").textContent = "Typed decisions → topology probabilities";
@@ -51,7 +65,7 @@ function reset() {
   $("result-note").textContent = "Plots and measurements come from the current ngspice run.";
   for (const [key, unit] of [["gain", "dB"], ["gbw", "MHz"], ["pm", "°"], ["power", "mW"]]) setMetric(key, null, unit);
   for (const node of document.querySelectorAll(".stages li")) node.className = "";
-  for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"]]) {
+  for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"], ["post-ac-plot", "Waiting for the extracted AC sweep"], ["post-step-plot", "Waiting for the extracted closed-loop steps"]]) {
     const p = document.createElement("p"); p.textContent = text; $(key).replaceChildren(p);
   }
 }
@@ -89,10 +103,26 @@ function showResult(data) {
   setMetric("gbw", data.metrics.gbw_mhz, "MHz");
   setMetric("pm", data.metrics.pm_deg, "°");
   setMetric("power", data.metrics.power_uw / 1000, "mW");
+  const physical = data.physical;
+  $("drc-result").textContent = `${physical.layout.drc_errors} errors`;
+  $("lvs-result").textContent = physical.lvs.passed ? "Matched" : "Failed";
+  $("pex-result").textContent = `${physical.pex.resistors} R / ${physical.pex.capacitors} C`;
+  $("area-result").textContent = `${physical.layout.area_um2.toFixed(0)} µm²`;
+  $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${(physical.all_physical_seconds ?? physical.total_seconds).toFixed(2)} s physical stages including candidate screening · ${physical.recovery.attempts.length} final sizing attempt(s)`;
+  const rows = [];
+  for (const [key, label, scale] of [["gain_db", "DC gain (dB)", 1], ["gbw_mhz", "Gain-bandwidth (MHz)", 1], ["pm_deg", "Phase margin (°)", 1], ["power_uw", "Power (mW)", 0.001], ["cmrr_db", "CMRR (dB)", 1], ["buffer_gain_error", "Closed-loop gain error (%)", 100], ["vin_dc", "Input bias (V)", 1]]) {
+    const before = data.prelayout.metrics[key], after = data.metrics[key];
+    const row = document.createElement("tr");
+    for (const text of [label, Number.isFinite(before) ? (before * scale).toFixed(3) : "—", Number.isFinite(after) ? (after * scale).toFixed(3) : "—", Number.isFinite(before) && Number.isFinite(after) ? `${after >= before ? "+" : ""}${((after - before) * scale).toFixed(3)}` : "—"]) {
+      const cell = document.createElement("td"); cell.textContent = text; row.append(cell);
+    }
+    rows.push(row);
+  }
+  $("comparison-body").replaceChildren(...rows);
   const checks = Object.values(data.checks);
-  $("verification").textContent = data.valid ? `${checks.filter(Boolean).length}/${checks.length} checks passed · netlist verified` : "Qualification failed; inspect the downloaded results.";
+  $("verification").textContent = data.valid ? `${checks.filter(Boolean).length}/${checks.length} post-layout checks passed · DRC clean · LVS matched` : "Qualification failed; inspect the downloaded results.";
   $("verification").className = `verification ${data.valid ? "success" : ""}`;
-  $("result-note").textContent = `Fresh Laya inference ${(data.laya_inference_seconds * 1000).toFixed(0)} ms · ${data.search.evaluations} circuits measured · ${data.model.device} · final ngspice verification ${data.wall_seconds.toFixed(2)} s.`;
+  $("result-note").textContent = `Fresh Laya inference ${(data.laya_inference_seconds * 1000).toFixed(0)} ms · ${data.search.evaluations} circuits measured · ${data.model.device} · post-layout ngspice ${data.wall_seconds.toFixed(2)} s. Final metrics above include the extracted RC network.`;
 }
 
 function complete(ok) {
@@ -106,10 +136,15 @@ function complete(ok) {
     badge(result.valid ? "Verified" : "Unqualified", result.valid ? "success" : "failed");
   } else if (!ok) badge("Stopped", "failed");
   if (ok && result) {
-    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"], ["decisions", "decisions.json"], ["search", "search.json"]]) {
+    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"], ["decisions", "decisions.json"], ["search", "search.json"], ["mag", "layout.mag"], ["gds", "layout.gds"], ["pex", "pex.spice"], ["physical", "physical.json"], ["evidence", "physical-evidence.zip"]]) {
       const link = $(`download-${id}`); link.href = `${api}/api/runs/${runId}/artifacts/${name}`; link.download = name;
     }
     $("downloads").hidden = false;
+    const completedId = runId;
+    fetch(`${api}/api/runs/${runId}/artifacts/layout.svg`, {credentials: "omit"})
+      .then(response => { if (!response.ok) throw new Error("Layout image unavailable"); return response.blob(); })
+      .then(blob => { if (completedId !== runId || !finished) return; if (layoutURL) URL.revokeObjectURL(layoutURL); layoutURL = URL.createObjectURL(blob); $("layout-frame").src = layoutURL; $("view-layout").disabled = false; setView(true); })
+      .catch(() => { $("physical-status").textContent += " · Preview unavailable; download the Magic or GDS file."; });
     $("availability").textContent = "Run complete · 15-second cooldown before restarting";
   }
   saveRun(null);
@@ -143,7 +178,7 @@ function event(data) {
       node.className = ["complete", "unqualified"].includes(data.stage) || i < index ? "done" : i === index ? "active" : "";
     }
     badge(data.stage === "complete" ? "Verified" : data.stage === "unqualified" ? "Unqualified" : "Running", data.stage === "complete" ? "success" : "");
-  } else if (data.type === "waveforms") drawWaveforms(data);
+  } else if (data.type === "waveforms") { drawWaveforms(data); if (data.postlayout) drawWaveforms(data.postlayout, "post-"); }
   else if (data.type === "result") showResult(data);
   else if (data.type === "error") { error(data.message); complete(false); }
 }
@@ -239,24 +274,26 @@ function chart(container, title, xLabel, yLabel, xDomain, yDomain, xTicks, serie
   if (rightLabel) svg.append(svgNode("text", { x: W - R, y: 9, "text-anchor": "end", ...textStyle, "font-size": 10 }, rightLabel));
   $(container).replaceChildren(svg);
 }
-function drawWaveforms(data) {
+function drawWaveforms(data, prefix = "") {
   const frequency = data.frequency_hz.map(Math.log10);
   const gainMin = Math.floor(Math.min(...data.gain_db) / 20) * 20;
   const gainMax = Math.ceil(Math.max(...data.gain_db) / 20) * 20;
   const phaseDomain = [Math.floor(Math.min(...data.phase_deg) / 90) * 90, Math.ceil(Math.max(...data.phase_deg) / 90) * 90];
-  chart("ac-plot", "Measured open-loop gain and phase versus frequency", "Frequency (Hz)", "Gain (dB)", [0, 11], [gainMin, gainMax], [[0, "1"], [3, "1k"], [6, "1M"], [9, "1G"], [11, "100G"]], [
+  chart(`${prefix}ac-plot`, "Measured open-loop gain and phase versus frequency", "Frequency (Hz)", "Gain (dB)", [0, 11], [gainMin, gainMax], [[0, "1"], [3, "1k"], [6, "1M"], [9, "1G"], [11, "100G"]], [
     { x: frequency, y: data.gain_db, color: "#087ebd" },
     { x: frequency, y: data.phase_deg, color: "#8b88b7", domain: phaseDomain, dash: true },
   ], "Phase (°)");
   const waves = data.steps.filter((step) => step.waveform);
-  if (!waves.length) { $("step-plot").querySelector("p").textContent = "Closed-loop qualification did not produce a waveform"; return; }
+  if (!waves.length) { const note = document.createElement("p"); note.textContent = "Closed-loop qualification did not produce a waveform"; $(`${prefix}step-plot`).replaceChildren(note); return; }
   const times = waves.flatMap((step) => step.waveform.t_us), low = Math.min(...times), high = Math.max(...times);
   const amplitude = Math.max(12, Math.ceil(Math.max(...waves.flatMap((step) => step.waveform.delta_mv.map(Math.abs))) / 2) * 2);
   const ticks = Array.from({ length: 5 }, (_, i) => { const n = i * high / 4; return [n, n.toFixed(1)]; });
-  chart("step-plot", "Measured positive and negative 10 millivolt unity-buffer step responses", "Time after input step (µs)", "Output change (mV)", [low, high], [-amplitude, amplitude], ticks,
+  chart(`${prefix}step-plot`, "Measured positive and negative 10 millivolt unity-buffer step responses", "Time after input step (µs)", "Output change (mV)", [low, high], [-amplitude, amplitude], ticks,
     waves.map((step) => ({ x: step.waveform.t_us, y: step.waveform.delta_mv, color: step.direction > 0 ? "#087ebd" : "#de892f" })));
 }
 
+$("view-schematic").addEventListener("click", () => setView(false));
+$("view-layout").addEventListener("click", () => setView(true));
 runButton.addEventListener("click", launch);
 $("examples").addEventListener("change", () => {
   const example = examples.find((item) => item.id === selectedExample());
@@ -275,7 +312,7 @@ $("expand").addEventListener("click", async () => {
   $("expand").setAttribute("aria-label", expanded ? "Exit expanded view" : "Expand live circuit view");
 });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape" && expanded) { expanded = false; document.querySelector(".viewer").classList.remove("expanded"); } });
-window.addEventListener("pagehide", () => { running = false; clearInterval(timer); socket?.close(); if (frameURL) URL.revokeObjectURL(frameURL); });
+window.addEventListener("pagehide", () => { running = false; clearInterval(timer); socket?.close(); if (frameURL) URL.revokeObjectURL(frameURL); if (layoutURL) URL.revokeObjectURL(layoutURL); });
 
 try {
   const config = await fetch("config.json", { cache: "no-store" }).then((response) => { if (!response.ok) throw new Error("Missing demo configuration"); return response.json(); });

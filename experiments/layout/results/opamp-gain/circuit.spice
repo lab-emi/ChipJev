@@ -1,0 +1,34 @@
+** sch_path: /home/cgao/git/ChipJev/runs/layout-preview/69483d53914aaae7c346d198ec9edb49/circuit.sch
+**.subckt circuit
+VDD vdd 0 1.8
+XM1 t1 s1t vdd vdd sky130_fd_pr__pfet_01v8 L=0.252333 W=6.056 nf=1 ad=1.75624 as=1.75624 pd=12.692 ps=12.692 nrd=0.0478864
++ nrs=0.0478864 sa=0 sb=0 sd=0 mult=1
+XM2 x1 inp t1 vdd sky130_fd_pr__pfet_01v8 L=0.252333 W=2.20539 nf=1 ad=0.639564 as=0.639564 pd=4.99079 ps=4.99079 nrd=0.131496
++ nrs=0.131496 sa=0 sb=0 sd=0 mult=1
+XM3 x2 inn t1 vdd sky130_fd_pr__pfet_01v8 L=0.252333 W=2.20539 nf=1 ad=0.639564 as=0.639564 pd=4.99079 ps=4.99079 nrd=0.131496
++ nrs=0.131496 sa=0 sb=0 sd=0 mult=1
+XM4 x1 x1 0 0 sky130_fd_pr__nfet_01v8 L=0.252333 W=25.738 nf=1 ad=7.46402 as=7.46402 pd=52.056 ps=52.056 nrd=0.0112674
++ nrs=0.0112674 sa=0 sb=0 sd=0 mult=1
+XM5 x2 x2 0 0 sky130_fd_pr__nfet_01v8 L=0.252333 W=25.738 nf=1 ad=7.46402 as=7.46402 pd=52.056 ps=52.056 nrd=0.0112674
++ nrs=0.0112674 sa=0 sb=0 sd=0 mult=1
+XM6 y1 x2 0 0 sky130_fd_pr__nfet_01v8 L=0.252333 W=109.26 nf=3 ad=21.1237 as=21.1237 pd=146.84 ps=146.84 nrd=0.00265421
++ nrs=0.00265421 sa=0 sb=0 sd=0 mult=1
+XM7 o1 x1 0 0 sky130_fd_pr__nfet_01v8 L=0.252333 W=109.26 nf=3 ad=21.1237 as=21.1237 pd=146.84 ps=146.84 nrd=0.00265421
++ nrs=0.00265421 sa=0 sb=0 sd=0 mult=1
+XM8 y1 y1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.252333 W=22.281 nf=1 ad=6.4615 as=6.4615 pd=45.1421 ps=45.1421 nrd=0.0130156
++ nrs=0.0130156 sa=0 sb=0 sd=0 mult=1
+XM9 o1 y1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.252333 W=22.281 nf=1 ad=6.4615 as=6.4615 pd=45.1421 ps=45.1421 nrd=0.0130156
++ nrs=0.0130156 sa=0 sb=0 sd=0 mult=1
+XM10 s2a o1 0 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=3.70933 nf=1 ad=1.07571 as=1.07571 pd=7.99867 ps=7.99867 nrd=0.0781812
++ nrs=0.0781812 sa=0 sb=0 sd=0 mult=1
+XM11 out s2cn s2a 0 sky130_fd_pr__nfet_01v8 L=0.178333 W=4.28 nf=1 ad=1.2412 as=1.2412 pd=9.14 ps=9.14 nrd=0.067757 nrs=0.067757
++ sa=0 sb=0 sd=0 mult=1
+XM12 out s2cp s2c vdd sky130_fd_pr__pfet_01v8 L=0.178333 W=4.28 nf=1 ad=1.2412 as=1.2412 pd=9.14 ps=9.14 nrd=0.067757 nrs=0.067757
++ sa=0 sb=0 sd=0 mult=1
+XM13 s2c o1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.178333 W=4.28 nf=1 ad=1.2412 as=1.2412 pd=9.14 ps=9.14 nrd=0.067757 nrs=0.067757
++ sa=0 sb=0 sd=0 mult=1
+V_S1T s1t 0 0.7325
+V_S2CN s2cn 0 0.91
+V_S2CP s2cp 0 0.435
+**.ends
+.end

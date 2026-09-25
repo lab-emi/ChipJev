@@ -1,7 +1,7 @@
 # ChipJev live design demo
 
 The static frontend runs on GitHub Pages. A Linux GPU host runs Laya, ChipJev,
-xschem and ngspice. This uses [OpenDPD Studio’s Pages + Tunnel architecture](https://github.com/lab-emi/OpenDPD/blob/main/docs/architecture/public-studio.md).
+xschem, Magic, Netgen and ngspice. This uses [OpenDPD Studio’s Pages + Tunnel architecture](https://github.com/lab-emi/OpenDPD/blob/main/docs/architecture/public-studio.md).
 The browser selects an allowlisted prompt and receives a view-only WebSocket
 stream. It cannot submit arbitrary prompts, Tcl, SPICE, files, paths or commands.
 
@@ -33,7 +33,8 @@ not themselves establish DNS or install a running production service.
    sampled candidates as the search runs, with real electrical wires. Display
    updates do not block CUDA acquisition.
    There is no artificial construction delay or prerecorded live footage.
-4. Stop at the first strictly verified solution, or after 96 batches / a 180 s
+4. Screen strict candidates through actual Magic/Netgen/RC ngspice. Reject failed
+   post-layout candidates back into the search. Stop at the first RC-qualified solution, or after 96 batches / a 180 s
    search budget. This interactive profile uses 256 random features, a 1,024-point
    random acquisition pool and a 2,048-point local pool. It is not the full paper
    benchmark. Per-prompt seeds are fixed for reproducibility; no archived sizing
@@ -44,23 +45,34 @@ not themselves establish DNS or install a running production service.
 6. Run a fresh strict SKY130 testbench: AC sweep and positive/negative unity-buffer
    steps. Stream measured arrays and performance numbers. An unqualified search
    result is explicitly labeled; it is never replaced by an archived success.
+7. Generate real SKY130 PCells and routing, run full Magic DRC and Netgen LVS,
+   extract distributed RC and simulate the actual extracted netlist in ngspice.
+   Bounded sizing recovery preserves every attempt; post-layout checks retain
+   the original strict limits. See [physical-flow details](../../experiments/layout/README.md).
+8. Display the exact layout geometry, R/C counts, schematic/post-layout metrics
+   and both sets of AC and closed-loop waveforms.
 
 The phase clocks report Laya (including load), design search (including candidate
-simulations), and final ngspice simulation. A separate measurement reports Laya
+simulations), schematic simulation, layout/DRC, LVS/RC extraction, and post-layout
+simulation/refinement. A separate measurement reports Laya
 inference latency. Total time starts at the click and freezes when the measured
 result arrives. Joining an active run adopts its server elapsed time. The UI and
 JSON state the actual CPU/CUDA device; `--device cuda` refuses CPU fallback.
 
 Downloadable artifacts are `decisions.json` (model revision, fine-tuned weight
 hash, answers and prior), `search.json` (prior, settings, candidate records and
-strict checks), `circuit.sch`, `circuit.spice`, `result.json`, and `plots.png`.
+strict checks), `circuit.sch`, `circuit.spice`, `result.json`, and `plots.png`, plus `layout.mag`,
+`layout.gds`, `layout.svg`, `pex.spice`, `physical.json`, `drc.txt`, `lvs.log` and
+`physical-evidence.zip` (all attempts, scripts, logs and waveforms).
 The idle poster remains a labeled reference capture from the archived complex
 example described in `demo/fixtures/sky130-opamp.json`. It is not a live result.
 
 ## Local setup and GPU access
 
 Requirements: Linux, NVIDIA GPU with a driver compatible with the locked PyTorch
-CUDA 13.0 runtime, Python 3.13, ngspice 47, xschem, Xvfb, xauth and ffmpeg.
+CUDA 13.0 runtime, Python 3.13, ngspice 47, xschem, Xvfb, xauth, ffmpeg,
+Magic ≥8.3.684 and LVS Netgen. `setup-demo.sh` builds the pinned local Magic;
+install Tcl/Tk, X11 and Cairo development headers and the Netgen LVS tool first.
 
 ```bash
 sudo apt-get install -y build-essential curl ripgrep xschem xvfb xauth ffmpeg util-linux

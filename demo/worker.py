@@ -5,13 +5,16 @@ parameters reach it. stdout is a JSON-lines event channel; tool logs stay local.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import secrets
 import select
+import shutil
 import subprocess
 import threading
 import time
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -20,6 +23,9 @@ import numpy as np
 from chipjev import xschem
 from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build
+from chipjev.layout.flow import complete as physical_design
+from chipjev.paths import ROOT
+from chipjev.provenance import code_hashes
 from chipjev.simulation.sky130 import evaluate
 from demo import design
 from demo.examples import DEFAULT_EXAMPLE, EXAMPLES
@@ -228,10 +234,14 @@ def plot(directory, waves):
 def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
     timing = RunTiming()
     example = EXAMPLES[example_id]
+    source_hashes = code_hashes()
+    source_hashes.update({str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+                          for p in sorted((ROOT / "demo").glob("*.py"))})
 
     def stage(name, **data):
         phase = {"starting": "startup", "deciding": "laya", "searching": "search",
-                 "netlisting": "netlist", "simulating": "simulation", "checking": "results"}.get(name)
+                 "netlisting": "netlist", "simulating": "simulation", "checking": "results",
+                 "layout": "layout", "extracting": "pex", "postsimulating": "postlayout"}.get(name)
         timing.move(phase)
         emit("stage", stage=name, **data, **timing.snapshot())
 
@@ -286,10 +296,11 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                 message = f"{event['evaluations']} circuits measured · " + (
                     "strictly verified design found" if best else "searching for a qualified design")
             stage("searching", message=message, search=info,
-                  progress=12 + round(66 * (event["round"] + 1) / design.ROUNDS))
+              progress=12 + round(48 * (event["round"] + 1) / design.ROUNDS))
 
         stage("searching", message="Starting ChipJev joint topology and sizing search", progress=12)
-        selected, search_result = design.search(answer, example, model.laya.device, observe)
+        selected, search_result = design.search(answer, example, model.laya.device, observe,
+                                                physical_directory=directory / "physical-search")
         if frame_update is not None:
             frame_update.result()
         (directory / "search.json").write_text(json.dumps(search_result, indent=2, allow_nan=False))
@@ -300,7 +311,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
         final.write_text(schematic)
         atomic_write(directory / "step-900.sch", schematic)
         screen.show(900)
-        stage("netlisting", message="Verifying every xschem wire, device and size", progress=82,
+        stage("netlisting", message="Verifying every xschem wire, device and size", progress=64,
               search={"topology": topology.id, "mosfets": len(builder.mos),
                       "evaluations": search_result["evaluations"]})
         netlist = xschem.netlist(final, directory / "netlist")
@@ -308,18 +319,68 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
         if not ok:
             raise RuntimeError("xschem connectivity check failed: " + "; ".join(problems))
         (directory / "circuit.spice").write_text(netlist)
-        stage("simulating", message="Final ngspice AC sweep + ±10 mV unity-buffer steps", progress=88)
+        stage("simulating", message="Schematic AC sweep + ±10 mV unity-buffer steps", progress=69)
         result = evaluate(topology, selected["values"], directory=directory, strict=True,
                           keep=True, vdd=example["vdd"], load_pf=example["load_pf"])
         if result["error"]:
             raise RuntimeError(result["error"])
-        stage("checking", message="Checking gain, stability and closed-loop operation", progress=96)
+        def physical_stage(name, data):
+            messages = {"layout": (75, "Generating SKY130 devices, routing and checking Magic DRC"),
+                        "extracting": (82, "Netgen LVS and Magic distributed RC extraction"),
+                        "postsimulating": (90, "Simulating the extracted RC netlist in ngspice")}
+            progress, message = messages[name]
+            stage(name, message=message, progress=progress)
+
+        physical = physical_design(topology, selected["values"], directory / "physical",
+                                   vdd=example["vdd"], load_pf=example["load_pf"],
+                                   observer=physical_stage, prelayout=result)
+        screens = [json.loads(p.read_text()) for p in
+                   sorted((directory / "physical-search").glob("*/physical.json"))]
+        physical["search_screening"] = {
+            "candidates": len(screens), "rejected": sum(not p["valid"] for p in screens),
+            "seconds": sum(p["physical_seconds"] for p in screens),
+        }
+        physical["all_physical_seconds"] = (physical["total_seconds"] +
+                                              physical["search_screening"]["seconds"])
+        (directory / "physical/physical.json").write_text(json.dumps(physical, indent=2, allow_nan=False))
+        if physical["recovery"]["changed"]:
+            selected["values"] = physical["values"]
+            builder = build(topology, selected["values"], example["vdd"])
+            schematic = routed_schematic(builder, topology.id, example["vdd"])
+            final.write_text(schematic)
+            atomic_write(directory / "step-901.sch", schematic)
+            screen.show(901)
+            netlist = xschem.netlist(final, directory / "final-netlist")
+            ok, problems = xschem.check(builder, netlist, example["vdd"])
+            if not ok:
+                raise RuntimeError("Refined schematic mismatch: " + "; ".join(problems))
+            (directory / "circuit.spice").write_text(netlist)
+            result = physical["prelayout"]
+            # Regenerate matching schematic waves after an accepted sizing change.
+            result = evaluate(topology, selected["values"], directory=directory,
+                              strict=True, keep=True, vdd=example["vdd"], load_pf=example["load_pf"])
+        stage("checking", message="Comparing schematic and extracted circuit performance", progress=96)
         waves = waveforms(directory, result)
-        emit("waveforms", **waves)
+        postwaves = waveforms(directory / "physical/postlayout", physical["postlayout"])
+        emit("waveforms", **waves, postlayout=postwaves)
         plot(directory, waves)
+        for name in ("layout.svg", "layout.mag", "layout.gds", "pex.spice", "physical.json", "drc.txt", "lvs.log"):
+            shutil.copy2(directory / "physical" / name, directory / name)
+        with zipfile.ZipFile(directory / "physical-evidence.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+            for path in sorted((directory / "physical").rglob("*")):
+                if path.is_file() and path.suffix in {".mag", ".gds", ".spice", ".json", ".tcl", ".log", ".txt", ".tsv", ".cir"}:
+                    archive.write(path, path.relative_to(directory / "physical"))
+            for path in sorted((directory / "physical-search").rglob("*")):
+                if path.is_file() and path.suffix in {".mag", ".gds", ".spice", ".json", ".tcl", ".log", ".txt", ".tsv", ".cir"}:
+                    archive.write(path, Path("physical-search") / path.relative_to(directory / "physical-search"))
         screen.check()
         result.pop("pid", None)
+        schematic_result = result
+        result = dict(physical["postlayout"])
+        result.update(valid=bool(physical["valid"] and schematic_result["valid"]),
+                      prelayout=schematic_result, physical=physical)
         result.update(mode="live-design", topology=topology.id, values=selected["values"],
+                      source_sha256=source_hashes,
                       example=example, model=metadata, netlist_match=ok, mosfets=len(builder.mos),
                       laya_inference_seconds=answer["seconds"], search={
                           k: search_result[k] for k in ("device", "acquisition_dtype", "wide_kernel",

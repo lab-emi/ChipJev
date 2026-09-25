@@ -54,11 +54,12 @@ STRICT = "reltol=1e-6 abstol=1e-12 vntol=1e-9"
 
 
 def deck(topology, values, *, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qualified",
-         temperature=27.0, corner="tt"):
+         temperature=27.0, corner="tt", circuit=None):
     """Return (deck text, Builder): ptm45.deck with SKY130 devices."""
     target = vdd / 2
-    b = build(topology, values, vdd)
+    b = circuit if circuit is not None else build(topology, values, vdd)
     lines = [f"* ChipJev-Topo SKY130 {topology.id}", include_text(corner)]
+    lines += getattr(b, "model_lines", [])
     lines.append(f".options {STRICT if strict else ONLINE}")
     lines.append(f".temp {temperature:.6g}")
     lines.append(f"vdd vdd 0 DC {vdd}")
@@ -84,12 +85,15 @@ def deck(topology, values, *, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qua
     for node in nodes:
         control.append(f'echo "@@V {node} $&v({node})"')
     for name, _d, _g, _s, kind in b.mos:
-        control += [
-            f"let i_{name} = {probe(name, kind, 'id')}",
-            f'echo "@@I {name} $&i_{name}"',
-            f"let d_{name} = {probe(name, kind, 'vds')} - {probe(name, kind, 'vdsat')}",
-            f'echo "@@D {name} $&d_{name}"',
-        ]
+        if circuit is not None:
+            control += b.probe_commands(name, kind)
+            control += [f'echo "@@I {name} $&i_{name}"', f'echo "@@D {name} $&d_{name}"']
+        else:
+            control += [f"let i_{name} = {probe(name, kind, 'id')}",
+                        f'echo "@@I {name} $&i_{name}"',
+                        f"let d_{name} = {probe(name, kind, 'vds')} - "
+                        f"{probe(name, kind, 'vdsat')}",
+                        f'echo "@@D {name} $&d_{name}"']
     for node in ["vdd", *(f"v_{n}" for n in sorted(b.bias))]:
         control += [f"let s_{node} = i({node})", f'echo "@@P {node} $&s_{node}"']
     control += ["ac dec 20 1 100g", "let mag = abs(v(out))", "let pha = cph(v(out)) * 180 / pi",
@@ -107,7 +111,7 @@ def deck(topology, values, *, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qua
 
 
 def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature, corner="tt",
-                 options=None):
+                 options=None, circuit=None):
     """ptm45.buffer_deck with SKY130 devices."""
     vin = metrics["vin_dc"]
     ugf = metrics.get("ugf_mhz")
@@ -115,7 +119,7 @@ def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature,
     delay = stop / 20
     inverted = abs(metrics["dc_phase_deg"]) >= 90
     feedback, signal = ("inp", "inn") if inverted else ("inn", "inp")
-    builder = build(topology, values, vdd)
+    builder = circuit if circuit is not None else build(topology, values, vdd)
     lines = [
         f"* Qualified buffer (SKY130): {topology.id}, direction {direction}",
         include_text(corner),
@@ -126,6 +130,7 @@ def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature,
         f"{vin + direction * STEP_V:.9g} {delay:.9g} 1n 1n 1 2)",
         f"vfb {feedback} out DC 0",
     ]
+    lines += getattr(builder, "model_lines", [])
     lines += [f"v_{n} {n} 0 DC {v:.9g}" for n, v in sorted(builder.bias.items())]
     lines += builder.lines + [
         f"cload out 0 {load_pf * 1e-12:.9g}",
@@ -137,7 +142,7 @@ def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature,
 
 
 def qualify_buffer(topology, values, metrics, directory, *, load_pf=LOAD_PF, vdd=VDD,
-                   temperature=27.0, corner="tt", strict=True):
+                   temperature=27.0, corner="tt", strict=True, circuit=None):
     """ptm45.qualify_buffer with SKY130 devices (same criteria); an
     online check (strict=False) uses the online tolerances and time limit and keeps no
     waveforms."""
@@ -146,7 +151,7 @@ def qualify_buffer(topology, values, metrics, directory, *, load_pf=LOAD_PF, vdd
         try:
             text, stop, delay = buffer_deck(topology, values, metrics, direction, load_pf, vdd,
                                             temperature, corner,
-                                            options=STRICT if strict else ONLINE)
+                                            options=STRICT if strict else ONLINE, circuit=circuit)
             path = directory / f"buffer-{direction}.cir"
             path.write_text(text)
             proc = subprocess.run([ngspice(), "-b", path.name], cwd=directory,
@@ -187,7 +192,7 @@ def qualify_buffer(topology, values, metrics, directory, *, load_pf=LOAD_PF, vdd
 
 
 def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF, vdd=VDD,
-             keep=False, rules="qualified", temperature=27.0, corner="tt"):
+             keep=False, rules="qualified", temperature=27.0, corner="tt", circuit=None):
     """ptm45.evaluate on SKY130: one JSON-serializable record per design
     (never raises for a bad design)."""
     start = time.perf_counter()
@@ -205,7 +210,7 @@ def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF,
     sim_seconds = 0.0
     try:
         text, b = deck(topology, values, strict=strict, load_pf=load_pf, vdd=vdd, rules=rules,
-                       temperature=temperature, corner=corner)
+                       temperature=temperature, corner=corner, circuit=circuit)
         record["devices"] = len(b.mos)
         (directory / "design.cir").write_text(text)
         sim_start = time.perf_counter()
@@ -233,7 +238,7 @@ def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF,
         if rules == "qualified" and valid and topology.differential:
             checked = qualify_buffer(topology, values, metrics, directory, load_pf=load_pf,
                                      vdd=vdd, temperature=temperature, corner=corner,
-                                     strict=strict)
+                                     strict=strict, circuit=circuit)
             record["qualification"] = checked
             record["checks"]["closed_loop"] = checked["passed"]
             record["valid"] = bool(checked["passed"])

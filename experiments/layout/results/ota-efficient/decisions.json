@@ -1,0 +1,118 @@
+{
+  "state": "Design a SKY130 single-stage differential OTA that maximizes GBW times load capacitance per unit power, at 1.8 V with a 100 pF load. Testbench: VDD = 1.8 V, load capacitance CL = 100 pF.",
+  "class": "opamp1",
+  "objective": "fom",
+  "topology_class": "opamp1",
+  "topology_objective": "fom",
+  "answers": {
+    "input": {
+      "choice": "differential",
+      "probabilities": {
+        "single": 0.0,
+        "differential": 1.0
+      }
+    },
+    "stages": {
+      "choice": "one",
+      "probabilities": {
+        "one": 1.0,
+        "several": 0.0
+      }
+    },
+    "objective": {
+      "choice": "fom",
+      "probabilities": {
+        "gain": 0.0,
+        "gbw": 0.0,
+        "fom": 1.0
+      }
+    },
+    "first": {
+      "choice": "tele",
+      "probabilities": {
+        "ota5": 0.4013,
+        "tele": 0.5337,
+        "fc": 0.0182,
+        "cmota": 0.0231,
+        "rload": 0.0237
+      }
+    },
+    "polarity": {
+      "choice": "p",
+      "probabilities": {
+        "n": 0.4528,
+        "p": 0.5472
+      }
+    }
+  },
+  "topologies": [
+    "ota5_n",
+    "ota5_p",
+    "tele_n",
+    "tele_p",
+    "fc_n",
+    "fc_p",
+    "cmota_n",
+    "cmota_p",
+    "rload_n",
+    "rload_p"
+  ],
+  "prior": [
+    0.18170864,
+    0.21959136000000004,
+    0.24165936,
+    0.29204064,
+    0.008240960000000002,
+    0.009959040000000002,
+    0.01045968,
+    0.012640320000000002,
+    0.01073136,
+    0.012968640000000002
+  ],
+  "seconds": 0.20903056499082595,
+  "search_topologies": [
+    "ota5_n",
+    "ota5_p",
+    "tele_n",
+    "tele_p",
+    "fc_n",
+    "fc_p",
+    "cmota_n",
+    "cmota_p",
+    "rload_n",
+    "rload_p"
+  ],
+  "search_prior": [
+    0.18170864,
+    0.21959136000000004,
+    0.24165936,
+    0.29204064,
+    0.008240960000000002,
+    0.009959040000000002,
+    0.01045968,
+    0.012640320000000002,
+    0.01073136,
+    0.012968640000000002
+  ],
+  "model": {
+    "model": "aac6fef/laya-multilingual-mlx",
+    "revision": "f2b4faf51023039425946074e2cf1361d2db11d5",
+    "precision": "float16",
+    "runtime": "pytorch-2.14.0+cu130",
+    "device": "cuda (NVIDIA GeForce RTX 4090)",
+    "fine_tuned": {
+      "sha256": "f5df4faaeb1e2721657e5200293f7667ca525b8f86c1c8d3c3ab14193baeb8d5"
+    }
+  },
+  "example": {
+    "id": "ota-efficient",
+    "title": "Single-stage \u00b7 power efficiency",
+    "cls": "opamp1",
+    "objective": "fom",
+    "stages": 1,
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "prompt": "Design a SKY130 single-stage differential OTA that maximizes GBW times load capacitance per unit power, at 1.8 V with a 100 pF load."
+  },
+  "model_load_seconds": 2.139361324007041
+}

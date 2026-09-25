@@ -7,6 +7,12 @@ ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / ".tools"
 
 
+def magic():
+    """Pinned local Magic, whose RC extractor supports SKY130 passive devices."""
+    local = TOOLS / "magic/bin/magic"
+    return str(local) if local.exists() else "magic"
+
+
 def ngspice():
     """The simulator: ngspice 47 from .tools/bin (scripts/setup.sh), else ngspice on the PATH.
 
