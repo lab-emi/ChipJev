@@ -3,6 +3,13 @@
 Static HTML/CSS/JavaScript for GitHub Pages. No frontend build, CDN dependencies,
 visitor login, third-party fonts or tracking scripts are required.
 
+The canonical public URL is `https://chipjev.com/`; GitHub Pages redirects the
+`www` and original GitHub Pages addresses to it. `robots.txt` allows crawling and
+advertises `sitemap.xml`, which lists canonical HTML pages only. Add new public
+pages to the sitemap when they are published. Submit the sitemap in the Google
+Search Console domain property for `chipjev.com`, which covers both hostnames.
+Indexing requests are processed by Google and do not guarantee inclusion.
+
 The visitor selects an allowlisted text prompt and starts a fresh Laya → ChipJev
 search → xschem → ngspice pipeline. Native xschem frames, actual model decisions,
 measured waveform arrays and performance arrive over a view-only WebSocket.
