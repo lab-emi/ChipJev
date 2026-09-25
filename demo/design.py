@@ -11,7 +11,7 @@ from chipjev.search.loop import ChipJevSearch, Settings, _outputs, _score_numpy
 WEIGHTS = ROOT / "experiments/ptm45/typed-decisions.pt"
 ROUNDS = 96
 SEARCH_SECONDS = 180
-SEEDS = {"opamp-gain": 1, "opamp-speed": 2, "ota-efficient": 2}
+SEEDS = {"opamp-gain": 0, "opamp-speed": 2, "ota-efficient": 2}
 
 
 def load_model(device=None):
@@ -36,6 +36,20 @@ def decide(model, example):
     return answer
 
 
+def least_violating(result):
+    # A loose-tolerance pass can fail strict re-simulation. Use the strict
+    # measurement for that same design when ranking an exhausted search.
+    measured = {}
+    for record in [*result["records"], *result["strict"]]:
+        topology, levels = record["design"]
+        measured[(topology, tuple(levels))] = record
+    records = list(measured.values())
+    if not records:
+        raise RuntimeError("The design search produced no measurements")
+    index = _score_numpy([_outputs(record) for record in records]).argmax()
+    return records[int(index)]
+
+
 def search(answer, example, device, observer):
     evaluator = Evaluator(8, technology="sky130")
     # Interactive profile: same grammar, priors, GP and strict qualification;
@@ -54,11 +68,7 @@ def search(answer, example, device, observer):
     if result["best"] is not None:
         selected = result["best"]
     else:
-        records = result["records"]
-        if not records:
-            raise RuntimeError("The design search produced no measurements")
-        index = _score_numpy([_outputs(record) for record in records]).argmax()
-        record = records[int(index)]
+        record = least_violating(result)
         selected = {"topology": record["topology"],
                     "values": ClassSpace(example["cls"], topologies=topologies).values(record["design"])}
     result["demo_stop_rule"] = "first strictly verified design or budget exhausted"

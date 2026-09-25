@@ -220,6 +220,21 @@ def test_site_prompts_match_the_server_allowlist():
     assert json.loads((ROOT / "website/examples.json").read_text()) == list(EXAMPLES.values())
 
 
+def test_exhausted_search_respects_failed_strict_remeasurement():
+    from demo.design import least_violating
+
+    margins = {"gain_db": 40, "pm_deg": 5, "current_decades": 0.1,
+               "region_v": 0.1, "cmrr_db": 20}
+    apparent_pass = {"design": [0, [1, 2]], "objective": 110,
+                     "margins": margins, "checks": {"closed_loop": True}}
+    rejected = {**apparent_pass, "margins": {**margins, "gain_db": -50},
+                "checks": {"closed_loop": False}}
+    near_pass = {**apparent_pass, "design": [0, [1, 3]],
+                 "margins": {**margins, "current_decades": -0.01}}
+    result = {"records": [apparent_pass, near_pass], "strict": [rejected]}
+    assert least_violating(result) is near_pass
+
+
 @pytest.mark.integration
 def test_every_public_topology_has_real_equivalent_wiring(tmp_path):
     import shutil
