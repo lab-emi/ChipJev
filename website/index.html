@@ -24,7 +24,7 @@
   <main>
     <section class="intro wrap" aria-labelledby="title">
       <div><p class="eyebrow">CHIPJEV / OPEN CIRCUIT DESIGN</p><h1 id="title">Watch a circuit <em>come to life.</em></h1>
-      <p class="lead">A blank xschem canvas. Thirteen transistors. A working op-amp.<br class="desktop-break"> Build it, simulate it, and see the results — live.</p></div>
+      <p class="lead">From a blank canvas to a fully connected, two-stage op-amp.<br class="desktop-break"> Watch the devices, current mirrors and feedback loop come together — live.</p></div>
       <div class="launch"><button id="run" class="button primary" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5 16 10 6 16.5Z"/></svg><span>Run live simulation</span></button><p id="availability" role="status">Connecting to the simulation service…</p></div>
     </section>
 
@@ -33,13 +33,13 @@
       <div class="studio">
         <div class="viewer">
           <div class="viewer-bar"><div><span id="live-dot" class="status-dot"></span><span id="stream-label">REFERENCE CAPTURE</span></div><span class="mono">xschem / ngspice</span><button id="expand" class="icon-button" type="button" aria-label="Expand live circuit view" title="Expand view">⛶</button></div>
-          <div id="screen" class="screen"><img id="frame" src="assets/circuit-preview.jpg" width="1440" height="900" alt="Reference capture of the 13-transistor SKY130 op-amp in xschem, with AC and step response plots"><div id="screen-note" class="screen-note"><span>REAL TOOLS. REAL SIMULATION.</span><p>Press Run to start a fresh session.</p></div></div>
+          <div id="screen" class="screen"><img id="frame" src="assets/circuit-preview.jpg" width="1440" height="900" alt="Wired SKY130 op-amp in xschem: differential input pair, connected current-mirror branches, cascoded output stage and Miller feedback loop"><div id="screen-note" class="screen-note"><span>REAL TOOLS. REAL CONNECTIONS.</span><p>Press Run to watch the topology take shape.</p></div></div>
           <div class="viewer-footer"><span id="frame-note">Actual xschem capture from a verified run</span><span id="elapsed" class="mono">— s</span></div>
         </div>
         <aside class="run-panel" aria-label="Simulation progress and measurements">
           <div class="panel-title"><h3>This run</h3><span id="run-state" class="state-badge">Ready</span></div>
           <ol class="stages" id="stages">
-            <li data-stage="building"><span class="step-number">1</span><div><strong>Assemble the circuit</strong><small>Place devices and connect nets</small></div></li>
+            <li data-stage="building"><span class="step-number">1</span><div><strong>Connect the topology</strong><small>Input pair → mirrors → output → feedback</small></div></li>
             <li data-stage="netlisting"><span class="step-number">2</span><div><strong>Check the netlist</strong><small>Verify every connection and size</small></div></li>
             <li data-stage="simulating"><span class="step-number">3</span><div><strong>Run ngspice</strong><small>AC sweep and closed-loop steps</small></div></li>
             <li data-stage="checking"><span class="step-number">4</span><div><strong>Verify the response</strong><small>Gain, stability and settling</small></div></li>
@@ -56,7 +56,7 @@
         </aside>
       </div>
       <p id="error" class="error" role="alert" hidden></p>
-      <div class="demo-caption"><p><span class="caption-label">What you’re watching</span> A published ChipJev design, rebuilt and simulated on each run. Device placement is paced for visibility. This demo does not rerun the topology search.</p><span class="view-only">View-only · No installation</span></div>
+      <div class="demo-caption"><p><span class="caption-label">Follow the connections</span> The differential pair drives two current mirrors and a cascoded output stage. The upper Miller loop connects the output back to the interstage node. Every signal wire is part of the verified xschem netlist.</p><span class="view-only">View-only · No installation</span></div>
 
       <div class="plots" aria-label="Live simulation results">
         <figure class="plot-card"><figcaption><div><span class="eyebrow">FREQUENCY DOMAIN</span><h3>Open-loop response</h3></div><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="ac-plot"><p>Waiting for the AC sweep</p></div></figure>
@@ -70,7 +70,7 @@
       <div class="method-details">
         <article><span class="method-number">01 / DECIDE</span><h3>A typed prior, in milliseconds.</h3><p>The Laya decision model answers structured design questions. Its answers guide a search across a grammar of 4,562 valid circuit topologies.</p></article>
         <article><span class="method-number">02 / DESIGN</span><h3>Search topology and sizing together.</h3><p>GPU-accelerated Bayesian search evaluates candidates with parallel ngspice workers. Only circuits that pass strict qualification count.</p></article>
-        <article><span class="method-number">03 / VERIFY</span><h3>Open the circuit. Inspect the evidence.</h3><p>This demo uses <code>cmota_n+inv_cas+miller</code>: the largest by MOSFET count among the study’s 60 qualified ChipJev final designs. A current-mirror OTA drives a cascoded inverter, with Miller compensation.</p><a href="https://github.com/lab-emi/ChipJev/blob/main/demo/fixtures/sky130-opamp.json">View this example’s provenance ↗</a></article>
+        <article><span class="method-number">03 / VERIFY</span><h3>Open the circuit. Inspect the evidence.</h3><p>This demo uses <code>cmota_n+inv_cas+miller</code>: the largest by MOSFET count among the study’s 60 qualified ChipJev final designs. Each run rebuilds and simulates this published design, with assembly paced for visibility. It does not rerun the topology search.</p><a href="https://github.com/lab-emi/ChipJev/blob/main/demo/fixtures/sky130-opamp.json">View this example’s provenance ↗</a></article>
       </div>
     </section>
   </main>

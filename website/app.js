@@ -146,6 +146,8 @@ async function launch() {
 function begin() {
   running = true; finished = false; startTime = performance.now();
   button("Simulation running…", true); badge("Starting");
+  // Keep the newly assembling circuit in view even on a narrow page.
+  $("demo").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
   clearInterval(timer);
   timer = setInterval(() => { $("elapsed").textContent = `${((performance.now() - startTime) / 1000).toFixed(1)} s`; }, 100);
   connect();

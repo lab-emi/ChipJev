@@ -5,6 +5,9 @@ visitor login, third-party fonts or tracking scripts are required.
 
 The main action starts a real, fixed-example xschem/ngspice run. The backend streams
 actual xschem JPEGs and measured waveform arrays over a view-only WebSocket.
+`demo/schematic.py` lays out the differential pair, current mirrors, output stack
+and Miller loop with real xschem wires. The animation adds connected branches in
+16 steps. The schematic stays at full size while result plots arrive below it.
 The idle poster is a reference capture. It is never presented as a live run.
 
 See [deployment instructions](../deploy/chipjev/README.md) for setup, architecture,

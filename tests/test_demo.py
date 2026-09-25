@@ -11,9 +11,11 @@ import pytest
 from aiohttp import WSMsgType
 from aiohttp.test_utils import TestClient, TestServer
 
+from chipjev import xschem
 from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build
 from chipjev.paths import ROOT
+from demo.schematic import schematic_steps
 from demo.server import FIXTURE, MAX_VIEWERS, RUN_TTL, SERVICE, Service, create_app
 
 ORIGIN = "https://chipjev.com"
@@ -129,6 +131,28 @@ def test_restart_cleans_only_owned_run_dirs_and_refuses_duplicate_server(tmp_pat
             Service(tmp_path, {ORIGIN})
     finally:
         service.lock.close()
+
+
+@pytest.mark.integration
+def test_wired_schematic_requires_physical_signal_connections(tmp_path):
+    import shutil
+
+    if not shutil.which("xschem") or not (xschem.library() / "sky130_fd_pr/nfet_01v8.sym").exists():
+        pytest.skip("xschem and SKY130 symbols are required")
+    builder = build(lookup(FIXTURE["cls"], FIXTURE["topology"]), FIXTURE["values"], FIXTURE["vdd"])
+    steps = schematic_steps(builder, FIXTURE)
+    schematic = steps[-1].schematic
+    path = tmp_path / "wired.sch"
+    path.write_text(schematic)
+    netlist = xschem.netlist(path, tmp_path / "connected")
+    assert xschem.check(builder, netlist, FIXTURE["vdd"]) == (True, [])
+    # If wiring were cosmetic and repeated pin labels still connected the circuit,
+    # removing every wire would leave the same netlist. This must fail instead.
+    path.write_text("\n".join(line for line in schematic.splitlines() if not line.startswith("N ")) + "\n")
+    disconnected = xschem.netlist(path, tmp_path / "disconnected")
+    ok, problems = xschem.check(builder, disconnected, FIXTURE["vdd"])
+    assert not ok
+    assert sum("connectivity" in problem for problem in problems) >= FIXTURE["mosfets"]
 
 
 @pytest.mark.integration

@@ -30,15 +30,19 @@ SHA-256, physical values and reference metrics. It does not alter the evidence.
 Each click starts a fresh run, or joins the current shared run:
 
 1. Start an Xvfb display with its own Xauthority cookie; never capture the host desktop.
-2. Assemble actual xschem schematics, adding one device and its named net connections
-   every 140 ms. This display pacing is included in the reported demo duration.
+2. Assemble an actual wired xschem schematic in 16 steps, about 200 ms apart:
+   supply rails, common-tail differential pair, PMOS/NMOS current mirrors, cascoded
+   output stack, biases and the Miller feedback loop. The 63 wire segments are
+   electrical connections, with one naming label per signal net; only body ties
+   use implicit global supplies. This pacing is included in the demo duration.
 3. Netlist the final schematic with xschem. Compare device identity, connectivity and
    geometry against ChipJev's generated circuit. A mismatch aborts the run.
 4. Run ChipJev's existing strict SKY130 testbench on that verified circuit, including
    the AC sweep and positive/negative unity-buffer steps. The testbench is generated
    by ChipJev; the connectivity check establishes equivalence to the xschem netlist.
-5. Stream measured arrays and the final result, with downloadable schematic, SPICE
-   circuit and JSON. Failed qualification remains visible as a failure.
+5. Stream measured arrays into the page's AC and step-response plots, keeping the
+   complete wired schematic visible in xschem. Offer the schematic, SPICE circuit
+   and JSON for download. Failed qualification remains visible as a failure.
 
 There is **no new Laya inference or topology search** in this button demo. It is a
 live reconstruction and re-simulation of a published example, explicitly labeled
@@ -72,6 +76,8 @@ CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m pytest -q tests/t
 
 The integration test really launches xschem and ngspice, decodes changing JPEGs,
 checks qualification and netlist equivalence, downloads results, and reconnects.
+A separate connectivity test removes all wires and confirms that netlist
+equivalence fails: the wires, rather than duplicated pin labels, carry signals.
 Tests also cover foreign origins, arbitrary inputs, body limits, shared admission,
 cooldown, private artifacts, expired runs, viewer limits, and view-only sockets.
 

@@ -21,6 +21,7 @@ from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build
 from chipjev.paths import ROOT
 from chipjev.simulation.sky130 import evaluate
+from demo.schematic import schematic_steps
 
 FIXTURE = ROOT / "demo/fixtures/sky130-opamp.json"
 WIDTH, HEIGHT = 1440, 900
@@ -37,36 +38,6 @@ def atomic_write(path, data):
     else:
         temporary.write_text(data)
     temporary.replace(path)
-
-
-def schematic_steps(builder, fixture):
-    """Keep each real device and its net labels together, preserving the exporter."""
-    full = xschem.schematic(builder, fixture["topology"], fixture["vdd"])
-    header, groups = [], []
-    for line in full.splitlines():
-        if line.startswith("C ") and "devices/lab_pin.sym" not in line:
-            groups.append([line])
-        elif groups:
-            groups[-1].append(line)
-        else:
-            header.append(line)
-    # Compact the rows without changing a device, pin offset or electrical value.
-    for i, group in enumerate(groups):
-        shift = (i // xschem.COLUMNS) * 50
-        for j, line in enumerate(group):
-            if line.startswith("C "):
-                fields = line.split(" ", 5)
-                fields[3] = str(int(fields[3]) - shift)
-                group[j] = " ".join(fields)
-    # A fixed viewport keeps symbols in place as the circuit is assembled.
-    rows = (len(groups) + xschem.COLUMNS - 1) // xschem.COLUMNS
-    bottom = (rows - 1) * 150 + 80
-    header += ["L 4 -120 -200 1530 -200 {dash=4}",
-               f"L 4 -120 {bottom} 1530 {bottom} {{dash=4}}"]
-    steps = ["\n".join(header) + "\n"]
-    for group in groups:
-        steps.append(steps[-1] + "\n".join(group) + "\n")
-    return steps
 
 
 class Screen:
@@ -122,15 +93,16 @@ class Screen:
                       f"append XSCHEM_LIBRARY_PATH :{xschem.library()}\n"
                       "set netlist_type spice\nset lvs_netlist 0\n"
                       "set dark_colorscheme 1\nset dark_gui_colorscheme 1\n"
-                      "set draw_grid 0\nset autoload_new_window 0\n")
+                      "set draw_grid 0\nset autoload_new_window 0\n"
+                      "set change_lw 0\nset line_width 1.8\n"
+                      "set enable_layer(5) 0\n")
         driver = self.directory / "display.tcl"
         driver.write_text('''
 wm geometry . 1440x900+0+0
 wm title . {ChipJev | LIVE xschem | SKY130}
 set chipjev_stage -1
-set chipjev_plot 0
 proc chipjev_tick {} {
-    global chipjev_stage chipjev_plot
+    global chipjev_stage
     if {[file exists stage.txt]} {
         set fd [open stage.txt r]
         set next [string trim [read $fd 16]]
@@ -144,20 +116,6 @@ proc chipjev_tick {} {
             puts $fd $next
             close $fd
         }
-    }
-    if {!$chipjev_plot && [file exists plots.png]} {
-        set chipjev_plot 1
-        wm geometry . 1440x600+0+0
-        update idletasks
-        xschem zoom_full
-        xschem redraw
-        toplevel .chipjev_plots
-        wm overrideredirect .chipjev_plots 1
-        wm geometry .chipjev_plots 1440x300+0+600
-        image create photo chipjev_plots -file plots.png
-        label .chipjev_plots.image -image chipjev_plots -borderwidth 0
-        pack .chipjev_plots.image -fill both -expand 1
-        raise .chipjev_plots
     }
     after 40 chipjev_tick
 }
@@ -271,23 +229,23 @@ def run(directory):
     topology = lookup(fixture["cls"], fixture["topology"])
     builder = build(topology, fixture["values"], fixture["vdd"])
     steps = schematic_steps(builder, fixture)
-    for i, text in enumerate(steps):
-        (directory / f"step-{i}.sch").write_text(text)
+    for i, step in enumerate(steps):
+        (directory / f"step-{i}.sch").write_text(step.schematic)
     screen = Screen(directory)
     emit("stage", stage="starting", message="Starting a private xschem display", progress=2)
     try:
         screen.start()
         screen.show(0)
-        emit("stage", stage="building", message="Empty canvas · placing SKY130 devices", progress=5)
+        emit("stage", stage="building", message=steps[0].message, progress=5)
         time.sleep(0.25)
         for i in range(1, len(steps)):
             screen.show(i)
-            emit("stage", stage="building", message=f"Placed device {i} of {len(steps) - 1}",
-                 placed=i, total=len(steps) - 1, progress=5 + round(48 * i / (len(steps) - 1)))
+            emit("stage", stage="building", message=steps[i].message,
+                 step=i, total=len(steps) - 1, progress=5 + round(48 * i / (len(steps) - 1)))
             # Pacing is for legible viewing, and is included in total wall time.
-            time.sleep(0.14)
+            time.sleep(0.2)
         final = directory / "circuit.sch"
-        final.write_text(steps[-1])
+        final.write_text(steps[-1].schematic)
         emit("stage", stage="netlisting", message="xschem is netlisting the assembled circuit",
              progress=58)
         netlist = xschem.netlist(final, directory / "netlist")
