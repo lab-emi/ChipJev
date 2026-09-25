@@ -14,7 +14,7 @@ authors:
     family-names: Chen
     affiliation: Leiden University
 repository-code: "https://github.com/lab-emi/ChipJev"
-license: MIT
+license: Apache-2.0
 keywords:
   - circuit design
   - electronic design automation

@@ -1,9 +1,10 @@
 ChipJev
 Copyright (c) 2026 Lab of Efficient Machine Intelligence (EMI)
 
-ChipJev's own code is licensed under the MIT License (LICENSE). This repository also
-contains work derived from the Apache-2.0 projects below; those portions remain under the
-Apache License 2.0 (LICENSES/Apache-2.0.txt).
+ChipJev is licensed under the Apache License, Version 2.0 (LICENSE). This repository
+also contains work derived from the Apache-2.0 projects below. Their attribution
+notices are retained here; other third-party materials keep their own terms as
+documented in THIRD_PARTY_NOTICES.md.
 
 -------------------------------------------------------------------------------------------
 Laya-MLX: https://github.com/mizorewww/laya-mlx

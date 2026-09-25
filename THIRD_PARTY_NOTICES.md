@@ -1,5 +1,8 @@
 # Third-party notices
 
+ChipJev's own code is licensed under [Apache-2.0](LICENSE). The notices and terms
+below continue to apply to third-party code, models and visual assets.
+
 ## Laya, Laya-MLX and the Laya checkpoint (src/chipjev/decisions/laya_torch.py, experiments/ptm45/typed-decisions.pt)
 
 - `src/chipjev/decisions/laya_torch.py` is a PyTorch port of [Laya-MLX](https://github.com/mizorewww/laya-mlx)
@@ -53,3 +56,16 @@ revision `fef70fad3804d1c298c70f78de769825d7dfea19`. These symbols are Copyright
 2021 Stefan Frederik Schippers, Apache-2.0. Their notices and the repository
 license are retained under the ignored `.tools/xschem/` installation directory.
 No third-party symbol source is redistributed as part of the website.
+
+## Institutional logos
+
+The website's EMI Lab and TU Delft logos identify the research affiliation and
+link to [EMI Lab](https://www.tudemi.com/). They were obtained on 2026-09-25 from
+the institutions' own websites, without changes to their artwork:
+
+- `website/assets/emi-logo.svg`: <https://www.tudemi.com/images/emi-logo.svg>
+- `website/assets/tu-delft-logo.svg`:
+  <https://www.tudelft.nl/_assets/2f383d4a929ad3d42eff11e81cdd4068/img/logo.svg>
+
+These institutional marks belong to their respective owners; the project's
+software license does not grant trademark rights.

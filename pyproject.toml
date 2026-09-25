@@ -6,6 +6,8 @@ build-backend = "hatchling.build"
 name = "chipjev"
 version = "0.1.0"
 description = "Ultrafast circuit design with a System One decision model and open-source EDA"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "LICENSES/*.txt", "THIRD_PARTY_NOTICES.md"]
 requires-python = ">=3.13,<3.14"
 dependencies = ["numpy>=2.2,<3"]
 
