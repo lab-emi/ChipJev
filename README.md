@@ -7,7 +7,7 @@
 
 **Ultrafast circuit design with a System One model and open-source EDA.**
 
-> **[Watch the live circuit demo →](https://lab-emi.github.io/ChipJev/)**
+> **[Watch the live circuit demo →](https://chipjev.com/)**
 > Choose a SKY130 design prompt. Each run executes Laya typed decisions and fresh
 > topology/sizing search, streams the connected circuit in xschem, and measures it
 > with ngspice. CUDA accelerates Laya and acquisition; the site reports the actual
