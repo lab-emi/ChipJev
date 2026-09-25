@@ -1,5 +1,5 @@
 [Unit]
-Description=ChipJev fixed-circuit live demo
+Description=ChipJev CUDA Laya circuit design demo
 After=network.target
 
 [Service]
@@ -13,7 +13,9 @@ Environment=CHIPJEV_PDK=/opt/chipjev/.tools/pdk/sky130_pdk
 Environment=CHIPJEV_SKY130_XSCHEM=/opt/chipjev/.tools/xschem
 Environment=CHIPJEV_DEMO_ORIGINS=https://chipjev.com,https://www.chipjev.com,https://lab-emi.github.io
 Environment=PYTHONDONTWRITEBYTECODE=1
-ExecStart=/opt/chipjev/.venv/bin/python -m demo.server --state /var/lib/chipjev-demo
+Environment=HF_HOME=/opt/chipjev/.tools/huggingface
+Environment=HF_HUB_OFFLINE=1
+ExecStart=/opt/chipjev/.venv/bin/python -m demo.server --device cuda --state /var/lib/chipjev-demo
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=5
@@ -22,7 +24,13 @@ NoNewPrivileges=true
 CapabilityBoundingSet=
 AmbientCapabilities=
 PrivateTmp=true
-PrivateDevices=true
+# CUDA needs the host NVIDIA character devices; keep other devices denied.
+PrivateDevices=false
+DevicePolicy=closed
+DeviceAllow=/dev/nvidia0 rw
+DeviceAllow=/dev/nvidiactl rw
+DeviceAllow=/dev/nvidia-uvm rw
+DeviceAllow=/dev/nvidia-uvm-tools rw
 ProtectSystem=strict
 ProtectHome=true
 ProtectKernelTunables=true
@@ -38,10 +46,10 @@ LockPersonality=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 IPAddressDeny=any
 IPAddressAllow=localhost
-MemoryMax=2G
+MemoryMax=8G
 MemorySwapMax=0
-CPUQuota=200%
-TasksMax=64
+CPUQuota=800%
+TasksMax=256
 LimitNOFILE=1024
 LimitCORE=0
 UMask=0077

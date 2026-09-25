@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CPU-only demo setup. Does not alter the research lockfile or install GPU models.
+# Install the pinned CUDA/Laya runtime and EDA tools without changing uv.lock.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 demo_root="$PWD"
@@ -12,9 +12,16 @@ done
 mkdir -p .tools/bin .tools/src .tools/xschem/sky130_fd_pr
 export UV_PYTHON_INSTALL_DIR="$demo_root/.tools/python"
 uv python install 3.13
-uv sync --frozen --python 3.13 --extra research
+uv sync --frozen --python 3.13 --extra research --extra rt
 uv pip install --python .venv/bin/python --require-hashes -r demo/requirements.lock
 .venv/bin/python -m chipjev.simulation.pdk
+export HF_HOME="$demo_root/.tools/huggingface"
+.venv/bin/python - <<'PYMODEL'
+from huggingface_hub import snapshot_download
+from chipjev.decisions.laya_torch import MODEL_ID, MODEL_REVISION
+snapshot_download(MODEL_ID, revision=MODEL_REVISION,
+    allow_patterns=["*.json", "*.safetensors", "tokenizer/*", "LICENSE*", "NOTICE*"])
+PYMODEL
 
 if ! .tools/bin/ngspice -v 2>/dev/null | rg -q 'ngspice-47'; then
   archive="$demo_root/.tools/src/ngspice-47.tar.gz"
@@ -45,4 +52,4 @@ for device in nfet pfet; do
 done
 curl -fL --retry 3 "https://raw.githubusercontent.com/StefanSchippers/xschem_sky130/$symbol_revision/LICENSE" -o .tools/xschem/LICENSE
 echo 'Ready. Start the demo with:'
-echo 'CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m demo.server --preview'
+echo 'bash scripts/run-demo-gpu.sh'

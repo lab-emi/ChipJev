@@ -1,99 +1,134 @@
-# ChipJev live demo deployment
+# ChipJev live design demo
 
-The website is a static GitHub Pages site. The simulation runs on a Linux host;
-GitHub Pages cannot execute xschem or ngspice. This follows
-[OpenDPD Studio's Pages + Tunnel architecture](https://github.com/lab-emi/OpenDPD/blob/main/docs/architecture/public-studio.md),
-with a much smaller public surface: one fixed example and a view-only stream.
+The static frontend runs on GitHub Pages. A Linux GPU host runs Laya, ChipJev,
+xschem and ngspice. This uses [OpenDPD Studio’s Pages + Tunnel architecture](https://github.com/lab-emi/OpenDPD/blob/main/docs/architecture/public-studio.md).
+The browser selects an allowlisted prompt and receives a view-only WebSocket
+stream. It cannot submit arbitrary prompts, Tcl, SPICE, files, paths or commands.
 
 ```text
-Browser ── HTTPS ── GitHub Pages (chipjev.com)
-   └──── HTTPS/WSS ── Cloudflare Tunnel (api.chipjev.com)
-                            └── 127.0.0.1:18766
-                                fixed-run API, unprivileged systemd service
-                                  ├── private Xvfb + xschem
-                                  ├── fresh ngspice 47 AC/buffer simulations
-                                  └── JPEG frames + measured waveform events
+Browser → GitHub Pages (chipjev.com)
+   └── HTTPS/WSS → Cloudflare Tunnel (api.chipjev.com)
+                       └── 127.0.0.1:18766
+                           ├── Laya typed decisions on CUDA
+                           ├── ChipJev topology/sizing search on CUDA
+                           ├── 8 CPU ngspice workers
+                           └── private Xvfb + wired xschem + measured plots
 ```
 
-The registrar can remain Squarespace. A named Cloudflare Tunnel on
-`api.chipjev.com` requires the domain's DNS zone to be active in Cloudflare.
-Changing nameservers changes DNS hosting, not domain ownership or registration.
+The registrar can remain Squarespace. A named Cloudflare Tunnel requires the
+chipjev.com DNS zone to be active in Cloudflare. The code and service units do
+not themselves establish DNS or install a running production service.
 
-## What a visitor actually runs
+## What each click runs
 
-`demo/select_example.py` ranks all 60 qualified **final** ChipJev designs in the
-archived SKY130 study by MOS count, then passive count and gain-stage count.
-It selects `cmota_n+inv_cas+miller`, seed 2 of `sky130-opampN-gain`, with 13 MOSFETs
-and one Miller capacitor. The checked-in fixture records the evidence path,
-SHA-256, physical values and reference metrics. It does not alter the evidence.
+1. Select one of the text prompts in `demo/examples.py`: a complex two-stage
+   high-gain op-amp (at least 13 MOSFETs), a wideband two-stage op-amp, or an
+   efficient single-stage OTA. All use SKY130 TT, 1.8 V and a 100 pF load.
+2. Load the pinned Laya checkpoint and ChipJev fine-tuned weights. Run fresh
+   batched typed decisions on the exact selected prompt. Condition its topology
+   probabilities on the prompt’s hard stage-count and complexity constraints.
+3. Pass that prior into **the actual `ChipJevSearch`**. Typed starts and the
+   prior/uniform mixture guide joint topology and transistor-sizing search.
+   Eight parallel ngspice workers measure every candidate batch. xschem displays
+   sampled candidates as the search runs, with real electrical wires. Display
+   updates do not block CUDA acquisition.
+   There is no artificial construction delay or prerecorded live footage.
+4. Stop at the first strictly verified solution, or after 96 batches / a 180 s
+   search budget. This interactive profile uses 256 random features, a 1,024-point
+   random acquisition pool and a 2,048-point local pool. It is not the full paper
+   benchmark. Per-prompt seeds are fixed for reproducibility; no archived sizing
+   solution, plot or measurement seeds the search. CPU and CUDA may choose
+   different designs because their numerical and random sampling paths differ.
+5. Export and netlist the selected wired xschem circuit. Compare every device,
+   connection and geometry against ChipJev’s generated circuit. Abort on mismatch.
+6. Run a fresh strict SKY130 testbench: AC sweep and positive/negative unity-buffer
+   steps. Stream measured arrays and performance numbers. An unqualified search
+   result is explicitly labeled; it is never replaced by an archived success.
 
-Each click starts a fresh run, or joins the current shared run:
+The phase clocks report Laya (including load), design search (including candidate
+simulations), and final ngspice simulation. A separate measurement reports Laya
+inference latency. Total time starts at the click and freezes when the measured
+result arrives. Joining an active run adopts its server elapsed time. The UI and
+JSON state the actual CPU/CUDA device; `--device cuda` refuses CPU fallback.
 
-1. Start an Xvfb display with its own Xauthority cookie; never capture the host desktop.
-2. Assemble an actual wired xschem schematic in 16 steps, about 200 ms apart:
-   supply rails, common-tail differential pair, PMOS/NMOS current mirrors, cascoded
-   output stack, biases and the Miller feedback loop. The 63 wire segments are
-   electrical connections, with one naming label per signal net; only body ties
-   use implicit global supplies. This pacing is included in the demo duration.
-3. Netlist the final schematic with xschem. Compare device identity, connectivity and
-   geometry against ChipJev's generated circuit. A mismatch aborts the run.
-4. Run ChipJev's existing strict SKY130 testbench on that verified circuit, including
-   the AC sweep and positive/negative unity-buffer steps. The testbench is generated
-   by ChipJev; the connectivity check establishes equivalence to the xschem netlist.
-5. Stream measured arrays into the page's AC and step-response plots, keeping the
-   complete wired schematic visible in xschem. Offer the schematic, SPICE circuit
-   and JSON for download. Failed qualification remains visible as a failure.
+Downloadable artifacts are `decisions.json` (model revision, fine-tuned weight
+hash, answers and prior), `search.json` (prior, settings, candidate records and
+strict checks), `circuit.sch`, `circuit.spice`, `result.json`, and `plots.png`.
+The idle poster remains a labeled reference capture from the archived complex
+example described in `demo/fixtures/sky130-opamp.json`. It is not a live result.
 
-There is **no new Laya inference or topology search** in this button demo. It is a
-live reconstruction and re-simulation of a published example, explicitly labeled
-in the UI. It requires no GPU, model checkpoint, LLM API key or visitor account.
-The idle poster is labeled as a reference capture; an unavailable backend never
-substitutes a recording or fabricated simulation data.
+## Local setup and GPU access
 
-## Local setup
-
-Linux x86-64, Python 3.13 (managed by uv), ngspice 47, xschem, Xvfb, xauth and
-ffmpeg are required. On Ubuntu, install prerequisites with:
+Requirements: Linux, NVIDIA GPU with a driver compatible with the locked PyTorch
+CUDA 13.0 runtime, Python 3.13, ngspice 47, xschem, Xvfb, xauth and ffmpeg.
 
 ```bash
 sudo apt-get install -y build-essential curl ripgrep xschem xvfb xauth ffmpeg util-linux
 # Install uv from https://docs.astral.sh/uv/getting-started/installation/ if needed.
 bash scripts/setup-demo.sh
-CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m demo.server --preview
+bash scripts/run-demo-gpu.sh
 ```
 
-Open `http://127.0.0.1:18766`. The preview serves only `website/` and the API;
-production serves only the API. `setup-demo.sh` installs the CPU research extras,
-adds the separately hashed HTTP dependencies, builds ngspice 47 if needed, and
-downloads the pinned models and two Apache-2.0 SKY130 symbols. The frozen root
-`uv.lock` is unchanged. An ordinary subsequent `uv sync` removes the demo's HTTP
-dependencies; rerun the `uv pip install` line below if that happens.
+The installer preserves `uv.lock`, installs the `rt` and `research` extras plus
+hashed HTTP dependencies, and downloads the pinned Laya checkpoint under
+`.tools/huggingface`. GPU kernels use the installed NVIDIA driver; a separate
+CUDA toolkit installation is not required by this runtime. The launcher performs
+an actual CUDA tensor operation before starting the server. The local preview is
+`http://127.0.0.1:18766`; production mode without `--preview` serves only `/api/`.
+
+Run the launcher **in the host terminal**. If host `nvidia-smi` works but a sandbox
+has no `/dev/nvidia*`, reinstalling the driver does not fix that sandbox’s device
+visibility. Do not bypass its isolation. Start the reviewed service on the host.
+
+For a temporary public preview, with cloudflared already installed:
 
 ```bash
-uv pip install --python .venv/bin/python --require-hashes -r demo/requirements.lock
-CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m pytest -q tests/test_demo.py
+bash scripts/run-demo-gpu.sh --background
 ```
 
-The integration test really launches xschem and ngspice, decodes changing JPEGs,
-checks qualification and netlist equivalence, downloads results, and reconnects.
-A separate connectivity test removes all wires and confirms that netlist
-equivalence fails: the wires, rather than duplicated pin labels, carry signals.
-Tests also cover foreign origins, arbitrary inputs, body limits, shared admission,
-cooldown, private artifacts, expired runs, viewer limits, and view-only sockets.
+This starts a background GPU server and a separate Quick Tunnel. It prints the
+new HTTPS URL and writes it to `runs/gpu-api-url.txt`; configure the frontend with
+`python -m demo.configure_site --api <that-url>` and republish Pages. Logs and PIDs
+are under `runs/gpu-service.*` and `runs/gpu-tunnel.*`. It never modifies another
+named tunnel. A Quick Tunnel is temporary and does not establish chipjev.com.
+Stop these exact PIDs before switching to the durable service. It is not a
+replacement for an unprivileged service on an always-on host.
+
+For explicit CPU development, start `python -m demo.server --device cpu --preview`
+with `CHIPJEV_SKY130_XSCHEM` and, if applicable, `HF_HOME` set to the paths above.
+The UI will display CPU. An ordinary `uv sync` removes the extra HTTP packages;
+restore them with `uv pip install --python .venv/bin/python --require-hashes -r demo/requirements.lock`.
+
+## Validation
+
+```bash
+CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m pytest -q tests/test_demo.py
+node --test tests/browser/run-clock.test.mjs
+```
+
+The integration test runs real Laya, the real search, xschem and ngspice. It decodes
+changing JPEGs, checks that the measured prior is the one used by search, verifies
+qualification and downloads/replays results. A routing test checks all 190 public
+grammar layouts with xschem. Removing signal wires must break connectivity.
+Other tests cover prompt allowlisting, origins, shared admission, body/resource
+limits, private artifacts, expiry, view-only sockets, and reconnecting timers.
+The Pages CI runs the lightweight API and browser-clock tests; EDA/model tests
+require the locally installed tools and checkpoint.
 
 ## Durable compute service
 
-Use a dedicated, always-on Linux host. A per-visitor VM is unnecessary for this
-fixed-input API. The included systemd unit runs as a separate dynamic user with a
-read-only filesystem, private temporary directory/devices, no capabilities, no
-privilege escalation and loopback-only networking. Cloudflare credentials belong
-to a different service and are never passed to EDA workers.
+A VM per visitor is unnecessary for this bounded prompt-selector API. Use a
+separate unprivileged service on an always-on GPU host. The included systemd unit
+has a read-only root, private temporary files, no capabilities or privilege
+escalation, and loopback-only network access. GPU access uses `DevicePolicy=closed`
+and explicit NVIDIA device allowances. `PrivateDevices=true` would hide the GPU;
+see [systemd’s device policy](https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html#DeviceAllow=).
+Cloudflare credentials belong to a separate service and never reach EDA workers.
 
-Install a **fresh clone** at `/opt/chipjev`, then run `scripts/setup-demo.sh` there.
-Do not copy a development `.venv` or `.tools` tree. The installer keeps its managed
-Python under `.tools/python`, so `ProtectHome=true` does not hide the interpreter.
-After installation, make the checkout root-owned and world-readable/executable
-as appropriate; the service must be able to read source, models, symbols and fonts.
+Install a fresh clone at `/opt/chipjev`, run `scripts/setup-demo.sh` there, and
+check the host with `python -m demo.runtime --device cuda`. Keep the checkout and
+model cache readable by the dynamic service user. Do not copy a development
+`.venv` or symlinked tool tree. The installer keeps Python under `.tools/python`.
 
 ```bash
 sudo chown -R root:root /opt/chipjev
@@ -103,24 +138,25 @@ sudo systemctl enable --now chipjev-demo.service
 curl --fail http://127.0.0.1:18766/api/health
 ```
 
-The response must say `"ready": true`. Inspect failures with
-`journalctl -u chipjev-demo.service` and the private worker logs under
-`/var/lib/chipjev-demo`. Do not run the public API as your normal desktop user.
-The installation above requires host administration; committing these units does
-not install or start them.
+Expect `ready: true`, `mode: live-design`, and `compute.cuda: true`. Check failures
+with `journalctl -u chipjev-demo.service` and private worker logs under
+`/var/lib/chipjev-demo`. These commands require host administration; committing
+these files does not install them. Test the CUDA and EDA path after installation.
 
-Limits: one shared run, 32 live viewers, 90 seconds per run, 15-second cooldown,
-120 runs/hour, at most eight retained results, ten-minute expiry. Per-process CPU,
-address-space, open-file and file-size limits supplement the service's 2 GiB
-memory cap, two-core quota and 64-task cap. Timeout/shutdown kills the worker's
-whole process group. Restart discards the previous service's run directories.
-No user-supplied Tcl, SPICE, shell, paths, text, parameters, uploads or remote
-desktop input are accepted. Origin checks are browser protections, not identity
-authentication; global limits still apply to non-browser callers. The results
-are public examples, so run IDs are not private-data credentials.
+Limits: one shared run, 32 viewers, 5 minutes per entire run, a 15-second cooldown,
+120 runs/hour, eight retained results and ten-minute expiry. The service has an
+8 GiB RAM cap, eight-core CPU quota and 256-task cap. Workers have CPU, open-file,
+file-size and core-dump limits. Do not impose the old 4 GiB virtual-address-space
+limit: CUDA reserves a large virtual address space. Timeout/shutdown kills the
+worker process group. Restart cleans only the service’s random run directories.
+GPU work is bounded by a fixed model, fixed search profile and single admission.
 
-Keep this boundary fixed. Offering editable SPICE or Tcl later would expose
-executable tool languages and require a new isolation design.
+`POST /api/runs` accepts only `{"example":"opamp-gain"}` or another listed ID;
+`{}` selects the default. Concurrent visitors join the same run and see its actual
+selected prompt. Inputs cannot edit constraints, budgets, source code or files.
+Origin checks protect browsers, not authenticate callers. Fixed global limits
+also apply to non-browser callers. Editable SPICE/Tcl would need a new isolation
+design because those are executable languages.
 
 ## Named HTTPS tunnel
 

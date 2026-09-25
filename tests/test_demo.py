@@ -15,7 +15,8 @@ from chipjev import xschem
 from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build
 from chipjev.paths import ROOT
-from demo.schematic import schematic_steps
+from demo.examples import EXAMPLES
+from demo.schematic import routed_schematic, schematic_steps
 from demo.server import FIXTURE, MAX_VIEWERS, RUN_TTL, SERVICE, Service, create_app
 
 ORIGIN = "https://chipjev.com"
@@ -57,7 +58,8 @@ def test_public_boundary_and_single_shared_run(tmp_path):
                 response = await client.post("/api/runs", json={}, headers=headers)
                 assert response.status == 403
             headers = {"Origin": ORIGIN}
-            for body in ({"command": "id"}, {"path": "/etc/passwd"}, [], None, {"seed": 2}):
+            for body in ({"command": "id"}, {"path": "/etc/passwd"}, [], None, {"seed": 2}, {"example": "../../tmp"},
+                         {"example": []}, {"example": "opamp-gain", "prompt": "id"}):
                 response = await client.post("/api/runs", data=json.dumps(body),
                                              headers={**headers, "Content-Type": "application/json"})
                 assert response.status == 400
@@ -67,11 +69,13 @@ def test_public_boundary_and_single_shared_run(tmp_path):
             assert (await client.post("/api/runs", data="{}", headers=headers)).status == 415
             assert (await client.post("/api/runs?command=id", json={}, headers=headers)).status == 400
             responses = await asyncio.gather(*[
-                client.post("/api/runs", json={}, headers=headers) for _ in range(4)])
+                client.post("/api/runs", json={"example": "opamp-speed"}, headers=headers) for _ in range(4)])
             payloads = [await response.json() for response in responses]
             assert {response.status for response in responses} == {200, 202}
             assert len({p["id"] for p in payloads}) == 1
             assert len(executed) == 1
+            assert all(p["example"] == EXAMPLES["opamp-speed"] for p in payloads)
+            assert service.runs[payloads[0]["id"]].example == "opamp-speed"
             ident = payloads[0]["id"]
             response = await client.get(f"/api/runs/{ident}", headers=headers)
             assert response.headers["Access-Control-Allow-Origin"] == ORIGIN
@@ -158,18 +162,18 @@ def test_wired_schematic_requires_physical_signal_connections(tmp_path):
 @pytest.mark.integration
 def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
     async def scenario():
-        app = create_app(tmp_path)
+        app = create_app(tmp_path, device="cpu")
         if missing := app[SERVICE].readiness():
             app[SERVICE].lock.close()
             pytest.skip("Demo dependencies missing: " + ", ".join(missing))
         from PIL import Image
 
         async with TestClient(TestServer(app)) as client:
-            response = await client.post("/api/runs", json={}, headers={"Origin": ORIGIN})
+            response = await client.post("/api/runs", json={"example": "ota-efficient"}, headers={"Origin": ORIGIN})
             assert response.status == 202
             ident = (await response.json())["id"]
             frames, events = [], []
-            async with asyncio.timeout(90):
+            async with asyncio.timeout(300):
                 async with client.ws_connect(f"/api/runs/{ident}/live", origin=ORIGIN) as ws:
                     async for message in ws:
                         if message.type == WSMsgType.BINARY:
@@ -181,7 +185,17 @@ def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
             assert not any(e["type"] == "error" for e in events), events
             result = next(e for e in events if e["type"] == "result")
             assert result["valid"] and result["netlist_match"]
-            assert result["metrics"]["gain_db"] == pytest.approx(FIXTURE["reference_metrics"]["gain_db"], abs=0.1)
+            assert result["mode"] == "live-design" and result["example"]["id"] == "ota-efficient"
+            assert result["model"]["device"] == "cpu"
+            assert result["laya_inference_seconds"] > 0
+            assert result["search"]["typed_prior"] and result["search"]["evaluations"] >= 8
+            assert result["timings_seconds"]["search"] > 0
+            decisions = await (await client.get(f"/api/runs/{ident}/artifacts/decisions.json")).json()
+            trace = await (await client.get(f"/api/runs/{ident}/artifacts/search.json")).json()
+            assert decisions["search_prior"] == trace["prior"]
+            assert len(set(round(p, 4) for p in trace["prior"])) > 1
+            assert any(r["source"] == "typed" for r in trace["records"])
+            assert trace["evaluations"] == len(trace["records"])
             assert result["wall_seconds"] > 0 and result["demo_seconds"] > result["wall_seconds"]
             waves = next(e for e in events if e["type"] == "waveforms")
             assert len(waves["frequency_hz"]) > 100 and len(waves["steps"]) == 2
@@ -200,3 +214,27 @@ def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
                         replay.append(json.loads(message.data))
             assert next(e for e in replay if e["type"] == "result")["id"] == result["id"]
     asyncio.run(scenario())
+
+
+def test_site_prompts_match_the_server_allowlist():
+    assert json.loads((ROOT / "website/examples.json").read_text()) == list(EXAMPLES.values())
+
+
+@pytest.mark.integration
+def test_every_public_topology_has_real_equivalent_wiring(tmp_path):
+    import shutil
+
+    from chipjev.circuits.space import ClassSpace
+
+    if not shutil.which("xschem") or not (xschem.library() / "sky130_fd_pr/nfet_01v8.sym").exists():
+        pytest.skip("xschem and SKY130 symbols are required")
+    for cls, stages in (("opampN", 2), ("opamp1", 1)):
+        space = ClassSpace(cls)
+        for index, top in enumerate(space.topologies):
+            if len(top.stages) != stages:
+                continue
+            builder = build(top, space.values(space.canonical(top.id)), 1.8)
+            path = tmp_path / f"{cls}-{index}.sch"
+            path.write_text(routed_schematic(builder, top.id, 1.8))
+            netlist = xschem.netlist(path, tmp_path / f"netlist-{cls}-{index}")
+            assert xschem.check(builder, netlist, 1.8) == (True, []), top.id

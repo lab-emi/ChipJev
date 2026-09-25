@@ -12,6 +12,7 @@ import select
 import subprocess
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
@@ -19,11 +20,12 @@ import numpy as np
 from chipjev import xschem
 from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build
-from chipjev.paths import ROOT
 from chipjev.simulation.sky130 import evaluate
-from demo.schematic import schematic_steps
+from demo import design
+from demo.examples import DEFAULT_EXAMPLE, EXAMPLES
+from demo.schematic import routed_schematic, text
+from demo.timing import RunTiming
 
-FIXTURE = ROOT / "demo/fixtures/sky130-opamp.json"
 WIDTH, HEIGHT = 1440, 900
 
 
@@ -93,7 +95,7 @@ class Screen:
                       f"append XSCHEM_LIBRARY_PATH :{xschem.library()}\n"
                       "set netlist_type spice\nset lvs_netlist 0\n"
                       "set dark_colorscheme 1\nset dark_gui_colorscheme 1\n"
-                      "set draw_grid 0\nset autoload_new_window 0\n"
+                      "set draw_grid 0\nset autoload_new_window 0\nset zoom_full_center 1\n"
                       "set change_lw 0\nset line_width 1.8\n"
                       "set enable_layer(5) 0\n")
         driver = self.directory / "display.tcl"
@@ -223,71 +225,127 @@ def plot(directory, waves):
     path.replace(directory / "plots.png")
 
 
-def run(directory):
-    start = time.monotonic()
-    fixture = json.loads(FIXTURE.read_text())
-    topology = lookup(fixture["cls"], fixture["topology"])
-    builder = build(topology, fixture["values"], fixture["vdd"])
-    steps = schematic_steps(builder, fixture)
-    for i, step in enumerate(steps):
-        (directory / f"step-{i}.sch").write_text(step.schematic)
+def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
+    timing = RunTiming()
+    example = EXAMPLES[example_id]
+
+    def stage(name, **data):
+        phase = {"starting": "startup", "deciding": "laya", "searching": "search",
+                 "netlisting": "netlist", "simulating": "simulation", "checking": "results"}.get(name)
+        timing.move(phase)
+        emit("stage", stage=name, **data, **timing.snapshot())
+
+    empty = ["v {xschem version=3.4.5 file_version=1.2}", "G {}", "K {}", "V {}", "S {}", "E {}",
+             text("CHIPJEV / A FRESH DESIGN", 60, 60, 0.7),
+             text("Laya is reading the selected prompt.", 60, 140, 0.4),
+             text("Live search candidates will appear here.", 60, 200, 0.4),
+             "L 2 0 0 1600 0 {}", "L 2 0 900 1600 900 {}"]
+    (directory / "step-0.sch").write_text("\n".join(empty) + "\n")
     screen = Screen(directory)
-    emit("stage", stage="starting", message="Starting a private xschem display", progress=2)
+    renderer = ThreadPoolExecutor(max_workers=1)
+    frame_update = None
+    stage("starting", message="Starting a fresh design and private xschem display",
+          progress=2, example=example)
     try:
         screen.start()
         screen.show(0)
-        emit("stage", stage="building", message=steps[0].message, progress=5)
-        time.sleep(0.25)
-        for i in range(1, len(steps)):
-            screen.show(i)
-            emit("stage", stage="building", message=steps[i].message,
-                 step=i, total=len(steps) - 1, progress=5 + round(48 * i / (len(steps) - 1)))
-            # Pacing is for legible viewing, and is included in total wall time.
-            time.sleep(0.2)
+        stage("deciding", message="Loading Laya and inferring typed design decisions", progress=5)
+        model = design.load_model(device)
+        answer = design.decide(model, example)
+        metadata = dict(model.metadata)
+        metadata["fine_tuned"] = {"sha256": model.metadata["fine_tuned"]["sha256"]}
+        answer.update(model=metadata, example=example, model_load_seconds=model.load_seconds)
+        (directory / "decisions.json").write_text(json.dumps(answer, indent=2, allow_nan=False))
+        ordered = sorted(zip(answer["search_topologies"], answer["search_prior"], strict=True),
+                         key=lambda item: -item[1])
+        stage("deciding", message="Laya decisions now guide the topology and sizing search",
+              progress=10, laya={"device": metadata["device"], "precision": metadata["precision"],
+                  "inference_seconds": answer["seconds"], "answers": answer["answers"],
+                  "topologies": len(ordered), "leading_topologies": ordered[:3]})
+
+        def observe(event):
+            nonlocal frame_update
+            info = {k: event[k] for k in ("round", "evaluations", "verifications") if k in event}
+            if event["kind"] == "candidate":
+                topology = lookup(example["cls"], event["topology"])
+                builder = build(topology, event["values"], example["vdd"])
+                index = event["round"] + 1
+                atomic_write(directory / f"step-{index}.sch",
+                             routed_schematic(builder, topology.id, example["vdd"]))
+                # A slow video frame must not stall CUDA acquisition. Sample the
+                # latest real candidates; at most one display update is in flight.
+                if frame_update is None or frame_update.done():
+                    if frame_update is not None:
+                        frame_update.result()
+                    frame_update = renderer.submit(screen.show, index)
+                info.update(topology=topology.id, mosfets=len(builder.mos), source=event["source"])
+                message = f"Round {index}: evaluating 8 candidates · {topology.id}"
+            else:
+                best = event["best"]
+                info["best_gain_db"] = None if best is None else best["metrics"].get("gain_db")
+                message = f"{event['evaluations']} circuits measured · " + (
+                    "strictly verified design found" if best else "searching for a qualified design")
+            stage("searching", message=message, search=info,
+                  progress=12 + round(66 * (event["round"] + 1) / design.ROUNDS))
+
+        stage("searching", message="Starting ChipJev joint topology and sizing search", progress=12)
+        selected, search_result = design.search(answer, example, model.laya.device, observe)
+        if frame_update is not None:
+            frame_update.result()
+        (directory / "search.json").write_text(json.dumps(search_result, indent=2, allow_nan=False))
+        topology = lookup(example["cls"], selected["topology"])
+        builder = build(topology, selected["values"], example["vdd"])
+        schematic = routed_schematic(builder, topology.id, example["vdd"])
         final = directory / "circuit.sch"
-        final.write_text(steps[-1].schematic)
-        emit("stage", stage="netlisting", message="xschem is netlisting the assembled circuit",
-             progress=58)
+        final.write_text(schematic)
+        atomic_write(directory / "step-900.sch", schematic)
+        screen.show(900)
+        stage("netlisting", message="Verifying every xschem wire, device and size", progress=82,
+              search={"topology": topology.id, "mosfets": len(builder.mos),
+                      "evaluations": search_result["evaluations"]})
         netlist = xschem.netlist(final, directory / "netlist")
-        ok, problems = xschem.check(builder, netlist, fixture["vdd"])
+        ok, problems = xschem.check(builder, netlist, example["vdd"])
         if not ok:
             raise RuntimeError("xschem connectivity check failed: " + "; ".join(problems))
         (directory / "circuit.spice").write_text(netlist)
-        emit("stage", stage="simulating", message="ngspice · AC sweep + ±10 mV unity-buffer steps",
-             progress=72)
-        result = evaluate(topology, fixture["values"], directory=directory, strict=True,
-                          keep=True, vdd=fixture["vdd"], load_pf=fixture["load_pf"])
+        stage("simulating", message="Final ngspice AC sweep + ±10 mV unity-buffer steps", progress=88)
+        result = evaluate(topology, selected["values"], directory=directory, strict=True,
+                          keep=True, vdd=example["vdd"], load_pf=example["load_pf"])
         if result["error"]:
             raise RuntimeError(result["error"])
+        stage("checking", message="Checking gain, stability and closed-loop operation", progress=96)
         waves = waveforms(directory, result)
         emit("waveforms", **waves)
-        emit("stage", stage="checking", message="Checking gain, stability and closed-loop operation",
-             progress=92)
         plot(directory, waves)
         screen.check()
         result.pop("pid", None)
-        result.update(mode="live-resimulation", topology=fixture["topology"],
-                      source=fixture["source"], source_sha256=fixture["source_sha256"],
-                      netlist_match=ok)
-        # Include display pacing, validation and plotting in the displayed elapsed time.
-        time.sleep(0.6)
-        result["demo_seconds"] = time.monotonic() - start
+        result.update(mode="live-design", topology=topology.id, values=selected["values"],
+                      example=example, model=metadata, netlist_match=ok, mosfets=len(builder.mos),
+                      laya_inference_seconds=answer["seconds"], search={
+                          k: search_result[k] for k in ("device", "acquisition_dtype", "wide_kernel",
+                          "topologies", "typed_prior", "evaluations", "verifications",
+                          "first_verified", "wall_seconds", "demo_stop_rule")})
+        timing.move(None)
+        result.update(timing.snapshot())
         (directory / "result.json").write_text(json.dumps(result, indent=2, allow_nan=False))
         emit("result", **result)
-        emit("stage", stage="complete" if result["valid"] else "unqualified",
-             message="All circuit checks passed" if result["valid"] else "Simulation finished; qualification failed",
-             progress=100)
+        stage("complete" if result["valid"] else "unqualified",
+              message="All circuit checks passed" if result["valid"] else "Search budget exhausted; qualification failed",
+              progress=100)
     finally:
+        renderer.shutdown(wait=True, cancel_futures=True)
         screen.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, required=True)
+    parser.add_argument("--example", choices=EXAMPLES, default=DEFAULT_EXAMPLE)
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     args = parser.parse_args()
     args.directory.mkdir(parents=True, exist_ok=True)
     try:
-        run(args.directory.resolve())
+        run(args.directory.resolve(), args.example, None if args.device == "auto" else args.device)
     except Exception:
         import traceback
         traceback.print_exc()

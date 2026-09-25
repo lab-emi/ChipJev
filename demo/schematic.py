@@ -1,4 +1,4 @@
-"""A wired, readable xschem layout for the fixed public-demo topology.
+"""Native wired xschem layouts for the reference and freshly searched circuits.
 
 Device properties come from the research exporter unchanged. Signal connections
 are xschem N primitives; labels name nets, they do not replace signal wiring.
@@ -86,7 +86,7 @@ def schematic_steps(builder, fixture):
             lines.append(text(f"{width}/{length}", tx, y + 6, 0.18, 14))
         elif name == "C14":
             lines += [text("C14  /  MILLER FEEDBACK", x - 105, y - 52, 0.28, 6),
-                      text("177 fF", x - 25, y + 22, 0.22)]
+                      text(f"{float(re.search(r' value=(\S+)', devices[name])[1]) * 1e15:.3g} fF", x - 25, y + 22, 0.22)]
         else:
             volts = re.search(r" value=(\S+)", devices[name])[1]
             lines += [text(name.replace("V_", ""), x + 35, y - 24, 0.23),
@@ -160,3 +160,11 @@ def schematic_steps(builder, fixture):
         wire((1160, 190), (1160, 0), (1410, 0)),
         wire((1470, 0), (1720, 0), (1720, 410)))
     return steps
+
+
+def routed_schematic(builder, topology, vdd):
+    """Arrange actual analog stages and route every signal with electrical wires."""
+    if topology == "cmota_n+inv_cas+miller":
+        return schematic_steps(builder, {"topology": topology, "vdd": vdd})[-1].schematic
+    from demo.analog_layout import analog_schematic
+    return analog_schematic(builder, topology, vdd)

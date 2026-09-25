@@ -3,17 +3,23 @@
 Static HTML/CSS/JavaScript for GitHub Pages. No frontend build, CDN dependencies,
 visitor login, third-party fonts or tracking scripts are required.
 
-The main action starts a real, fixed-example xschem/ngspice run. The backend streams
-actual xschem JPEGs and measured waveform arrays over a view-only WebSocket.
-`demo/schematic.py` lays out the differential pair, current mirrors, output stack
-and Miller loop with real xschem wires. The animation adds connected branches in
-16 steps. The schematic stays at full size while result plots arrive below it.
-The idle poster is a reference capture. It is never presented as a live run.
+The visitor selects an allowlisted text prompt and starts a fresh Laya → ChipJev
+search → xschem → ngspice pipeline. Native xschem frames, actual model decisions,
+measured waveform arrays and performance arrive over a view-only WebSocket.
+`demo/analog_layout.py` connects differential pairs, active loads, gain stages and
+feedback with electrical xschem wires. Real search candidates are sampled for the live display; the selected result is netlist-verified before the final simulation.
+No archived design or measurement seeds a run. The idle poster is clearly labeled
+as a reference capture. It is never substituted for an unavailable live backend.
+
+The button timer starts on click; server phase clocks distinguish Laya loading
+and inference, design search, and final simulation. Reconnecting restores the run.
+The selected prompt and the actual CPU/CUDA device stay visible. The GPU launcher
+requires CUDA and fails explicitly if device access is unavailable.
 
 See [deployment instructions](../deploy/chipjev/README.md) for setup, architecture,
 resource limits, Cloudflare Tunnel and Squarespace/custom-domain steps.
 
-Preview with `.venv/bin/python -m demo.server --preview` from the repository root,
+Preview with `bash scripts/run-demo-gpu.sh` from the repository root,
 after `bash scripts/setup-demo.sh`. Browse `http://127.0.0.1:18766`.
 
 To change the public backend, run `demo.configure_site` as documented. It updates

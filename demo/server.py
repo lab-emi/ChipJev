@@ -1,4 +1,4 @@
-"""Public API for the fixed, view-only ChipJev demo. Bind to loopback only.
+"""Public API for the prompt-selected, view-only ChipJev demo. Bind to loopback only.
 
 One shared run at a time. WebSocket messages carry actual xschem JPEG frames
 and structured simulation events; spectators have no keyboard/mouse channel.
@@ -25,15 +25,17 @@ from aiohttp import web
 from chipjev import xschem
 from chipjev.paths import ROOT, ngspice
 from chipjev.simulation.pdk import model_root
+from demo.examples import DEFAULT_EXAMPLE, EXAMPLES
+from demo.runtime import inspect_runtime
 
 FIXTURE = json.loads((ROOT / "demo/fixtures/sky130-opamp.json").read_text())
-PUBLIC_FIXTURE = {k: v for k, v in FIXTURE.items() if k != "values"}
 ARTIFACTS = {"circuit.sch": "text/plain", "circuit.spice": "text/plain",
-             "result.json": "application/json", "plots.png": "image/png"}
+             "result.json": "application/json", "plots.png": "image/png",
+             "decisions.json": "application/json", "search.json": "application/json"}
 DEFAULT_ORIGINS = {"https://chipjev.com", "https://www.chipjev.com",
                    "https://lab-emi.github.io"}
 RUN_TTL = 600
-RUN_TIMEOUT = 90
+RUN_TIMEOUT = 300
 COOLDOWN = 15
 MAX_VIEWERS = 32
 MAX_RETAINED = 8
@@ -43,6 +45,7 @@ MAX_RETAINED = 8
 class Run:
     id: str
     directory: Path
+    example: str = DEFAULT_EXAMPLE
     created: float = field(default_factory=time.monotonic)
     events: list = field(default_factory=list)
     status: str = "running"
@@ -54,7 +57,7 @@ class Run:
 
 
 class Service:
-    def __init__(self, directory, origins, preview=False):
+    def __init__(self, directory, origins, preview=False, device="auto"):
         self.directory = directory.resolve()
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lock = (self.directory / ".server.lock").open("a")
@@ -63,13 +66,16 @@ class Service:
         except BlockingIOError:
             self.lock.close()
             raise RuntimeError("Another demo server owns this state directory") from None
-        # Previous process' fixed-example outputs are disposable. Only our own
+        # Previous process' demo outputs are disposable. Only our own
         # random run-directory names are eligible; never follow a symlink.
         for old in self.directory.iterdir():
             if re.fullmatch(r"[0-9a-f]{32}", old.name) and old.is_dir() and not old.is_symlink():
                 shutil.rmtree(old)
         self.origins = frozenset(origins)
         self.preview = preview
+        self.device = device
+        self.compute = {"device": "Checking", "cuda": False}
+        self.runtime_check = None
         self.runs = {}
         self.active = None
         self.next_start = 0.0
@@ -86,11 +92,13 @@ class Service:
             missing.append("SKY130 xschem symbols")
         if not (model_root() / "libs.ref/sky130_fd_pr/spice").exists():
             missing.append("SKY130 models")
-        return missing
+        if self.runtime_check is None:
+            self.compute, self.runtime_check = inspect_runtime(self.device)
+        return missing + self.runtime_check
 
     def publish(self, run, event):
-        # Fixed worker produces fewer than 40 events; cap even on a broken worker.
-        if len(run.events) >= 100:
+        # At most two events per search round plus the bounded phase events.
+        if len(run.events) >= 240:
             raise RuntimeError("Worker exceeded the event limit")
         run.events.append({**event, "id": len(run.events) + 1,
                            "elapsed": round(time.monotonic() - run.created, 3)})
@@ -106,7 +114,10 @@ class Service:
         environment = {
             "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
             "PYTHONPATH": str(ROOT / "src") + os.pathsep + str(ROOT),
-            "PYTHONUNBUFFERED": "1", "LC_ALL": "C.UTF-8", "OMP_NUM_THREADS": "1",
+            "PYTHONUNBUFFERED": "1", "LC_ALL": "C.UTF-8", "OMP_NUM_THREADS": "8",
+            "HF_HUB_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false",
+            "TRITON_CACHE_DIR": str(self.directory / ".triton"),
+            "TORCHINDUCTOR_CACHE_DIR": str(self.directory / ".torch-cache"),
             "OPENBLAS_NUM_THREADS": "1", "MPLCONFIGDIR": str(run.directory / "mpl"),
             "TMPDIR": str(run.directory), "CHIPJEV_PDK": str(model_root()),
             "CHIPJEV_SKY130_XSCHEM": str(xschem.library()),
@@ -115,12 +126,15 @@ class Service:
         # xschem's writable configuration is separately redirected into this run.
         if "HOME" in os.environ:
             environment["HOME"] = os.environ["HOME"]
+        if "HF_HOME" in os.environ:
+            environment["HF_HOME"] = os.environ["HF_HOME"]
         try:
             with (run.directory / "worker.log").open("wb") as log:
                 run.process = await asyncio.create_subprocess_exec(
-                    "prlimit", "--cpu=60:60", "--as=4294967296:4294967296",
+                    "prlimit", "--cpu=1800:1800",
                     "--nofile=256:256", "--fsize=67108864:67108864", "--core=0:0", "--",
                     sys.executable, "-m", "demo.worker", "--directory", str(run.directory),
+                    "--example", run.example, "--device", self.device,
                     cwd=ROOT, env=environment, start_new_session=True,
                     stdout=asyncio.subprocess.PIPE, stderr=log, limit=262144,
                 )
@@ -139,7 +153,7 @@ class Service:
                     elif run.status != "error":
                         run.status = "complete"
         except TimeoutError:
-            self.failure(run, "The simulation exceeded its 90-second limit. Please try again.")
+            self.failure(run, "The simulation exceeded its 5-minute limit. Please try again.")
         except asyncio.CancelledError:
             self.failure(run, "The demo server is restarting. Please reconnect.")
             raise
@@ -211,8 +225,8 @@ async def health(request):
     service = request.app[SERVICE]
     missing = service.readiness()
     return json_response({"ready": not missing, "missing": missing,
-                          "active_run": service.active, "example": PUBLIC_FIXTURE,
-                          "mode": "live-resimulation", "retention_seconds": RUN_TTL},
+                          "active_run": service.active, "examples": list(EXAMPLES.values()),
+                          "compute": service.compute, "mode": "live-design", "retention_seconds": RUN_TTL},
                          503 if missing else 200)
 
 
@@ -234,18 +248,23 @@ async def start(request):
     if request.headers.get("Origin") not in service.origins:
         return json_response({"error": "An allowed browser Origin is required."}, 403)
     if request.content_type != "application/json":
-        return json_response({"error": "Send an empty JSON object."}, 415)
+        return json_response({"error": "Send a JSON object with a listed example ID."}, 415)
     try:
         async with asyncio.timeout(3):
             body = await request.read()
-        if len(body) > 64 or json.loads(body) != {}:
+        payload = json.loads(body)
+        if not isinstance(payload, dict) or set(payload) - {"example"}:
+            raise ValueError
+        example_id = payload.get("example", DEFAULT_EXAMPLE)
+        if not isinstance(example_id, str) or example_id not in EXAMPLES:
             raise ValueError
     except (ValueError, TimeoutError):
-        return json_response({"error": "Only an empty JSON object is accepted."}, 400)
+        return json_response({"error": "Only a listed example ID is accepted; prompts and commands cannot be submitted."}, 400)
     if service.readiness():
         return json_response({"error": "The simulation service is not ready."}, 503)
     if service.active:
-        return json_response({"id": service.active, "joined": True}, 200)
+        return json_response({"id": service.active, "joined": True,
+                              "example": EXAMPLES[service.runs[service.active].example]}, 200)
     now = time.monotonic()
     if now < service.next_start:
         seconds = max(1, int(service.next_start - now) + 1)
@@ -263,12 +282,12 @@ async def start(request):
     ident = secrets.token_hex(16)
     directory = service.directory / ident
     directory.mkdir(mode=0o700)
-    run = Run(ident, directory)
+    run = Run(ident, directory, example=example_id)
     service.runs[ident] = run
     service.active = ident
     service.admissions.append(now)
     run.task = asyncio.create_task(service.execute(run))
-    return json_response({"id": ident, "joined": False}, 202)
+    return json_response({"id": ident, "joined": False, "example": EXAMPLES[example_id]}, 202)
 
 
 def get_run(request):
@@ -280,7 +299,7 @@ def get_run(request):
 
 async def snapshot(request):
     run = get_run(request)
-    return json_response({"id": run.id, "status": run.status, "events": run.events})
+    return json_response({"id": run.id, "status": run.status, "example": EXAMPLES[run.example], "events": run.events})
 
 
 async def stream(request):
@@ -355,8 +374,8 @@ async def artifact(request):
                                           "Content-Disposition": f'attachment; filename="{name}"'})
 
 
-def create_app(directory=None, origins=None, preview=False):
-    service = Service(directory or ROOT / "runs/live-demo", origins or DEFAULT_ORIGINS, preview)
+def create_app(directory=None, origins=None, preview=False, device="auto"):
+    service = Service(directory or ROOT / "runs/live-demo", origins or DEFAULT_ORIGINS, preview, device)
     app = web.Application(middlewares=[policy], client_max_size=64)
     app[SERVICE] = service
     app.on_response_prepare.append(response_headers)
@@ -388,12 +407,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=18766)
     parser.add_argument("--preview", action="store_true", help="Also serve the website locally")
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--state", type=Path, default=ROOT / "runs/live-demo")
     args = parser.parse_args()
     origins = set(filter(None, os.environ.get("CHIPJEV_DEMO_ORIGINS", "").split(","))) or DEFAULT_ORIGINS
     if args.preview:
         origins = origins | {f"http://localhost:{args.port}", f"http://127.0.0.1:{args.port}"}
-    web.run_app(create_app(args.state, origins, args.preview), host="127.0.0.1", port=args.port,
+    web.run_app(create_app(args.state, origins, args.preview, args.device), host="127.0.0.1", port=args.port,
                 access_log=None, handler_cancellation=True, shutdown_timeout=5)
 
 

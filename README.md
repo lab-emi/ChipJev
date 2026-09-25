@@ -8,9 +8,11 @@
 **Ultrafast circuit design with a System One model and open-source EDA.**
 
 > **[Watch the live circuit demo →](https://lab-emi.github.io/ChipJev/)**
-> One click rebuilds ChipJev's largest published SKY130 final design in xschem,
-> runs fresh ngspice simulations, and streams the circuit and measured responses.
-> The demo uses a fixed published design; it does not repeat the topology search.
+> Choose a SKY130 design prompt. Each run executes Laya typed decisions and fresh
+> topology/sizing search, streams the connected circuit in xschem, and measures it
+> with ngspice. CUDA accelerates Laya and acquisition; the site reports the actual
+> device, phase timings, waveforms and qualification. The default prompt requires
+> a complex two-stage op-amp with at least 13 MOSFETs.
 > [Run or deploy the demo](deploy/chipjev/README.md).
 
 Source code, recorded experiments and reproducible circuit-design tools. The manuscript is maintained separately.
@@ -95,7 +97,7 @@ ChipJev/
 ├── assets/chipjev-banner.png    README banner
 ├── CITATION.cff                 citation metadata, including Laya and Laya-MLX
 ├── NOTICE, LICENSES/            Apache-2.0 notices and license for the Laya-derived parts
-├── LICENSE                      MIT
+├── LICENSE                      Apache-2.0
 ├── THIRD_PARTY_NOTICES.md       provenance of third-party code, models and tools
 └── pyproject.toml, uv.lock      locked Python environment
 ```
@@ -247,7 +249,7 @@ Laya and Laya-MLX, whose model and runtime ChipJev builds on:
 
 ## License
 
-ChipJev is released under the [MIT License](LICENSE). `src/chipjev/decisions/laya_torch.py` and
+ChipJev is released under the [Apache License 2.0](LICENSE). `src/chipjev/decisions/laya_torch.py` and
 the fine-tuned weights `experiments/ptm45/typed-decisions.pt` derive from Laya-MLX, Laya and the
 Laya checkpoint; those portions remain under the Apache License 2.0 ([NOTICE](NOTICE),
 [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)). Third-party tools, models and weights keep

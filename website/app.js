@@ -1,9 +1,12 @@
+import { RunClock } from "./run-clock.mjs";
 const $ = (id) => document.getElementById(id);
 const runButton = $("run");
-const stageNames = ["building", "netlisting", "simulating", "checking"];
+const stageNames = ["deciding", "searching", "netlisting", "simulating", "checking"];
+const clock = new RunClock();
+let examples = [];
 let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false;
-let startTime = 0, timer, result, finished = false, expanded = false;
-const runKey = "chipjev-live-run-v1";
+let timer, result, finished = false, expanded = false;
+const runKey = "chipjev-live-run-v2";
 
 function saveRun(value) {
   try { value ? sessionStorage.setItem(runKey, value) : sessionStorage.removeItem(runKey); } catch { /* Storage is optional. */ }
@@ -12,7 +15,35 @@ function readRun() { try { return sessionStorage.getItem(runKey); } catch { retu
 function button(label, disabled = false) { runButton.querySelector("span").textContent = label; runButton.disabled = disabled; }
 function error(message) { $("error").textContent = message; $("error").hidden = !message; }
 function badge(text, style = "") { $("run-state").textContent = text; $("run-state").className = `state-badge ${style}`; }
+function selectedExample() { return document.querySelector('input[name="example"]:checked').value; }
+function applyExample(example) {
+  const radio = [...document.querySelectorAll('input[name="example"]')].find((node) => node.value === example.id);
+  if (radio) radio.checked = true;
+  $("selected-prompt").textContent = example.prompt;
+  $("circuit-title").textContent = example.stages === 2 ? "SKY130 two-stage op-amp" : "SKY130 single-stage OTA";
+}
+function renderTime() {
+  const value = clock.sample(), phases = value.phases;
+  $("button-timer").textContent = `${value.total.toFixed(1)} s`;
+  $("elapsed").textContent = `${value.total.toFixed(2)} s`;
+  const small = document.createElement("small"); small.textContent = "s";
+  $("total-timer").replaceChildren(document.createTextNode(value.total.toFixed(2)), small);
+  for (const [id, phase] of [["laya-timer", "laya"], ["build-timer", "search"], ["simulation-timer", "simulation"]]) {
+    $(id).textContent = phases[phase] === undefined ? "—" : `${phases[phase].toFixed(2)} s`;
+  }
+}
+function startClock() {
+  $("button-timer").hidden = false;
+  clearInterval(timer); renderTime(); timer = setInterval(renderTime, 100);
+}
 function reset() {
+  clock.reset(); renderTime();
+  $("laya-decisions").hidden = true; $("laya-decisions").replaceChildren();
+  $("laya-note").textContent = "Typed decisions → topology probabilities";
+  $("search-note").textContent = "Joint topology + transistor sizing";
+  $("topology-note").textContent = "A fresh topology and sizing search on every run";
+  $("frame").src = "assets/circuit-preview.jpg";
+  $("stream-label").textContent = "STARTING";
   error(""); result = null; lastEvent = 0; reconnects = 0; finished = false;
   $("downloads").hidden = true; $("progress").value = 0;
   $("screen-note").hidden = true; $("verification").className = "verification";
@@ -35,10 +66,12 @@ async function request(path, options = {}) {
 async function health() {
   try {
     const state = await request("/api/health");
-    $("availability").textContent = state.active_run ? "A run is in progress · click to watch live" : "Service online · one click to start";
+    $("compute-device").textContent = state.compute.device;
+    $("availability").textContent = state.active_run ? "A shared run is in progress · click to watch" : `${state.compute.device} · ready to design`;
     return true;
   } catch {
     $("availability").textContent = "Live service unavailable · click to retry";
+    $("compute-device").textContent = "Compute service offline";
     return false;
   }
 }
@@ -49,7 +82,9 @@ function setMetric(key, value, unit) {
 }
 
 function showResult(data) {
-  result = data;
+  result = data; clock.stop(); renderTime();
+  $("topology-note").textContent = `${data.topology} · ${data.mosfets} MOSFETs`;
+  $("timing-note").textContent = "Completed. Laya time includes model loading; search includes candidate simulations.";
   setMetric("gain", data.metrics.gain_db, "dB");
   setMetric("gbw", data.metrics.gbw_mhz, "MHz");
   setMetric("pm", data.metrics.pm_deg, "°");
@@ -57,21 +92,21 @@ function showResult(data) {
   const checks = Object.values(data.checks);
   $("verification").textContent = data.valid ? `${checks.filter(Boolean).length}/${checks.length} checks passed · netlist verified` : "Qualification failed; inspect the downloaded results.";
   $("verification").className = `verification ${data.valid ? "success" : ""}`;
-  $("result-note").textContent = `Fresh run · strict verification ${data.wall_seconds.toFixed(2)} s · demo ${data.demo_seconds.toFixed(2)} s including display pacing.`;
+  $("result-note").textContent = `Fresh Laya inference ${(data.laya_inference_seconds * 1000).toFixed(0)} ms · ${data.search.evaluations} circuits measured · ${data.model.device} · final ngspice verification ${data.wall_seconds.toFixed(2)} s.`;
 }
 
 function complete(ok) {
-  finished = true; running = false; clearInterval(timer);
+  finished = true; running = false; clock.stop(); clearInterval(timer); renderTime();
+  $("examples").disabled = false;
   $("live-dot").classList.remove("active");
   $("stream-label").textContent = ok ? "RUN COMPLETE" : "RUN STOPPED";
   $("frame-note").textContent = ok ? "Final frame from this live xschem session" : "Last received xschem frame";
   button("Run again");
   if (result) {
-    $("elapsed").textContent = `${result.demo_seconds.toFixed(2)} s`;
     badge(result.valid ? "Verified" : "Unqualified", result.valid ? "success" : "failed");
   } else if (!ok) badge("Stopped", "failed");
   if (ok && result) {
-    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"]]) {
+    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"], ["decisions", "decisions.json"], ["search", "search.json"]]) {
       const link = $(`download-${id}`); link.href = `${api}/api/runs/${runId}/artifacts/${name}`; link.download = name;
     }
     $("downloads").hidden = false;
@@ -84,8 +119,24 @@ function event(data) {
   if (data.type === "finished") { complete(data.status === "complete"); return; }
   if (data.id && data.id <= lastEvent) return;
   lastEvent = data.id || lastEvent;
-  if (data.elapsed) startTime = performance.now() - data.elapsed * 1000;
+  clock.observe(data); renderTime();
   if (data.type === "stage") {
+    if (data.example) applyExample(data.example);
+    if (data.laya) {
+      $("compute-device").textContent = `${data.laya.device} · ${data.laya.precision}`;
+      const decisions = $("laya-decisions"); decisions.replaceChildren(); decisions.hidden = false;
+      const heading = document.createElement("strong"); heading.textContent = "Laya’s live decisions"; decisions.append(heading);
+      const names = {ota5: "5-transistor OTA", cmota: "Current-mirror OTA", tele: "Telescopic cascode", fc: "Folded cascode", rload: "Resistor load", n: "NMOS", p: "PMOS", cs: "Common source", cas: "Cascode", inv: "Inverter", inv_cas: "Cascoded inverter", miller: "Miller capacitor", miller_rz: "Miller + nulling resistor", none: "No compensation"};
+      for (const [key, label] of [["first", "Input"], ["polarity", "Polarity"], ["later", "Next stage"], ["comp", "Compensation"]]) {
+        const answer = data.laya.answers[key]; if (!answer) continue;
+        const node = document.createElement("span"); node.textContent = `${label}: ${names[answer.choice] || answer.choice}`; decisions.append(node);
+      }
+      $("laya-note").textContent = `${(data.laya.inference_seconds * 1000).toFixed(0)} ms inference · ${data.laya.topologies} allowed topologies`;
+    }
+    if (data.search) {
+      $("search-note").textContent = `${data.search.evaluations} circuits measured${data.search.best_gain_db == null ? "" : ` · best ${data.search.best_gain_db.toFixed(1)} dB`}`;
+      if (data.search.topology) $("topology-note").textContent = `${data.search.topology} · ${data.search.mosfets} MOSFETs`;
+    }
     $("run-message").textContent = data.message; $("progress").value = data.progress;
     const index = stageNames.indexOf(data.stage);
     for (const [i, node] of [...document.querySelectorAll(".stages li")].entries()) {
@@ -118,7 +169,7 @@ function connect() {
       setTimeout(() => { if (!finished && running) connect(); }, Math.min(1000 * 2 ** reconnects, 8000));
     } else {
       error("The live connection was interrupted. The simulation may still be running; click Reconnect to recover it.");
-      clearInterval(timer); running = false; button("Reconnect to run");
+      clock.stop(); clearInterval(timer); running = false; button("Reconnect to run");
       $("availability").textContent = "Live connection lost"; badge("Disconnected", "failed");
     }
   };
@@ -130,26 +181,26 @@ async function launch() {
   try {
     if (runId && !finished && lastEvent) {
       const state = await request(`/api/runs/${runId}`);
-      if (["running", "complete"].includes(state.status)) { reconnects = 0; begin(); return; }
+      if (["running", "complete"].includes(state.status)) { reconnects = 0; applyExample(state.example); clock.resume(); begin(); return; }
     }
-    const response = await request("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-    reset(); runId = response.id; saveRun(runId);
-    $("run-message").textContent = response.joined ? "Joining the shared live run already in progress…" : "Starting a fresh circuit simulation…";
+    reset(); clock.start(); startClock(); $("examples").disabled = true;
+    const response = await request("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({example: selectedExample()}) });
+    runId = response.id; saveRun(runId); applyExample(response.example);
+    $("run-message").textContent = response.joined ? "Joining the shared live design shown above…" : "Reading the selected prompt and starting a fresh design…";
     begin();
   } catch (err) {
-    error(err instanceof TypeError ? "The live service could not be reached. Please retry shortly. The reference capture remains available below." : err.message);
-    button("Retry live simulation");
-    $("availability").textContent = "Waiting for the simulation service";
+    clock.stop(); clearInterval(timer); renderTime(); $("examples").disabled = false;
+    error(err instanceof TypeError ? "The live design service could not be reached. Please retry shortly." : err.message);
+    button("Retry design");
+    $("availability").textContent = "Waiting for the design service";
     if (err.message.includes("expired")) { runId = null; lastEvent = 0; saveRun(null); }
   }
 }
 function begin() {
-  running = true; finished = false; startTime = performance.now();
-  button("Simulation running…", true); badge("Starting");
-  // Keep the newly assembling circuit in view even on a narrow page.
-  $("demo").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
-  clearInterval(timer);
-  timer = setInterval(() => { $("elapsed").textContent = `${((performance.now() - startTime) / 1000).toFixed(1)} s`; }, 100);
+  running = true; finished = false; $("examples").disabled = true;
+  if (!clock.running) clock.resume();
+  button("Design running…", true); badge("Running"); startClock();
+  $("timing-note").textContent = "From your click to the result. Search includes candidate simulations.";
   connect();
 }
 
@@ -207,6 +258,15 @@ function drawWaveforms(data) {
 }
 
 runButton.addEventListener("click", launch);
+$("examples").addEventListener("change", () => {
+  const example = examples.find((item) => item.id === selectedExample());
+  if (example && !running) {
+    reset(); applyExample(example); $("button-timer").hidden = true;
+    $("stream-label").textContent = "REFERENCE CAPTURE";
+    $("frame-note").textContent = "Idle reference capture · replaced when you start";
+    badge("Ready"); button("Start design");
+  }
+});
 $("expand").addEventListener("click", async () => {
   const viewer = document.querySelector(".viewer");
   if (document.fullscreenElement) { await document.exitFullscreen(); return; }
@@ -222,10 +282,12 @@ try {
   const local = ["localhost", "127.0.0.1"].includes(location.hostname);
   api = local ? location.origin : new URL(config.apiBase).origin;
   if (!local && !api.startsWith("https://")) throw new Error("The demo API must use HTTPS.");
+  examples = await fetch("examples.json").then((response) => response.json());
+  applyExample(examples.find((item) => item.id === selectedExample()));
   await health();
   const previous = readRun();
   if (previous && /^[0-9a-f]{32}$/.test(previous)) {
-    try { await request(`/api/runs/${previous}`); reset(); runId = previous; begin(); }
+    try { const state = await request(`/api/runs/${previous}`); reset(); applyExample(state.example); runId = previous; begin(); }
     catch { saveRun(null); }
   }
 } catch { error("The demo configuration could not be loaded. Please reload this page."); button("Demo unavailable", true); }

@@ -105,6 +105,10 @@ class ChipJevSearch:
         rules="qualified",
         prior=None,
         deadline=None,
+        observer=None,
+        topologies=None,
+        stop_after_verified=False,
+        wait_for_refit=False,
     ):
         import torch
 
@@ -114,6 +118,7 @@ class ChipJevSearch:
         start = time.perf_counter()
         space = ClassSpace(
             cls,
+            topologies=topologies,
             carry_sizes=s.carry_sizes,
             prior=None if prior is None else mixture(prior, s.prior_mix),
             roles=s.roles,
@@ -207,7 +212,7 @@ class ChipJevSearch:
                 fit_start = time.perf_counter()
                 if gp.state is None:
                     gp.fit(*data(s.fit_points), steps=s.gp_steps_first)
-                elif refit is not None and refit.done():
+                elif refit is not None and (refit.done() or wait_for_refit):
                     gp.state["raw"], seconds = refit.result()
                     timing["gp_refit"] += seconds
                     refit = None
@@ -273,6 +278,11 @@ class ChipJevSearch:
                 add(space.random(rng, 1)[0], "random")
             settle(block=False)
             eval_start = time.perf_counter()
+            if observer is not None:
+                observer({"kind": "candidate", "round": round_index,
+                          "evaluations": len(records),
+                          "topology": space.topology(batch[0]).id,
+                          "values": space.values(batch[0]), "source": sources[0]})
             handle = evaluator.submit(space, batch, load_pf=load_pf, vdd=vdd, rules=rules)
             if (
                 s.surrogate
@@ -330,6 +340,12 @@ class ChipJevSearch:
                     "best": None if state["best"] is None else state["best"]["objective"],
                 }
             )
+            if observer is not None:
+                observer({"kind": "round", "round": round_index,
+                          "evaluations": len(records), "verifications": len(strict_records),
+                          "best": state["best"]})
+            if stop_after_verified and state["best"] is not None:
+                break
         settle(block=True)
         best, first = state["best"], state["first"]
         wall = time.perf_counter() - start
