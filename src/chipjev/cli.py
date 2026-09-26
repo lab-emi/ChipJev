@@ -22,9 +22,8 @@ import sys
 import time
 from pathlib import Path
 
-from .paths import ROOT
+from .paths import ROOT, WEIGHTS
 
-WEIGHTS = ROOT / "experiments/ptm45/typed-decisions.pt"
 DEFAULT_VDD = {"ptm45": 1.2, "sky130": 1.8}
 DEFAULT_LOAD_PF = 100.0
 
@@ -38,15 +37,33 @@ def _weights(path):
     return None
 
 
+def _pinned(weights):
+    """The vendored ChipLaya release's SHA-256 for the default weights; None for others."""
+    if weights is None or Path(weights).resolve() != WEIGHTS.resolve():
+        return None
+    from .decisions.typed import released_sha256
+
+    return released_sha256()
+
+
 def _decisions(args):
     from .decisions.typed import TypedDecisions
 
     weights = _weights(args.weights)
-    model = TypedDecisions(weights=weights, device=args.device)
+    model = TypedDecisions(weights=weights, device=args.device, expected_sha256=_pinned(weights))
     model.warm()
-    label = f"fine-tuned ({weights})" if weights else "zero-shot (no fine-tuned weights found)"
-    print(f"typed decisions: Laya on {model.metadata['device']}, {label}", flush=True)
+    print(f"typed decisions: {model_label(model)} on {model.metadata['device']}", flush=True)
     return model
+
+
+def model_label(model):
+    """ChipLaya's release for released weights, else what the weights are."""
+    from .decisions.typed import release_label
+
+    if model.weights is None:
+        return "base Laya, zero-shot (no fine-tuned weights found)"
+    label = release_label(model.weights["sha256"]) or "Laya fine-tuned"
+    return f"{label} ({model.weights['path']})"
 
 
 def _print_answer(answer, top):

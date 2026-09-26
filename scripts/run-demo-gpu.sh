@@ -11,6 +11,8 @@ if [[ -d "$demo_root/.tools/huggingface" ]]; then
 fi
 export PATH="$demo_root/.tools/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
+# This checkout's chipjev and vendored chiplaya, whatever the venv's editable install points at.
+export PYTHONPATH="$demo_root/src:$demo_root"
 .venv/bin/python -m demo.runtime --device cuda
 .venv/bin/python - <<'PY'
 import socket

@@ -1,0 +1,28 @@
+mmBERT-base (https://huggingface.co/jhu-clsp/mmBERT-base) is released under the MIT
+License, as declared in the metadata of its model card (read at revision
+c5955035435e2bf121cde7f3c8863ef52ff35d82). The model repository contains no LICENSE file
+and names no copyright holder; its authors, per the card, are Marc Marone, Orion Weller,
+William Fleshman, Eugene Yang, Dawn Lawrie and Benjamin Van Durme (arXiv:2509.06888).
+The laya-multilingual checkpoint's encoder is initialized from mmBERT-base, so the
+fine-tuned encoder layers in ChipLaya's released weights derive from it. The MIT License
+text follows.
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

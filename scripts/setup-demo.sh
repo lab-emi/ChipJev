@@ -19,7 +19,7 @@ bash scripts/setup-layout.sh
 export HF_HOME="$demo_root/.tools/huggingface"
 .venv/bin/python - <<'PYMODEL'
 from huggingface_hub import snapshot_download
-from chipjev.decisions.laya_torch import MODEL_ID, MODEL_REVISION
+from chiplaya.laya_torch import MODEL_ID, MODEL_REVISION
 snapshot_download(MODEL_ID, revision=MODEL_REVISION,
     allow_patterns=["*.json", "*.safetensors", "tokenizer/*", "LICENSE*", "NOTICE*"])
 PYMODEL

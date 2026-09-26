@@ -1,0 +1,31 @@
+name: ChipLaya link
+# ChipJev vendors ChipLaya (https://github.com/lab-emi/ChipLaya) at the release pinned in
+# CHIPLAYA.json. This checks the pin against GitHub (tag -> commit, byte-identical files) and
+# reports newer ChipLaya releases; the offline check runs in the website workflow.
+on:
+  push:
+    branches: [main]
+    paths: ['src/chiplaya/**', 'CHIPLAYA.json', 'scripts/sync_chiplaya.py', 'experiments/ptm45/typed-decisions.pt', '.github/workflows/chiplaya.yml']
+  pull_request:
+    paths: ['src/chiplaya/**', 'CHIPLAYA.json', 'scripts/sync_chiplaya.py', 'experiments/ptm45/typed-decisions.pt', '.github/workflows/chiplaya.yml']
+  schedule:
+    - cron: '41 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          sparse-checkout: |
+            CHIPLAYA.json
+            src/chiplaya
+            scripts/sync_chiplaya.py
+            experiments/ptm45/typed-decisions.pt
+          sparse-checkout-cone-mode: false
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+      - run: uv run --no-project --python 3.13 python scripts/sync_chiplaya.py --check --upstream --latest

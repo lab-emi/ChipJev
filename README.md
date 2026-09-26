@@ -19,9 +19,12 @@
 
 Source code, recorded experiments and reproducible circuit-design tools. The manuscript is maintained separately.
 
-> ChipJev's typed decisions run the [**Laya**](https://github.com/NandhaKishorM/laya) decision
-> model by Convai Innovations through a PyTorch port of [**Laya-MLX**](https://github.com/mizorewww/laya-mlx).
-> We thank both projects; see [Acknowledgments](#acknowledgments) and [Citation](#citation).
+> ChipJev's decision model is [**ChipLaya**](https://github.com/lab-emi/ChipLaya), our fine-tune of
+> the [**Laya**](https://github.com/NandhaKishorM/laya) decision model by Convai Innovations, run
+> through a PyTorch port of [**Laya-MLX**](https://github.com/mizorewww/laya-mlx). ChipLaya's model,
+> runtime, weights and model card live in their own repository; this repository is the design agent
+> around it ([ChipJev and ChipLaya](#chipjev-and-chiplaya)). We thank the Laya, Laya-MLX and mmBERT
+> authors; see [Acknowledgments](#acknowledgments) and [Citation](#citation).
 
 Large language model (LLM) flows such as AnalogCoder-Pro design circuits as a slow *System Two*:
 they write netlists token by token, repair them and size every candidate with a thousand
@@ -29,8 +32,8 @@ simulations. ChipJev applies the *System One* paradigm of TypeSafe's
 [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) (unstructured state in,
 typed probabilistic decisions out, in one parallel pass) to circuit design:
 
-1. **System One decisions.** Laya, an open Jev-like decision model fine-tuned on development
-   data, answers closed-option questions about a design request (input stage, stage count,
+1. **System One decisions.** ChipLaya, an open System One decision model (Laya fine-tuned on
+   development data), answers closed-option questions about a design request (input stage, stage count,
    compensation, ...) on the GPU in about 10 ms. Every option is a symbol of a 4,562-topology
    grammar, so every answer is a valid circuit.
 2. **GPU search.** The answers form a prior that seeds a joint topology and sizing search:
@@ -57,7 +60,7 @@ evidence by one command ([Reproduce the experiments](#reproduce-the-experiments)
 - **Open SKY130 PDK** ([SKY130 study](experiments/sky130-system-two/README.md)). ChipJev qualifies **60/60** runs
   (TPE 51/60, random 24/60), loses no task against TPE's medians and reaches TPE's final quality
   **4.5× sooner**; all 135 qualified designs export to xschem.
-- **System One versus System Two** ([same study](experiments/sky130-system-two/README.md)). Laya answers a
+- **System One versus System Two** ([same study](experiments/sky130-system-two/README.md)). ChipLaya answers a
   request's typed questions in **9.8 ms**; DeepSeek-V3 and GPT-5-mini answering the same
   questions take 8.0 s and 16 s (**820–1,600× slower**) and give no better designs.
 
@@ -70,12 +73,17 @@ time, the full physical flow including recovery, and the entire live run.
 
 ```text
 ChipJev/
+├── src/chiplaya/                ChipLaya, the decision model, vendored from lab-emi/ChipLaya (CHIPLAYA.json)
+│   ├── laya_torch.py            Laya on CUDA, MPS or CPU: PyTorch port of Laya-MLX (Apache-2.0)
+│   ├── schema.py                the typed design questions and option cards
+│   ├── model.py, weights.py     loading a release; the released weights and their SHA-256
+│   └── finetune.py              templates, trainer and parsing evaluation
 ├── src/chipjev/                 the ChipJev package (command line: chipjev)
 │   ├── decisions/               typed decisions
-│   │   ├── laya_torch.py        Laya on CUDA, MPS or CPU: PyTorch port of Laya-MLX (Apache-2.0)
-│   │   ├── typed.py             typed design questions and the topology prior (System One)
-│   │   ├── finetune.py          fine-tuning Laya on development data
-│   │   └── llm.py               System Two baseline: an LLM answers the same questions
+│   │   ├── typed.py             ChipLaya's answers as a prior over the topology grammar (System One)
+│   │   ├── finetune.py          grammar labels from development searches for fine-tuning
+│   │   ├── llm.py               System Two baseline: an LLM answers the same questions
+│   │   └── layout*.py, pro_layout.py  layout decisions over knowledge cards
 │   ├── circuits/                grammar of 4,562 topologies, joint topology-and-sizing space,
 │   │                            AnalogCoder-Pro's published topologies, SKY130 devices
 │   ├── simulation/              ngspice testbenches: shared measurement, PTM 45 nm, SKY130,
@@ -100,11 +108,13 @@ ChipJev/
 │   ├── frozen.py                rebuilds and runs locally supplied source snapshots
 │   ├── README.md                optional source archive paths and reproduction requirements
 │   └── report_*.py              evidence archives to the paper's macros, tables and Fig. 2
-├── scripts/                     setup.sh (environment, models, ngspice 47), setup-analogcoder-pro.sh
+├── scripts/                     setup.sh (environment, models, ngspice 47), setup-analogcoder-pro.sh,
+│                                sync_chiplaya.py (checks and updates the vendored ChipLaya)
 ├── tests/                       pytest suite, including frozen-versus-package equivalence
 ├── assets/chipjev-banner.png    README banner
-├── CITATION.cff                 citation metadata, including Laya and Laya-MLX
-├── NOTICE, LICENSES/            Apache-2.0 notices and license for the Laya-derived parts
+├── CHIPLAYA.json                the pinned ChipLaya release: tag, commit, file and weights SHA-256
+├── CITATION.cff                 citation metadata, including ChipLaya, Laya, Laya-MLX and mmBERT
+├── NOTICE, LICENSES/            Apache-2.0 notices and licenses for the Laya- and mmBERT-derived parts
 ├── LICENSE                      Apache-2.0
 ├── THIRD_PARTY_NOTICES.md       provenance of third-party code, models and tools
 └── pyproject.toml, uv.lock      locked Python environment
@@ -122,9 +132,36 @@ inputs; [experiments/README.md](experiments/README.md) maps the names.
 
 ## Goal-driven analog layout
 
-The Magic → distributed RC PEX → ngspice flow now searches explicit layout plans: matching groups, guard domains and taps, current-based rails, unit decomposition, grounded separators and physical decap. Laya proposes legal actions; full DRC/LVS and fixed-bias simulation decide acceptance. The demo shows iteration history, parasitic balance, noise, PSRR and supply measurements. See [commands, coverage and limitations](docs/analog-layout-usage.md).
+The Magic → distributed RC PEX → ngspice flow now searches explicit layout plans: matching groups, guard domains and taps, current-based rails, unit decomposition, grounded separators and physical decap. ChipLaya proposes legal actions; full DRC/LVS and fixed-bias simulation decide acceptance. The demo shows iteration history, parasitic balance, noise, PSRR and supply measurements. See [commands, coverage and limitations](docs/analog-layout-usage.md).
 
 The [three measured development runs](experiments/analog-layout/report/README.md) include native geometry, every evaluated layout and raw verification evidence. Their complete layout loops take 19.24–38.52 s on the recorded host; area falls by 34.2% and 13.9% for two cases, while the wideband case retains its initial feasible layout. These are development regressions, not held-out success rates or a comparison with dedicated layout tools.
+
+## ChipJev and ChipLaya
+
+ChipJev is the circuit design agent; [ChipLaya](https://github.com/lab-emi/ChipLaya) is its
+decision model, developed and released in its own repository with its model card.
+
+| | ChipJev (this repository) | [ChipLaya](https://github.com/lab-emi/ChipLaya) |
+|---|---|---|
+| Role | the design agent: topology grammar and prior, GPU topology/sizing search, EDA verification, layout loop, experiments, live demo | the System One model: typed questions, Laya runtime, fine-tuning code, released weights, model card |
+| Code | `src/chipjev`, `demo/`, `reproduce/` | `src/chiplaya`, vendored here |
+| Weights | runs `experiments/ptm45/typed-decisions.pt`, the frozen studies' file | publishes it as weights release v1.0.0 (same bytes, plus a safetensors copy) |
+
+- ChipJev vendors `src/chiplaya/` byte for byte from a ChipLaya release tag and pins it in
+  [`CHIPLAYA.json`](CHIPLAYA.json): the tag, its commit and the SHA-256 of every file and of the
+  weights. A package dependency would change `uv.lock`, which the frozen protocols hash, and the
+  demo host runs offline.
+- `python scripts/sync_chiplaya.py --check` verifies the pin offline (in the website CI);
+  `--check --upstream --latest` also verifies it against GitHub and reports newer releases
+  (weekly, [`.github/workflows/chiplaya.yml`](.github/workflows/chiplaya.yml));
+  `--update vX.Y.Z` vendors another release.
+- [`tests/test_chiplaya.py`](tests/test_chiplaya.py) ties the release to the frozen evidence:
+  ChipLaya's `laya_torch.py` is byte-identical to the protocols' Laya runtime, its v1.0.0 weights
+  are the protocols' weights, and its questions cover every decision of the topology grammar.
+  ChipLaya's own CI checks that ChipJev's pinned copy equals the tagged sources.
+- `chipjev decide` and the [live demo](https://chipjev.com/) report the ChipLaya release they run.
+- Do not install the separate `chiplaya` package into ChipJev's environment: `chipjev.decisions`
+  refuses any `chiplaya` other than the vendored copy.
 
 ## Getting started
 
@@ -149,8 +186,8 @@ scripts/setup.sh   # Python 3.13, the locked CUDA environment, Laya, SKY130 mode
 `scripts/setup.sh --install-system-packages` installs the build dependencies with the system
 package manager (sudo); `--xschem` also builds xschem 3.4.7 into `.tools/`.
 
-**Typed decisions.** Laya answers the typed questions of a design request, with the fine-tuned
-weights of the paper:
+**Typed decisions.** ChipLaya answers the typed questions of a design request, with the
+fine-tuned weights of the paper (ChipLaya's v1.0.0 weights, run by the vendored v1.0.1):
 
 ```bash
 .venv/bin/chipjev decide "Design a two-stage op-amp with the highest gain-bandwidth product" \
@@ -158,7 +195,7 @@ weights of the paper:
 ```
 
 ```text
-typed decisions: Laya on cuda (NVIDIA GeForce RTX 4090), fine-tuned (.../typed-decisions.pt)
+typed decisions: ChipLaya v1.0.1 (.../typed-decisions.pt) on cuda (NVIDIA GeForce RTX 4090)
 class opampN, objective gbw (parsed); topology prior over 1620 opampN topologies for gbw, ...
   first           ota5 0.61, tele 0.25, cmota 0.08, fc 0.04, rload 0.03
   count           2 0.77, 3 0.23
@@ -240,19 +277,25 @@ bit-identical under a seed; compare medians and intervals with the archived evid
 ## Acknowledgments
 
 - **[Laya](https://github.com/NandhaKishorM/laya)** by Convai Innovations and the Laya
-  contributors (Apache-2.0) is the typed decision model behind ChipJev's System One decisions.
-  The checkpoint we fine-tune is a conversion of its multilingual model
-  [`convaiinnovations/laya-multilingual`](https://huggingface.co/convaiinnovations/laya-multilingual).
+  contributors (Apache-2.0) is the typed decision model that ChipLaya fine-tunes. The checkpoint
+  is a conversion of its multilingual model
+  [`convaiinnovations/laya-multilingual`](https://huggingface.co/convaiinnovations/laya-multilingual)
+  (revision `052592a1`).
 - **[Laya-MLX](https://github.com/mizorewww/laya-mlx)** by the Laya-MLX contributors (version 0.1.0,
   commit `fc1df628`, Apache-2.0) is the runtime we build on.
-  [`src/chipjev/decisions/laya_torch.py`](src/chipjev/decisions/laya_torch.py) ports its inference path to PyTorch
+  [`src/chiplaya/laya_torch.py`](src/chiplaya/laya_torch.py) ports its inference path to PyTorch
   for CUDA: question rendering, token sequences, confidence and calibrated option scoring, and
-  its ModernBERT encoder and Laya decision head. We run the FP16 conversion published for
-  Laya-MLX, [`aac6fef/laya-multilingual-mlx`](https://huggingface.co/aac6fef/laya-multilingual-mlx)
+  its ModernBERT-architecture encoder and Laya decision head. We run the FP16 conversion
+  published for Laya-MLX, [`aac6fef/laya-multilingual-mlx`](https://huggingface.co/aac6fef/laya-multilingual-mlx)
   (revision `f2b4faf5`). Laya-MLX's notice and our changes are in [NOTICE](NOTICE), its license in
   [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt).
+- **[mmBERT](https://huggingface.co/jhu-clsp/mmBERT-base)** by Marone, Weller, Fleshman, Yang,
+  Lawrie and Van Durme (MIT, [arXiv:2509.06888](https://arxiv.org/abs/2509.06888)) is the encoder
+  the Laya checkpoint is built on ([LICENSES/MIT-mmBERT.txt](LICENSES/MIT-mmBERT.txt)).
 - TypeSafe AI's [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) introduced
-  the System One framing that ChipJev follows; Jev itself is not used.
+  the System One framing that ChipJev follows. Jev itself is not used, and ChipJev and ChipLaya
+  are independent academic projects, not affiliated with or endorsed by TypeSafe AI or Convai
+  Innovations.
 - [AnalogCoder-Pro](https://github.com/laiyao1/AnalogCoderPro) (commit `05542af`, run unchanged and
   not redistributed) is the LLM baseline. [ngspice](https://ngspice.sourceforge.io/),
   [xschem](https://github.com/StefanSchippers/xschem), the
@@ -264,10 +307,19 @@ bit-identical under a seed; compare medians and intervals with the archived evid
 
 ## Citation
 
-Software metadata is available in [CITATION.cff](CITATION.cff). Please also acknowledge
-Laya and Laya-MLX, whose model and runtime ChipJev builds on:
+Software metadata is available in [CITATION.cff](CITATION.cff). Please also cite ChipLaya,
+ChipJev's decision model, and acknowledge Laya, the laya-multilingual checkpoint, Laya-MLX and
+mmBERT, on which it builds:
 
 ```bibtex
+@software{chiplaya,
+  author  = {Gao, Chang and Chen, Qinyu},
+  title   = {{ChipLaya}: A Typed Decision Model for Analog Circuit Design},
+  year    = {2026},
+  version = {1.0.1},
+  url     = {https://github.com/lab-emi/ChipLaya}
+}
+
 @misc{laya,
   author       = {{Convai Innovations and Laya contributors}},
   title        = {{Laya}: Multilingual, Non-Autoregressive Typed Decision Engine},
@@ -282,12 +334,32 @@ Laya and Laya-MLX, whose model and runtime ChipJev builds on:
   note         = {Version 0.1.0, commit fc1df628},
   howpublished = {\url{https://github.com/mizorewww/laya-mlx}}
 }
+
+@misc{layamultilingual,
+  author       = {{Convai Innovations}},
+  title        = {laya-multilingual},
+  year         = {2026},
+  note         = {Revision 052592a15d198d9ad47da779604259b10b47b7aa},
+  howpublished = {\url{https://huggingface.co/convaiinnovations/laya-multilingual}}
+}
+
+@misc{mmbert,
+  author        = {Marone, Marc and Weller, Orion and Fleshman, William and Yang, Eugene and
+                   Lawrie, Dawn and Van Durme, Benjamin},
+  title         = {{mmBERT}: A Modern Multilingual Encoder with Annealed Language Learning},
+  year          = {2025},
+  eprint        = {2509.06888},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL}
+}
 ```
 
 ## License
 
-ChipJev is released under the [Apache License 2.0](LICENSE). `src/chipjev/decisions/laya_torch.py` and
-the fine-tuned weights `experiments/ptm45/typed-decisions.pt` derive from Laya-MLX, Laya and the
-Laya checkpoint; those portions remain under the Apache License 2.0 ([NOTICE](NOTICE),
-[LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)). Third-party tools, models and weights keep
+ChipJev is released under the [Apache License 2.0](LICENSE); so is the vendored ChipLaya
+package (`src/chiplaya`). `src/chiplaya/laya_torch.py` and the fine-tuned weights
+`experiments/ptm45/typed-decisions.pt` derive from Laya-MLX, Laya and the Laya checkpoint;
+those portions remain under the Apache License 2.0 ([NOTICE](NOTICE),
+[LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)). The weights' encoder layers also derive
+from mmBERT-base (MIT, [LICENSES/MIT-mmBERT.txt](LICENSES/MIT-mmBERT.txt)). Third-party tools, models and weights keep
 their own licenses ([THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).

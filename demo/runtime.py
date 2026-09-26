@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from chipjev.decisions.laya_torch import MODEL_ID, MODEL_REVISION
-from chipjev.paths import ROOT
+from chipjev.paths import WEIGHTS
+from chiplaya.laya_torch import MODEL_ID, MODEL_REVISION
 
 
 def inspect_runtime(device="auto"):
@@ -27,7 +27,7 @@ def inspect_runtime(device="auto"):
         missing.append("PyTorch / Laya dependencies (run scripts/setup-demo.sh)")
     except Exception:
         missing.append("Pinned Laya checkpoint (run scripts/setup-demo.sh)")
-    if not (ROOT / "experiments/ptm45/typed-decisions.pt").is_file():
+    if not WEIGHTS.is_file():
         missing.append("ChipJev typed-decision weights")
     return info, missing
 

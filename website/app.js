@@ -84,10 +84,10 @@ function stopText(stop) {
 }
 function loopNotes(stage) {
   const loop = loopState;
-  if (!loop) return ["Laya-guided loop over steps 5–9", "ngspice AC and closed-loop steps"];
+  if (!loop) return ["ChipLaya-guided loop over steps 5–9", "ngspice AC and closed-loop steps"];
   if (loop.done) return [`${loop.iteration} iterations · ${loop.total} layouts · selected layout ${loop.selected}`, loop.stop ? `Stopped: ${stopText(loop.stop)}` : `Selected layout ${loop.selected} · after ${loop.iteration} iterations`];
   if (loop.stop) return [`${loop.iteration} iterations · ${loop.total} layouts`, `Stopped: ${stopText(loop.stop)}`];
-  const first = loop.iteration === 1 ? "Iteration 1 · initial plan · layout 1" : `Iteration ${loop.iteration} · Laya proposed ${span(loop.layouts)}`;
+  const first = loop.iteration === 1 ? "Iteration 1 · initial plan · layout 1" : `Iteration ${loop.iteration} · ChipLaya proposed ${span(loop.layouts)}`;
   const post = Number.isInteger(loop.accepted) ? `Layout ${loop.accepted + 1} accepted → back to step 5` :
     loop.evaluated >= loop.size && Number.isInteger(loop.incumbent) ? `No gain · incumbent layout ${loop.incumbent + 1} kept → back to step 5` :
     stage === "postsimulating" ? `Simulating ${span(loop.layouts)} · ${Math.min(loop.finished, loop.size)}/${loop.size} done` : "ngspice AC and closed-loop steps";
@@ -227,7 +227,7 @@ function setMetric(key, value, unit) {
 function showResult(data) {
   result = data; clock.stop(); renderTime();
   $("topology-note").textContent = `${data.topology} · ${data.mosfets} MOSFETs`;
-  $("timing-note").textContent = "Completed. Laya time includes model loading; search includes candidate simulations.";
+  $("timing-note").textContent = "Completed. ChipLaya time includes model loading; search includes candidate simulations.";
   setMetric("gain", data.metrics.gain_db, "dB");
   setMetric("gbw", data.metrics.gbw_mhz, "MHz");
   setMetric("pm", data.metrics.pm_deg, "°");
@@ -267,7 +267,7 @@ function showResult(data) {
   const checks = Object.values(data.checks);
   $("verification").textContent = data.valid ? `${checks.filter(Boolean).length}/${checks.length} post-layout checks passed · DRC clean · LVS matched` : "Qualification failed; inspect the downloaded results.";
   $("verification").className = `verification ${data.valid ? "success" : ""}`;
-  $("result-note").textContent = `Fresh Laya inference ${(data.laya_inference_seconds * 1000).toFixed(0)} ms · ${data.search.evaluations} circuits measured · ${data.model.device} · post-layout ngspice ${data.wall_seconds.toFixed(2)} s. Final metrics above include the extracted RC network.`;
+  $("result-note").textContent = `Fresh ChipLaya inference ${(data.laya_inference_seconds * 1000).toFixed(0)} ms · ${data.search.evaluations} circuits measured · ${data.model.device} · post-layout ngspice ${data.wall_seconds.toFixed(2)} s. Final metrics above include the extracted RC network.`;
 }
 
 function showQuality(physical) {
@@ -284,8 +284,8 @@ function showQuality(physical) {
   const delta = first ? (1 - chosen / area(first)) * 100 : 0;
   const clean = trace.history.filter(row => row.drc === 0).length, matched = trace.history.filter(row => row.lvs === true).length;
   $("optimization-summary").textContent = trace.pareto_plan_ids ?
-    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. Laya proposes actions; DRC, LVS and ngspice decide acceptance.` :
-    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s, ${trace.parallel} in parallel · ${clean}/${trace.evaluations} DRC clean · ${matched}/${trace.evaluations} LVS matched · ${delta.toFixed(1)}% area reduction from the first qualified layout. Laya and the layout knowledge cards propose actions; DRC, LVS and ngspice decide acceptance.${trace.stop ? ` The loop stopped after ${trace.stop.iterations} iterations: ${trace.stop.text}.` : ""}`;
+    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. ChipLaya proposes actions; DRC, LVS and ngspice decide acceptance.` :
+    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s, ${trace.parallel} in parallel · ${clean}/${trace.evaluations} DRC clean · ${matched}/${trace.evaluations} LVS matched · ${delta.toFixed(1)}% area reduction from the first qualified layout. ChipLaya and the layout knowledge cards propose actions; DRC, LVS and ngspice decide acceptance.${trace.stop ? ` The loop stopped after ${trace.stop.iterations} iterations: ${trace.stop.text}.` : ""}`;
   $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${trace.wall_seconds.toFixed(2)} s complete layout optimization · fixed input bias ${trace.fixed_input_bias_v.toFixed(4)} V`;
   const rows = trace.history.map(item => {
     const row = document.createElement("tr");
@@ -355,7 +355,7 @@ function event(data) {
     if (data.laya) {
       $("compute-device").textContent = `${data.laya.device} · ${data.laya.precision}`;
       const decisions = $("laya-decisions"); decisions.replaceChildren(); decisions.hidden = false;
-      const heading = document.createElement("strong"); heading.textContent = "Laya’s live decisions"; decisions.append(heading);
+      const heading = document.createElement("strong"); heading.textContent = `${data.laya.release ?? "ChipLaya"} · live decisions`; decisions.append(heading);
       const names = {ota5: "5-transistor OTA", cmota: "Current-mirror OTA", tele: "Telescopic cascode", fc: "Folded cascode", rload: "Resistor load", n: "NMOS", p: "PMOS", cs: "Common source", cas: "Cascode", inv: "Inverter", inv_cas: "Cascoded inverter", miller: "Miller capacitor", miller_rz: "Miller + nulling resistor", none: "No compensation"};
       for (const [key, label] of [["first", "Input"], ["polarity", "Polarity"], ["later", "Next stage"], ["comp", "Compensation"]]) {
         const answer = data.laya.answers[key]; if (!answer) continue;

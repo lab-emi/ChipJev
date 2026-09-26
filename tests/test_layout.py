@@ -7,6 +7,7 @@ import re
 import subprocess
 
 import chipjev
+import chiplaya
 from chipjev.paths import ROOT
 
 FROZEN_NAMES = re.compile(r"chipjev_topo|chipjev\.rt\b|chipjev\.research\b|topo_system2|"
@@ -17,9 +18,10 @@ ALLOWED = {"tests/equivalence/probe.py", "tests/test_layout.py", "reproduce/froz
 
 
 def test_every_module_imports_on_the_cpu():
-    for module in pkgutil.walk_packages(chipjev.__path__, "chipjev."):
-        if module.name != "chipjev.__main__":
-            importlib.import_module(module.name)
+    for package in (chipjev, chiplaya):
+        for module in pkgutil.walk_packages(package.__path__, f"{package.__name__}."):
+            if not module.name.endswith(".__main__"):
+                importlib.import_module(module.name)
 
 
 def test_frozen_packages_are_gone():

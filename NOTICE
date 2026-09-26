@@ -2,19 +2,26 @@ ChipJev
 Copyright (c) 2026 Lab of Efficient Machine Intelligence (EMI)
 
 ChipJev is licensed under the Apache License, Version 2.0 (LICENSE). This repository
-also contains work derived from the Apache-2.0 projects below. Their attribution
-notices are retained here; other third-party materials keep their own terms as
-documented in THIRD_PARTY_NOTICES.md.
+also contains work derived from the projects below (Apache-2.0; mmBERT under MIT). Their
+attribution notices are retained here; other third-party materials keep their own terms as
+documented in THIRD_PARTY_NOTICES.md. Its decision model, ChipLaya (src/chiplaya), is
+developed at https://github.com/lab-emi/ChipLaya under the same license.
+
+ChipJev and ChipLaya are independent academic projects of the EMI Lab. They are not
+affiliated with, sponsored or endorsed by Convai Innovations, the Laya, Laya-MLX or mmBERT
+authors, or TypeSafe AI (whose Jev is not used).
 
 -------------------------------------------------------------------------------------------
 Laya-MLX: https://github.com/mizorewww/laya-mlx
 Version 0.1.0, revision fc1df62828a3fedf4d8229fdac1cbd85f1cdf337, Apache License 2.0
 
-src/chipjev/decisions/laya_torch.py is a PyTorch port of Laya-MLX. It adapts Laya-MLX's question
-rendering, token-sequence construction, confidence calculation and calibrated option
-scoring, and re-expresses its MLX network definition (ModernBERT encoder and Laya decision
-head) in PyTorch. ChipJev's changes: the PyTorch implementation for CUDA, MPS and CPU, the
-mapping of the checkpoint's MLX parameter names onto it, and batched scoring.
+src/chiplaya/laya_torch.py (ChipLaya, https://github.com/lab-emi/ChipLaya, vendored here; it
+was first published as src/chipjev/decisions/laya_torch.py and is unchanged) is a PyTorch
+port of Laya-MLX. It adapts Laya-MLX's question rendering, token-sequence construction,
+confidence calculation and calibrated option scoring, and re-expresses its MLX network
+definition (the ModernBERT-architecture encoder and the Laya decision head) in PyTorch.
+Changes: the PyTorch implementation for CUDA, MPS and CPU, the mapping of the checkpoint's
+MLX parameter names onto it, and batched scoring.
 
 Laya-MLX's NOTICE file (also shipped with the checkpoint below) reads:
 
@@ -38,14 +45,27 @@ Laya: https://github.com/NandhaKishorM/laya
 Copyright Convai Innovations and Laya contributors, Apache License 2.0
 
 Laya is the typed decision model and runtime that Laya-MLX, and through it
-src/chipjev/decisions/laya_torch.py, derive from.
+src/chiplaya/laya_torch.py, derive from.
 
 -------------------------------------------------------------------------------------------
 Laya multilingual checkpoint: https://huggingface.co/aac6fef/laya-multilingual-mlx
 Revision f2b4faf51023039425946074e2cf1361d2db11d5, Apache License 2.0; an MLX FP16
 conversion of https://huggingface.co/convaiinnovations/laya-multilingual
+(revision 052592a15d198d9ad47da779604259b10b47b7aa, Apache License 2.0)
 
 The checkpoint is not redistributed; the setup scripts download it from Hugging Face.
-experiments/ptm45/typed-decisions.pt holds ChipJev's fine-tuned values of 35M of its
-parameters (decision head, option scorer, type embedding, final norm and the last four
-encoder layers), modified by src/chipjev/decisions/finetune.py.
+experiments/ptm45/typed-decisions.pt (ChipLaya weights release v1.0.0) holds fine-tuned values of
+35M of its parameters (decision head, option scorer, type embedding, final norm and the last
+four encoder layers), modified by src/chiplaya/finetune.py with the labels of
+src/chipjev/decisions/finetune.py.
+
+-------------------------------------------------------------------------------------------
+mmBERT: https://huggingface.co/jhu-clsp/mmBERT-base
+MIT License, as declared in its model card (read at revision
+c5955035435e2bf121cde7f3c8863ef52ff35d82; the checkpoint's configuration names the encoder
+without a revision)
+
+The checkpoint's encoder is initialized from mmBERT-base (Marone, Weller, Fleshman, Yang,
+Lawrie and Van Durme, 2025, arXiv:2509.06888), so the fine-tuned encoder layers in
+experiments/ptm45/typed-decisions.pt derive from it. The license text and its provenance are
+in LICENSES/MIT-mmBERT.txt.

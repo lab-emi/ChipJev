@@ -1,6 +1,6 @@
 # ChipJev live design demo
 
-The static frontend runs on GitHub Pages. A Linux GPU host runs Laya, ChipJev,
+The static frontend runs on GitHub Pages. A Linux GPU host runs ChipLaya, ChipJev,
 xschem, Magic, Netgen and ngspice. This uses [OpenDPD Studio’s Pages + Tunnel architecture](https://github.com/lab-emi/OpenDPD/blob/main/docs/architecture/public-studio.md).
 The browser selects an allowlisted prompt and receives a view-only WebSocket
 stream. It cannot submit arbitrary prompts, Tcl, SPICE, files, paths or commands.
@@ -9,7 +9,7 @@ stream. It cannot submit arbitrary prompts, Tcl, SPICE, files, paths or commands
 Browser → GitHub Pages (chipjev.com)
    └── HTTPS/WSS → Cloudflare Tunnel (api.chipjev.com)
                        └── 127.0.0.1:18766
-                           ├── Laya typed decisions on CUDA
+                           ├── ChipLaya typed decisions on CUDA
                            ├── ChipJev topology/sizing search on CUDA
                            ├── 8 CPU ngspice workers
                            └── private Xvfb + live xschem / Magic + measured plots
@@ -27,7 +27,9 @@ not themselves establish DNS or install a running production service.
    cascode, five-transistor, current-mirror, Miller with a nulling resistor,
    cascoded second stage, PMOS or NMOS input) and loads from 1 pF to 100 pF, all
    on SKY130 TT at 1.8 V. Every listed prompt has been run end to end.
-2. Load the pinned Laya checkpoint and ChipJev fine-tuned weights. Run fresh
+2. Load the decision model, [ChipLaya](https://github.com/lab-emi/ChipLaya) v1.0.1 (the
+   pinned Laya checkpoint with ChipLaya's v1.0.0 fine-tuned weights, vendored in
+   `src/chiplaya` and pinned by `CHIPLAYA.json`). Run fresh
    batched typed decisions on the exact selected prompt. Condition its topology
    probabilities on the prompt’s hard stage-count, complexity and circuit-family
    constraints.
@@ -52,7 +54,7 @@ not themselves establish DNS or install a running production service.
 7. Generate real SKY130 PCells and routing, run full Magic DRC and Netgen LVS,
    extract distributed RC and simulate the actual extracted netlist in ngspice.
    Steps 5–9 form the layout loop, drawn with a feedback arrow from step 9 to 5.
-   Each iteration (the seed plan, then each batch Laya proposes) walks layout, DRC,
+   Each iteration (the seed plan, then each batch ChipLaya proposes) walks layout, DRC,
    LVS, RC extraction and post-layout simulation: the active step and its incoming
    arrow light up, DRC and LVS re-run and show that batch's verdict (a green check
    when all pass), and a new iteration lights the feedback arrow. The final state
@@ -70,9 +72,9 @@ not themselves establish DNS or install a running production service.
    Final geometry and device-group views remain available beside the live view.
    R/C counts, schematic/post-layout metrics and both sets of waveforms follow.
 
-The phase clocks report Laya (including load), design search (including candidate
+The phase clocks report ChipLaya (including load), design search (including candidate
 simulations), schematic simulation, layout/DRC, LVS/RC extraction, and post-layout
-simulation/refinement. A separate measurement reports Laya
+simulation/refinement. A separate measurement reports ChipLaya
 inference latency. Total time starts at the click and freezes when the measured
 result arrives. Joining an active run adopts its server elapsed time. The UI and
 JSON state the actual CPU/CUDA device; `--device cuda` refuses CPU fallback.
@@ -142,7 +144,7 @@ CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m pytest -q tests/t
 node --test tests/browser/run-clock.test.mjs
 ```
 
-The integration test runs real Laya, the real search, xschem, Magic and ngspice. It decodes
+The integration test runs real ChipLaya, the real search, xschem, Magic and ngspice. It decodes
 changing dual-editor JPEGs, checks that the measured prior is the one used by search,
 matches live iteration events to the measured optimization history, verifies the
 restored Magic cell against the selected artifact, and downloads/replays results.

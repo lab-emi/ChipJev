@@ -69,6 +69,8 @@ def capture(runs, archive):
             stream.write((source / "search.json").read_bytes())
     source_paths = [
         *ROOT.glob("src/chipjev/**/*.py"),
+        *ROOT.glob("src/chiplaya/**/*.py"),
+        ROOT / "CHIPLAYA.json",
         *ROOT.glob("demo/*.py"),
         ROOT / "scripts/setup-layout.sh",
         ROOT / "reproduce/report_layout.py",

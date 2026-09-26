@@ -263,14 +263,14 @@ def main():
     if not train_rows or not test_rows:
         raise ValueError("Both training and held-out families need rows")
     train_set, test_set = examples(train_rows, seed=0), examples(test_rows, seed=1)
-    from ..paths import ROOT
+    from ..paths import WEIGHTS
     from .finetune import train as fit
     from .typed import TypedDecisions
 
     baseline = score_policies(test_set, TypedDecisions(device=args.device))
     # The weights the loop runs today (fine-tuned on circuit-topology decisions only).
     topology_weights = score_policies(
-        test_set, TypedDecisions(weights=ROOT / "experiments/ptm45/typed-decisions.pt", device=args.device))
+        test_set, TypedDecisions(weights=WEIGHTS, device=args.device))
     summary = fit({"summary": {"source": "layout self-play (measured outcomes)",
                                "rows": len(train_rows), "holdout_families": args.holdout}},
                   args.output, epochs=args.epochs, device=args.device,

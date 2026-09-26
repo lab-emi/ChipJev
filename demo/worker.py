@@ -288,6 +288,18 @@ def plot(directory, waves):
     path.replace(directory / "plots.png")
 
 
+def published_model(metadata):
+    """The model description that leaves the worker: fixed fields only, never a local path.
+    ``release`` is the ChipLaya release the fine-tuned weights belong to."""
+    import chiplaya
+    from chipjev.decisions.typed import release_label
+
+    digest = metadata["fine_tuned"]["sha256"]
+    return {**{k: metadata[k] for k in ("model", "revision", "precision", "runtime", "device")},
+            "fine_tuned": {"sha256": digest}, "chiplaya": chiplaya.__version__,
+            "release": release_label(digest)}
+
+
 def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
     timing = RunTiming()
     example = EXAMPLES[example_id]
@@ -312,7 +324,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
 
     empty = ["v {xschem version=3.4.5 file_version=1.2}", "G {}", "K {}", "V {}", "S {}", "E {}",
              text("CHIPJEV / A FRESH DESIGN", 60, 60, 0.7),
-             text("Laya is reading the selected prompt.", 60, 140, 0.4),
+             text("ChipLaya is reading the selected prompt.", 60, 140, 0.4),
              text("Live search candidates will appear here.", 60, 200, 0.4),
              "L 2 0 0 1600 0 {}", "L 2 0 900 1600 900 {}"]
     (directory / "step-0.sch").write_text("\n".join(empty) + "\n")
@@ -324,17 +336,18 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
     try:
         screen.start()
         screen.show(0)
-        stage("deciding", message="Loading Laya and inferring typed design decisions", progress=5)
+        stage("deciding", message="Loading ChipLaya and inferring typed design decisions",
+              progress=5)
         model = design.load_model(device)
         answer = design.decide(model, example)
-        metadata = dict(model.metadata)
-        metadata["fine_tuned"] = {"sha256": model.metadata["fine_tuned"]["sha256"]}
+        metadata = published_model(model.metadata)
         answer.update(model=metadata, example=example, model_load_seconds=model.load_seconds)
         (directory / "decisions.json").write_text(json.dumps(answer, indent=2, allow_nan=False))
         ordered = sorted(zip(answer["search_topologies"], answer["search_prior"], strict=True),
                          key=lambda item: -item[1])
-        stage("deciding", message="Laya decisions now guide the topology and sizing search",
+        stage("deciding", message="ChipLaya decisions now guide the topology and sizing search",
               progress=10, laya={"device": metadata["device"], "precision": metadata["precision"],
+                  "release": metadata["release"],
                   "inference_seconds": answer["seconds"], "answers": answer["answers"],
                   "topologies": len(ordered), "leading_topologies": ordered[:3]})
 
@@ -393,7 +406,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
         live_layout = {}
         displayed_plan = None
         step_progress = {"layout": 72, "drc": 75, "lvs": 79, "extracting": 83, "postsimulating": 87}
-        # One loop iteration = one batch of layout candidates (the seed plan, then Laya's
+        # One loop iteration = one batch of layout candidates (the seed plan, then ChipLaya's
         # proposals from the incumbent), verified in parallel. The steps follow the batch's
         # slowest candidate, so every iteration walks layout -> DRC -> LVS -> RC ->
         # post-layout simulation and then feeds back; DRC and LVS report per iteration.
@@ -498,7 +511,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                     message = f"Iteration 1: the initial layout plan · {labels['layout']}"
                 else:
                     moves = ", ".join(actions.get(a, a) for a in event["actions"])
-                    message = (f"Iteration {event['iteration']}: Laya proposes layouts {first}–{last} "
+                    message = (f"Iteration {event['iteration']}: ChipLaya proposes layouts {first}–{last} "
                                f"({moves}) from incumbent layout {event['incumbent'] + 1}")
                 publish(message, moved=True)
                 return
@@ -547,7 +560,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
             publish(f"Layout {number}: {outcome}", layout_iteration=live_layout,
                     **({"progress": 90} if kind == "evaluated" else {}))
 
-        stage("layout", message="Starting the goal-driven layout loop: Laya proposes, DRC, LVS "
+        stage("layout", message="Starting the goal-driven layout loop: ChipLaya proposes, DRC, LVS "
               "and ngspice decide", progress=71)
         physical = physical_design(topology, selected["values"], directory / "physical",
                                    vdd=example["vdd"], load_pf=example["load_pf"],

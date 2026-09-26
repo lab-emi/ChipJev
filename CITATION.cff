@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: >-
-  This metadata describes the ChipJev software repository. Its typed decisions run the Laya
-  decision model through a PyTorch port of Laya-MLX; please also cite Laya and Laya-MLX
-  (listed under references).
+  This metadata describes the ChipJev software repository. Its decision model is ChipLaya,
+  a fine-tune of the Laya decision model run through a PyTorch port of Laya-MLX; please also
+  cite ChipLaya, Laya, Laya-MLX and mmBERT (listed under references).
 type: software
 title: "ChipJev"
 authors:
@@ -25,6 +25,18 @@ keywords:
   - open-source EDA
 references:
   - type: software
+    title: "ChipLaya: A Typed Decision Model for Analog Circuit Design"
+    authors:
+      - given-names: Chang
+        family-names: Gao
+      - given-names: Qinyu
+        family-names: Chen
+    repository-code: "https://github.com/lab-emi/ChipLaya"
+    version: 1.0.1
+    license: Apache-2.0
+    year: 2026
+    notes: "ChipJev's decision model, vendored in src/chiplaya at the release pinned in CHIPLAYA.json."
+  - type: software
     title: "Laya: Multilingual, Non-Autoregressive Typed Decision Engine"
     authors:
       - name: Convai Innovations and Laya contributors
@@ -42,7 +54,7 @@ references:
     commit: fc1df62828a3fedf4d8229fdac1cbd85f1cdf337
     license: Apache-2.0
     year: 2026
-    notes: "src/chipjev/decisions/laya_torch.py is a PyTorch port of Laya-MLX."
+    notes: "src/chiplaya/laya_torch.py is a PyTorch port of Laya-MLX."
   - type: generic
     title: "laya-multilingual-mlx"
     authors:
@@ -52,5 +64,42 @@ references:
     license: Apache-2.0
     year: 2026
     notes: >-
-      MLX FP16 conversion of convaiinnovations/laya-multilingual; ChipJev fine-tunes 35M of
+      MLX FP16 conversion of convaiinnovations/laya-multilingual; ChipLaya fine-tunes 35M of
       its parameters.
+  - type: generic
+    title: "laya-multilingual"
+    authors:
+      - name: Convai Innovations
+    url: "https://huggingface.co/convaiinnovations/laya-multilingual"
+    commit: 052592a15d198d9ad47da779604259b10b47b7aa
+    license: Apache-2.0
+    year: 2026
+    notes: "The base checkpoint of the conversion above."
+  - type: article
+    title: "mmBERT: A Modern Multilingual Encoder with Annealed Language Learning"
+    authors:
+      - given-names: Marc
+        family-names: Marone
+      - given-names: Orion
+        family-names: Weller
+      - given-names: William
+        family-names: Fleshman
+      - given-names: Eugene
+        family-names: Yang
+      - given-names: Dawn
+        family-names: Lawrie
+      - given-names: Benjamin
+        family-names: Van Durme
+    year: 2025
+    identifiers:
+      - type: other
+        value: "arXiv:2509.06888"
+    url: "https://arxiv.org/abs/2509.06888"
+    notes: "The encoder of the laya-multilingual checkpoint (jhu-clsp/mmBERT-base, MIT)."
+  - type: blog
+    title: "Introducing System One models and Jev"
+    authors:
+      - name: TypeSafe AI, Inc.
+    url: "https://typesafe.ai/blog/introducing-system-one-models-and-jev"
+    year: 2026
+    notes: "The System One framing ChipJev follows; Jev itself is not used."

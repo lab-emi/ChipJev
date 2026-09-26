@@ -68,7 +68,7 @@ class ProLayoutDecisions:
         laya = getattr(self.model, "laya", None)
         model_state = state
         if laya is not None:
-            from .laya_torch import build_prefix
+            from chiplaya.laya_torch import build_prefix
 
             prefix, _ = build_prefix(laya.tok, laya._to_internal(question["action"]),
                                      laya.cfg.get("head_max_len", 192))

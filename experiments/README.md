@@ -42,7 +42,7 @@ Where the same code lives in the current package:
 | `chipjev_topo_v2.search.Evaluator`, `chipjev_topo_v4.search.Evaluator` | `chipjev.search.evaluator.Evaluator(workers, technology=...)` |
 | `chipjev_topo_v2.baselines` (`tpe8`, `random8`), `chipjev_topo.baselines` (their helpers) | `chipjev.search.baselines` |
 | `chipjev_topo.bench`, `.search`, `.provenance` (the first study's testbench, search and guard; hashed but superseded or unused) | no counterpart (removed as unreachable) |
-| `chipjev.laya_torch`, `chipjev_topo_v3.typed`, `.finetune` | `chipjev.decisions.laya_torch`, `.typed`, `.finetune` |
+| `chipjev.laya_torch`, `chipjev_topo_v3.typed`, `.finetune` | `chiplaya.laya_torch` (the vendored ChipLaya package, `src/chiplaya/laya_torch.py`, byte-identical), `chipjev.decisions.typed` (questions from `chiplaya.schema`), `chipjev.decisions.finetune` (trainer from `chiplaya.finetune`) |
 | `chipjev_topo_v4.system2`, `chipjev.topo_system2` (system2b prompt) | `chipjev.decisions.llm` (the system2b prompt) |
 | `chipjev_topo_v3.acpro`, `.netlist` | `chipjev.analogcoder_pro.helper`, `.netlist` |
 | `chipjev.topo_xschem`, `chipjev.rt.provenance` | `chipjev.xschem`, `chipjev.provenance` |

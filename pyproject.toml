@@ -53,10 +53,13 @@ url = "https://download.pytorch.org/whl/cu130"
 explicit = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/chipjev"]
+# chiplaya is ChipLaya (https://github.com/lab-emi/ChipLaya), vendored at the release pinned
+# in CHIPLAYA.json rather than declared as a dependency, which would change uv.lock.
+packages = ["src/chipjev", "src/chiplaya"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src", "."]
 markers = [
     "integration: runs the installed ngspice (and xschem) binaries",
     "frozen: reruns the probe on the frozen code (reproduce/frozen.py)",

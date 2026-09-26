@@ -3,25 +3,33 @@
 ChipJev's own code is licensed under [Apache-2.0](LICENSE). The notices and terms
 below continue to apply to third-party code, models and visual assets.
 
-## Laya, Laya-MLX and the Laya checkpoint (src/chipjev/decisions/laya_torch.py, experiments/ptm45/typed-decisions.pt)
+## Laya, Laya-MLX, the Laya checkpoint and mmBERT (src/chiplaya/laya_torch.py, experiments/ptm45/typed-decisions.pt)
 
-- `src/chipjev/decisions/laya_torch.py` is a PyTorch port of [Laya-MLX](https://github.com/mizorewww/laya-mlx)
-  0.1.0 (revision `fc1df62828a3fedf4d8229fdac1cbd85f1cdf337`, Apache-2.0), which derives from
+- `src/chiplaya/laya_torch.py` (part of [ChipLaya](https://github.com/lab-emi/ChipLaya), vendored
+  here; first published unchanged as `src/chipjev/decisions/laya_torch.py`) is a PyTorch port of
+  [Laya-MLX](https://github.com/mizorewww/laya-mlx) 0.1.0 (revision
+  `fc1df62828a3fedf4d8229fdac1cbd85f1cdf337`, Apache-2.0), which derives from
   [Laya](https://github.com/NandhaKishorM/laya) by Convai Innovations and the Laya contributors
   (Apache-2.0, upstream revision `6a5819129eb220570792e417e49723d697efd76f`). It adapts Laya-MLX's
   question rendering, token-sequence construction, confidence calculation and calibrated option
-  scoring, and re-expresses its MLX network definition (ModernBERT encoder and Laya decision
-  head) in PyTorch.
+  scoring, and re-expresses its MLX network definition (the ModernBERT-architecture encoder and
+  the Laya decision head) in PyTorch. Its docstring's "ModernBERT encoder" names the
+  architecture; the encoder weights are mmBERT-base (below).
 - The checkpoint [`aac6fef/laya-multilingual-mlx`](https://huggingface.co/aac6fef/laya-multilingual-mlx)
   (revision `f2b4faf51023039425946074e2cf1361d2db11d5`, Apache-2.0), an MLX FP16 conversion of
-  [`convaiinnovations/laya-multilingual`](https://huggingface.co/convaiinnovations/laya-multilingual),
-  is downloaded by the setup scripts and not redistributed. `experiments/ptm45/typed-decisions.pt`
-  holds ChipJev's fine-tuned values of 35M of its parameters.
+  [`convaiinnovations/laya-multilingual`](https://huggingface.co/convaiinnovations/laya-multilingual)
+  (revision `052592a15d198d9ad47da779604259b10b47b7aa`, Apache-2.0), is downloaded by the setup
+  scripts and not redistributed. `experiments/ptm45/typed-decisions.pt`, ChipLaya's v1.0.0 weights
+  release, holds fine-tuned values of 35M of its parameters.
+- The checkpoint's encoder is [`jhu-clsp/mmBERT-base`](https://huggingface.co/jhu-clsp/mmBERT-base)
+  (Marone et al., [arXiv:2509.06888](https://arxiv.org/abs/2509.06888)), MIT-licensed per its
+  model card; the fine-tuned encoder layers in the weights derive from it
+  ([LICENSES/MIT-mmBERT.txt](LICENSES/MIT-mmBERT.txt)).
 
 These derived portions remain under the Apache License 2.0
-([LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt), the copy that Laya-MLX ships). The complete
-Laya-MLX NOTICE, which the checkpoint also carries, and ChipJev's changes are reproduced in
-[NOTICE](NOTICE).
+([LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt), the copy that Laya-MLX ships), and the
+mmBERT-derived layers also under the MIT License. The complete Laya-MLX NOTICE, which the
+checkpoint also carries, and ChipJev's changes are reproduced in [NOTICE](NOTICE).
 
 ## PTM 45 nm device models (src/chipjev/simulation/models/ptm45hp.pm)
 

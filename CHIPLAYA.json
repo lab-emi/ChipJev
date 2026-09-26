@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/lab-emi/ChipLaya",
+  "version": "1.0.1",
+  "tag": "v1.0.1",
+  "commit": "700988637f9429d180dcda50757504d41060d2bd",
+  "path": "src/chiplaya",
+  "files": {
+    "__init__.py": "e4d75c48a18ce52f823cd8771b3435ad31aaaf24a1acca0f263098a5bf022555",
+    "__main__.py": "d917cc2a961d7064fe04b705d282d91408b24cfc97d2b38386caf6a71a87e492",
+    "finetune.py": "a4f6dafe633eb321d485c73ad063881aadef0ac9d81297cd0b4eba90a498a62c",
+    "laya_torch.py": "d15285ec4060e4676c11dbd3918c8191d6fc6c03fa1b4b93bf6a95faf1b2d615",
+    "model.py": "ed8de9b7fd99db2067f7a59da066e514712fcfab30e006840e32b9867af104b4",
+    "schema.py": "9f757b7b2ee4c17949db2107b562f7271d3f5dd177fb358d196c7f3c42ab5b55",
+    "weights.py": "099a1680fbda30e37b6e406a51456701e5de1a18f4fafe2df44def367521173a"
+  },
+  "weights": {
+    "release": "1.0.0",
+    "path": "experiments/ptm45/typed-decisions.pt",
+    "sha256": "f5df4faaeb1e2721657e5200293f7667ca525b8f86c1c8d3c3ab14193baeb8d5",
+    "url": "https://github.com/lab-emi/ChipLaya/releases/download/v1.0.0/typed-decisions.pt"
+  }
+}

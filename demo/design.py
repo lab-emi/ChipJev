@@ -9,14 +9,13 @@ from tempfile import mkdtemp
 from chipjev.circuits.grammar import default_values, library
 from chipjev.circuits.sky130_devices import build
 from chipjev.circuits.space import ClassSpace
-from chipjev.decisions.typed import TypedDecisions
-from chipjev.paths import ROOT
+from chipjev.decisions.typed import TypedDecisions, released_sha256
+from chipjev.paths import WEIGHTS
 from chipjev.search.evaluator import Evaluator
 from chipjev.search.loop import ChipJevSearch, Settings, _outputs, _score_numpy
 from chipjev.simulation.analysis import CMRR_MIN_DB, MIN_GAIN_DB, PM_MIN
 from demo.examples import allows
 
-WEIGHTS = ROOT / "experiments/ptm45/typed-decisions.pt"
 ROUNDS = 96
 SEARCH_SECONDS = 180
 
@@ -125,7 +124,8 @@ def load_model(device=None):
     import torch
 
     torch.set_num_threads(8)
-    return TypedDecisions(weights=WEIGHTS, device=device, offline=True)
+    return TypedDecisions(weights=WEIGHTS, device=device, offline=True,
+                          expected_sha256=released_sha256())
 
 
 def decide(model, example):

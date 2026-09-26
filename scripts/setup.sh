@@ -131,7 +131,7 @@ uv run --frozen --all-extras python -m chipjev.simulation.pdk
 uv run --frozen --all-extras python - <<'PY'
 from huggingface_hub import snapshot_download
 
-from chipjev.decisions.laya_torch import MODEL_ID, MODEL_REVISION
+from chiplaya.laya_torch import MODEL_ID, MODEL_REVISION
 
 snapshot_download(MODEL_ID, revision=MODEL_REVISION,
                   allow_patterns=['*.json', '*.safetensors', 'tokenizer/*', 'LICENSE*', 'NOTICE*'])

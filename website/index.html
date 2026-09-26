@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Design SKY130 analog circuits with ChipJev and Laya. Explore live schematic search, automated Magic layout, RC extraction and ngspice post-layout verification from EMI Lab at TU Delft.">
+  <meta name="description" content="Design SKY130 analog circuits with ChipJev and its ChipLaya decision model. Explore live schematic search, automated Magic layout, RC extraction and ngspice post-layout verification from EMI Lab at TU Delft.">
   <meta name="theme-color" content="#071a31">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self' https://versions-involvement-press-saves.trycloudflare.com wss://versions-involvement-press-saves.trycloudflare.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>ChipJev — AI Analog Circuit Design with Open-Source EDA</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="canonical" href="https://chipjev.com/">
-  <link rel="stylesheet" href="styles.css?v=prompts-1">
-  <script src="app.js?v=prompts-1" type="module"></script>
+  <link rel="stylesheet" href="styles.css?v=chiplaya-1">
+  <script src="app.js?v=chiplaya-1" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#demo">Skip to live demo</a>
@@ -32,7 +32,7 @@
         <div class="hero">
           <p class="eyebrow">CHIPJEV / OPEN CIRCUIT DESIGN</p>
           <h1 id="title">Watch a circuit <em>come to life.</em></h1>
-          <p class="lead">Laya decides. Real EDA tools verify every step.</p>
+          <p class="lead">ChipLaya decides. Real EDA tools verify every step.</p>
         </div>
         <div class="prompt-picker">
           <p class="picker-label" id="picker-label">01 / DESIGN PROMPT</p>
@@ -45,13 +45,13 @@
         <p class="prompt-meta" id="compute-device">Checking compute device…</p>
         <div class="launch"><button id="run" class="button primary" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5 16 10 6 16.5Z"/></svg><span>Start design</span></button><output id="button-timer" class="button-timer" role="timer" aria-live="off" hidden>0.0 s</output></div>
         <p id="availability" role="status">Connecting to the design service…</p>
-        <div id="laya-decisions" class="decision-strip" aria-label="Live Laya decisions" hidden></div>
+        <div id="laya-decisions" class="decision-strip" aria-label="Live ChipLaya decisions" hidden></div>
         <div class="run-timing" aria-label="Run timing">
           <div class="total-timing"><span>Total elapsed</span><output id="total-timer" role="timer" aria-live="off">0.00<small>s</small></output></div>
-          <div class="phase-timing"><div><span>Laya</span><output id="laya-timer">—</output></div><div><span>Design search</span><output id="build-timer">—</output></div><div><span>Schematic sim</span><output id="simulation-timer">—</output></div><div><span>Layout + DRC</span><output id="layout-timer">—</output></div><div><span>LVS + RC</span><output id="pex-timer">—</output></div><div><span>Post-layout</span><output id="postlayout-timer">—</output></div></div>
+          <div class="phase-timing"><div><span>ChipLaya</span><output id="laya-timer">—</output></div><div><span>Design search</span><output id="build-timer">—</output></div><div><span>Schematic sim</span><output id="simulation-timer">—</output></div><div><span>Layout + DRC</span><output id="layout-timer">—</output></div><div><span>LVS + RC</span><output id="pex-timer">—</output></div><div><span>Post-layout</span><output id="postlayout-timer">—</output></div></div>
           <p id="timing-note">From your click to the measured result. Search includes candidate simulations.</p>
         </div>
-        <div id="downloads" class="downloads" hidden><span>Download this run</span><a id="download-sch">Schematic</a><a id="download-spice">SPICE</a><a id="download-json">Results</a><a id="download-decisions">Laya decisions</a><a id="download-search">Search trace</a><a id="download-mag">Magic layout</a><a id="download-gds">GDSII</a><a id="download-pex">RC netlist</a><a id="download-physical">Physical results</a><a id="download-optimization">Layout iterations</a><a id="download-evidence">DRC, LVS &amp; simulation evidence</a></div>
+        <div id="downloads" class="downloads" hidden><span>Download this run</span><a id="download-sch">Schematic</a><a id="download-spice">SPICE</a><a id="download-json">Results</a><a id="download-decisions">ChipLaya decisions</a><a id="download-search">Search trace</a><a id="download-mag">Magic layout</a><a id="download-gds">GDSII</a><a id="download-pex">RC netlist</a><a id="download-physical">Physical results</a><a id="download-optimization">Layout iterations</a><a id="download-evidence">DRC, LVS &amp; simulation evidence</a></div>
       </aside>
 
       <div class="stage-area">
@@ -90,11 +90,11 @@
         <div class="panel-title"><h2>This run</h2><span id="run-state" class="state-badge">Ready</span></div>
         <div class="stage-flow" id="stage-flow">
         <ol class="stages" id="stages">
-          <li data-stage="deciding"><span class="step-number">1</span><div><strong>Laya reads your prompt</strong><small id="laya-note">Typed decisions → topology probabilities</small></div></li>
+          <li data-stage="deciding"><span class="step-number">1</span><div><strong>ChipLaya reads your prompt</strong><small id="laya-note">Typed decisions → topology probabilities</small></div></li>
           <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + sizing + RC screening</small></div></li>
           <li data-stage="netlisting"><span class="step-number">3</span><div><strong>Check every connection</strong><small>xschem netlist and geometry verification</small></div></li>
           <li data-stage="simulating"><span class="step-number">4</span><div><strong>Verify the schematic</strong><small>AC sweep and closed-loop steps</small></div></li>
-          <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small id="layout-note">Laya-guided loop over steps 5–9</small></div></li>
+          <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small id="layout-note">ChipLaya-guided loop over steps 5–9</small></div></li>
           <li data-stage="drc"><span class="step-number"><span>6</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Design-rule check</strong><small id="drc-note">Magic DRC · full SKY130 rule deck</small></div></li>
           <li data-stage="lvs"><span class="step-number"><span>7</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Layout vs. schematic</strong><small id="lvs-note">Netgen LVS · every device and net</small></div></li>
           <li data-stage="extracting"><span class="step-number">8</span><div><strong>Extract the real circuit</strong><small>Magic distributed RC parasitics</small></div></li>
@@ -102,7 +102,7 @@
           <li data-stage="checking"><span class="step-number">10</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
         </ol>
         <svg class="loop-arrow" id="loop-arrow" aria-hidden="true"></svg>
-        <span class="loop-badge" id="loop-badge" title="Layout loop: steps 5–9 repeat for every batch of layouts Laya proposes"><i aria-hidden="true">↻</i><b id="loop-count">×</b></span>
+        <span class="loop-badge" id="loop-badge" title="Layout loop: steps 5–9 repeat for every batch of layouts ChipLaya proposes"><i aria-hidden="true">↻</i><b id="loop-count">×</b></span>
         </div>
         <progress id="progress" value="0" max="100" aria-label="Run progress"></progress>
         <p id="run-message" class="run-message" role="status">Choose a prompt to start a fresh design.</p>
@@ -139,16 +139,16 @@
     <section id="method" class="method wrap" aria-labelledby="method-title">
       <div class="method-intro"><p class="eyebrow">BEHIND THE DEMO</p><h2 id="method-title">Fast decisions.<br>Measured circuits.</h2><p>ChipJev combines a System One decision model, joint topology and sizing search, and open-source EDA.</p><a href="https://github.com/lab-emi/ChipJev#results">Explore the research and results <span aria-hidden="true">↗</span></a></div>
       <div class="method-details">
-        <article><span class="method-number">01 / DECIDE</span><h3>Your prompt becomes typed decisions.</h3><p>Every click runs the fine-tuned Laya model. Its probabilities guide the search over the circuit grammar, constrained to the number of stages in your selected prompt. The actual device and inference time are shown above.</p></article>
-        <article><span class="method-number">02 / DESIGN</span><h3>Search topology and sizing together.</h3><p>Laya and Bayesian search use CUDA when the GPU backend is connected. Eight ngspice CPU workers measure real candidate circuits. Gain and OTA prompts reserve modest search margins. Strict candidates undergo real PEX screening before the search accepts them. The layout loop then compares matched placement, packing and supply options at one fixed input bias; every attempt is recorded.</p></article>
-        <article><span class="method-number">03 / VERIFY</span><h3>From schematic to verified physical layout.</h3><p>Download the current run’s Laya decisions, search trace, wired schematic, Magic layout, GDSII, extracted RC netlist and both sets of measurements. Every run starts from the selected prompt. The idle preview is a reference capture; live results come from new computations.</p><a href="https://github.com/lab-emi/ChipJev/tree/main/demo">Inspect the live pipeline ↗</a></article>
+        <article><span class="method-number">01 / DECIDE</span><h3>Your prompt becomes typed decisions.</h3><p>Every click runs <a href="https://github.com/lab-emi/ChipLaya/releases/tag/v1.0.1">ChipLaya v1.0.1</a>, our decision model: <a href="https://github.com/NandhaKishorM/laya">Laya</a> by Convai Innovations, run through a PyTorch port of <a href="https://github.com/mizorewww/laya-mlx">Laya-MLX</a> and fine-tuned for circuit design (<a href="https://github.com/lab-emi/ChipLaya">model repository ↗</a>). Its probabilities guide the search over the circuit grammar, constrained to the number of stages in your selected prompt. The actual device and inference time are shown above.</p></article>
+        <article><span class="method-number">02 / DESIGN</span><h3>Search topology and sizing together.</h3><p>ChipLaya and Bayesian search use CUDA when the GPU backend is connected. Eight ngspice CPU workers measure real candidate circuits. Gain and OTA prompts reserve modest search margins. Strict candidates undergo real PEX screening before the search accepts them. The layout loop then compares matched placement, packing and supply options at one fixed input bias; every attempt is recorded.</p></article>
+        <article><span class="method-number">03 / VERIFY</span><h3>From schematic to verified physical layout.</h3><p>Download the current run’s ChipLaya decisions, search trace, wired schematic, Magic layout, GDSII, extracted RC netlist and both sets of measurements. Every run starts from the selected prompt. The idle preview is a reference capture; live results come from new computations.</p><a href="https://github.com/lab-emi/ChipJev/tree/main/demo">Inspect the live pipeline ↗</a></article>
       </div>
     </section>
   </main>
   <dialog id="prompt-dialog" class="prompt-dialog" aria-labelledby="prompt-dialog-title">
-    <div class="dialog-head"><div><p class="eyebrow">CHOOSE A DESIGN PROMPT</p><h2 id="prompt-dialog-title">What should ChipJev design?</h2><p>Every prompt runs the full live flow: Laya, topology and sizing search, xschem, the Magic layout loop with DRC and LVS, RC extraction and post-layout ngspice.</p></div><button id="prompt-close" class="dialog-close" type="button" aria-label="Close">×</button></div>
+    <div class="dialog-head"><div><p class="eyebrow">CHOOSE A DESIGN PROMPT</p><h2 id="prompt-dialog-title">What should ChipJev design?</h2><p>Every prompt runs the full live flow: ChipLaya, topology and sizing search, xschem, the Magic layout loop with DRC and LVS, RC extraction and post-layout ngspice.</p></div><button id="prompt-close" class="dialog-close" type="button" aria-label="Close">×</button></div>
     <div id="prompt-groups" class="prompt-groups"></div>
   </dialog>
-  <footer class="wrap"><a class="wordmark" href="./">Chip<span>Jev</span></a><p><a href="https://www.tudemi.com/">Efficient Machine Intelligence Lab · TU Delft</a></p><div><a href="https://www.tudemi.com/">EMI Lab ↗</a><a href="https://github.com/lab-emi/ChipJev/blob/main/LICENSE">Apache-2.0</a><a href="https://github.com/lab-emi/ChipJev">Source code ↗</a></div></footer>
+  <footer class="wrap"><a class="wordmark" href="./">Chip<span>Jev</span></a><p><a href="https://www.tudemi.com/">Efficient Machine Intelligence Lab · TU Delft</a></p><div><a href="https://www.tudemi.com/">EMI Lab ↗</a><a href="https://github.com/lab-emi/ChipJev/blob/main/LICENSE">Apache-2.0</a><a href="https://github.com/lab-emi/ChipJev/blob/main/NOTICE">Notices</a><a href="https://github.com/lab-emi/ChipLaya">ChipLaya model ↗</a><a href="https://github.com/lab-emi/ChipJev">Source code ↗</a></div></footer>
 </body>
 </html>

@@ -5,6 +5,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / ".tools"
+# The vendored ChipLaya release (src/chiplaya) and its fine-tuned weights, which the PTM 45 nm
+# protocol freezes (scripts/sync_chiplaya.py keeps the two consistent).
+CHIPLAYA = ROOT / "CHIPLAYA.json"
+WEIGHTS = ROOT / "experiments/ptm45/typed-decisions.pt"
 
 
 def magic():

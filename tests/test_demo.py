@@ -284,6 +284,28 @@ def test_site_prompts_match_the_server_allowlist():
     assert json.loads((ROOT / "website/examples.json").read_text()) == list(EXAMPLES.values())
 
 
+def test_the_worker_publishes_the_chiplaya_release_and_no_paths():
+    from demo.worker import published_model
+
+    pin = json.loads((ROOT / "CHIPLAYA.json").read_text())
+    metadata = {"model": "aac6fef/laya-multilingual-mlx", "revision": "f2b4faf", "precision":
+                "float16", "runtime": "pytorch", "device": "cuda", "path": str(ROOT / "x"),
+                "fine_tuned": {"path": str(ROOT / "w.pt"), "sha256": pin["weights"]["sha256"]}}
+    published = published_model(metadata)
+    assert published["release"] == f"ChipLaya {pin['tag']}"
+    assert str(ROOT) not in json.dumps(published)
+    unknown = published_model(dict(metadata, fine_tuned={"path": "w", "sha256": "0" * 64}))
+    assert unknown["release"] is None
+
+
+def test_the_site_credits_the_pinned_chiplaya_release():
+    pin = json.loads((ROOT / "CHIPLAYA.json").read_text())
+    page = (ROOT / "website/index.html").read_text()
+    assert f"ChipLaya {pin['tag']}" in page
+    assert f"https://github.com/lab-emi/ChipLaya/releases/tag/{pin['tag']}" in page
+    assert "https://github.com/lab-emi/ChipJev/blob/main/NOTICE" in page
+
+
 def test_every_public_prompt_constrains_a_nonempty_grammar():
     from chipjev.circuits.grammar import library
     from demo.examples import allows
