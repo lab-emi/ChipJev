@@ -9,55 +9,67 @@
   <title>ChipJev — AI Analog Circuit Design with Open-Source EDA</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="canonical" href="https://chipjev.com/">
-  <link rel="stylesheet" href="styles.css?v=drc-lvs-3">
-  <script src="app.js?v=drc-lvs-3" type="module"></script>
+  <link rel="stylesheet" href="styles.css?v=dashboard-1">
+  <script src="app.js?v=dashboard-1" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#demo">Skip to live demo</a>
   <header class="site-header">
-    <div class="wrap header-inner">
+    <div class="header-inner">
       <a class="wordmark" href="./" aria-label="ChipJev home">Chip<span>Jev</span><span class="brand-chip" aria-hidden="true">↯</span></a>
+      <p class="tagline">AI analog circuit design with open-source EDA</p>
       <div class="affiliation">
         <a class="institution-logo" href="https://www.tudemi.com/" aria-label="EMI Lab website"><img src="assets/emi-logo.svg" alt="EMI Lab" width="109" height="36"></a>
         <a class="lab-name" href="https://www.tudemi.com/">Efficient Machine<br>Intelligence Lab</a>
         <a class="institution-logo delft-logo" href="https://www.tudemi.com/" aria-label="TU Delft · EMI Lab website"><img src="assets/tu-delft-logo.svg" alt="TU Delft" width="102" height="40"></a>
       </div>
-      <nav aria-label="Main navigation"><a href="#method">How it works</a><a href="https://github.com/lab-emi/ChipJev">GitHub <span aria-hidden="true">↗</span></a></nav>
+      <nav aria-label="Main navigation"><a href="#details">Results</a><a href="#method">How it works</a><a href="https://github.com/lab-emi/ChipJev">GitHub <span aria-hidden="true">↗</span></a></nav>
     </div>
   </header>
   <main>
-    <section class="intro wrap" aria-labelledby="title">
-      <div><p class="eyebrow">CHIPJEV / OPEN CIRCUIT DESIGN</p><h1 id="title">Watch a circuit <em>come to life.</em></h1>
-      <p class="lead">Choose a design prompt. Laya guides the circuit and layout decisions.<br class="desktop-break"> Watch the schematic become a physical layout, then verify its extracted circuit.</p></div>
-      <div class="launch"><div class="launch-action"><button id="run" class="button primary" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5 16 10 6 16.5Z"/></svg><span>Start design</span></button><output id="button-timer" class="button-timer" role="timer" aria-live="off" hidden>0.0 s</output></div><p id="availability" role="status">Connecting to the design service…</p></div>
-      <div class="prompt-selector">
+    <section id="demo" class="dashboard" aria-label="Live circuit design demo">
+      <aside class="control-panel" aria-labelledby="title">
+        <div class="hero">
+          <p class="eyebrow">CHIPJEV / OPEN CIRCUIT DESIGN</p>
+          <h1 id="title">Watch a circuit <em>come to life.</em></h1>
+          <p class="lead">Laya decides. Real EDA tools verify every step.</p>
+        </div>
         <fieldset id="examples"><legend>01 / CHOOSE A DESIGN PROMPT</legend>
           <label><input type="radio" name="example" value="opamp-gain" checked><span><strong>Two-stage op-amp</strong><small>13+ MOSFETs · maximum DC gain</small></span></label>
           <label><input type="radio" name="example" value="opamp-speed"><span><strong>Wideband op-amp</strong><small>Maximum gain-bandwidth</small></span></label>
           <label><input type="radio" name="example" value="ota-efficient"><span><strong>Efficient single-stage OTA</strong><small>Bandwidth per unit power</small></span></label>
         </fieldset>
         <p class="prompt-text" id="selected-prompt">Design a complex SKY130 two-stage op-amp with at least 13 MOSFETs and maximum DC gain, at 1.8 V with a 100 pF load.</p>
-        <div class="prompt-meta"><span>SKY130 · 1.8 V · 100 pF</span><span id="compute-device">Checking compute device…</span></div>
+        <p class="prompt-meta" id="compute-device">Checking compute device…</p>
+        <div class="launch"><button id="run" class="button primary" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5 16 10 6 16.5Z"/></svg><span>Start design</span></button><output id="button-timer" class="button-timer" role="timer" aria-live="off" hidden>0.0 s</output></div>
+        <p id="availability" role="status">Connecting to the design service…</p>
         <div id="laya-decisions" class="decision-strip" aria-label="Live Laya decisions" hidden></div>
-      </div>
-    </section>
+        <div class="run-timing" aria-label="Run timing">
+          <div class="total-timing"><span>Total elapsed</span><output id="total-timer" role="timer" aria-live="off">0.00<small>s</small></output></div>
+          <div class="phase-timing"><div><span>Laya</span><output id="laya-timer">—</output></div><div><span>Design search</span><output id="build-timer">—</output></div><div><span>Schematic sim</span><output id="simulation-timer">—</output></div><div><span>Layout + DRC</span><output id="layout-timer">—</output></div><div><span>LVS + RC</span><output id="pex-timer">—</output></div><div><span>Post-layout</span><output id="postlayout-timer">—</output></div></div>
+          <p id="timing-note">From your click to the measured result. Search includes candidate simulations.</p>
+        </div>
+        <div id="downloads" class="downloads" hidden><span>Download this run</span><a id="download-sch">Schematic</a><a id="download-spice">SPICE</a><a id="download-json">Results</a><a id="download-decisions">Laya decisions</a><a id="download-search">Search trace</a><a id="download-mag">Magic layout</a><a id="download-gds">GDSII</a><a id="download-pex">RC netlist</a><a id="download-physical">Physical results</a><a id="download-optimization">Layout iterations</a><a id="download-evidence">DRC, LVS &amp; simulation evidence</a></div>
+      </aside>
 
-    <section id="demo" class="wrap" aria-label="Live circuit demo">
-      <div class="demo-heading"><div class="spec-title"><span class="spec-index">01</span><h2 id="circuit-title">SKY130 two-stage op-amp</h2><span class="tech-tag">130 nm</span></div><p class="spec-meta" id="topology-note">A fresh topology and sizing search on every run</p></div>
-      <div class="studio">
+      <div class="stage-area">
         <div class="viewer">
-          <div class="viewer-bar"><div><span id="live-dot" class="status-dot"></span><span id="stream-label">REFERENCE CAPTURE</span></div><span class="mono">xschem / Magic / ngspice</span><button id="expand" class="icon-button" type="button" aria-label="Expand live circuit view" title="Expand view">⛶</button></div>
-          <div class="view-switch" aria-label="Circuit view"><button id="view-schematic" type="button" aria-pressed="true">xschem + Magic</button><button id="view-layout" type="button" aria-pressed="false" disabled>Final layout</button><button id="view-intent" type="button" aria-pressed="false" disabled>Device groups</button></div>
+          <div class="viewer-bar">
+            <div class="live-state"><span id="live-dot" class="status-dot"></span><span id="stream-label">REFERENCE CAPTURE</span></div>
+            <div class="circuit-name"><h2 id="circuit-title">SKY130 two-stage op-amp</h2><span id="topology-note">A fresh topology and sizing search on every run</span></div>
+            <div class="view-switch" aria-label="Circuit view"><button id="view-schematic" type="button" aria-pressed="true">xschem + Magic</button><button id="view-layout" type="button" aria-pressed="false" disabled>Final layout</button><button id="view-intent" type="button" aria-pressed="false" disabled>Device groups</button></div>
+            <button id="expand" class="icon-button" type="button" aria-label="Expand live circuit view" title="Expand view">⛶</button>
+          </div>
           <div id="screen" class="screen">
             <div id="live-workspace" class="live-workspace">
               <section class="tool-pane" aria-label="Live xschem schematic">
                 <div class="tool-heading"><strong>xschem</strong><span id="schematic-live-status">Reference schematic</span></div>
-                <div class="tool-screen"><img id="frame" src="assets/workspace-preview.jpg" width="1920" height="900" alt="Reference capture: connected SKY130 op-amp in the native xschem editor"></div>
+                <div class="tool-screen"><img id="frame" src="assets/workspace-preview.jpg?v=pro-1" width="1920" height="900" alt="Reference capture: connected SKY130 op-amp in the native xschem editor"></div>
                 <p class="tool-note" id="schematic-live-note">Live topology and sizing candidates appear here.</p>
               </section>
               <section class="tool-pane" aria-label="Live Magic layout">
                 <div class="tool-heading"><strong>Magic</strong><span id="magic-live-status">Reference layout</span></div>
-                <div class="tool-screen"><img id="magic-frame" src="assets/workspace-preview.jpg" width="1920" height="900" alt="Reference capture: the matching SKY130 physical layout in the native Magic editor"><div id="magic-waiting" class="magic-waiting" hidden><strong>Waiting for the selected circuit</strong><span>Each generated layout opens here once Magic DRC has checked it, then goes through LVS, RC extraction and post-layout verification.</span></div></div>
+                <div class="tool-screen"><img id="magic-frame" src="assets/workspace-preview.jpg?v=pro-1" width="1920" height="900" alt="Reference capture: the matching SKY130 physical layout in the native Magic editor"><div id="magic-waiting" class="magic-waiting" hidden><strong>Waiting for the selected circuit</strong><span>Each generated layout opens here once Magic DRC has checked it, then goes through LVS, RC extraction and post-layout verification.</span></div></div>
                 <p class="tool-note" id="magic-live-note" role="status">Placement, routing and acceptance update with each layout.</p>
               </section>
             </div>
@@ -66,48 +78,45 @@
           </div>
           <div class="viewer-footer"><span id="frame-note">Idle reference capture · replaced by the live session on start</span><span id="elapsed" class="mono">— s</span></div>
         </div>
-        <aside class="run-panel" aria-label="Simulation progress and measurements">
-          <div class="panel-title"><h3>This run</h3><span id="run-state" class="state-badge">Ready</span></div>
-          <div class="run-timing" aria-label="Run timing">
-            <div class="total-timing"><span>Total elapsed</span><output id="total-timer" role="timer" aria-live="off">0.00<small>s</small></output></div>
-            <div class="phase-timing"><div><span>Laya</span><output id="laya-timer">—</output></div><div><span>Design search</span><output id="build-timer">—</output></div><div><span>Schematic sim</span><output id="simulation-timer">—</output></div><div><span>Layout + DRC</span><output id="layout-timer">—</output></div><div><span>LVS + RC extraction</span><output id="pex-timer">—</output></div><div><span>Post-layout + refinement</span><output id="postlayout-timer">—</output></div></div>
-            <p id="timing-note">From your click to the measured result. Search includes candidate simulations.</p>
-          </div>
-          <ol class="stages" id="stages">
-            <li data-stage="deciding"><span class="step-number">1</span><div><strong>Laya reads your prompt</strong><small id="laya-note">Typed decisions → topology probabilities</small></div></li>
-            <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + sizing + RC screening</small></div></li>
-            <li data-stage="netlisting"><span class="step-number">3</span><div><strong>Check every connection</strong><small>xschem netlist and geometry verification</small></div></li>
-            <li data-stage="simulating"><span class="step-number">4</span><div><strong>Verify the schematic</strong><small>AC sweep and closed-loop steps</small></div></li>
-            <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small>Matched rows, supply rails and goal-driven refinement</small></div></li>
-            <li data-stage="drc"><span class="step-number"><span>6</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Design-rule check</strong><small id="drc-note">Magic DRC · full SKY130 rule deck</small></div></li>
-            <li data-stage="lvs"><span class="step-number"><span>7</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Layout vs. schematic</strong><small id="lvs-note">Netgen LVS · every device and net</small></div></li>
-            <li data-stage="extracting"><span class="step-number">8</span><div><strong>Extract the real circuit</strong><small>Magic distributed RC parasitics</small></div></li>
-            <li data-stage="postsimulating"><span class="step-number">9</span><div><strong>Verify after layout</strong><small>ngspice AC and closed-loop steps</small></div></li>
-            <li data-stage="checking"><span class="step-number">10</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
-          </ol>
-          <progress id="progress" value="0" max="100" aria-label="Run progress"></progress>
-          <p id="run-message" class="run-message" role="status">Choose a prompt to start a fresh design.</p>
-          <div class="metrics" aria-label="Measured post-layout circuit performance">
-            <div><span>DC gain</span><strong id="gain">—<small>dB</small></strong></div>
-            <div><span>Gain-bandwidth</span><strong id="gbw">—<small>MHz</small></strong></div>
-            <div><span>Phase margin</span><strong id="pm">—<small>°</small></strong></div>
-            <div><span>Power</span><strong id="power">—<small>mW</small></strong></div>
-          </div>
-          <p id="verification" class="verification">Measurements appear after simulation.</p>
-        </aside>
+        <div class="plots" aria-label="Measured responses: schematic and after RC extraction">
+          <figure class="plot-card"><figcaption><h3>Open-loop response</h3><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase <i class="pre"></i>Schematic</span></figcaption><div class="plot-area" id="ac-plot"><p>Waiting for the AC sweep</p></div></figure>
+          <figure class="plot-card"><figcaption><h3>Unity-buffer steps</h3><span class="plot-key"><i></i>+10 mV <i class="negative"></i>−10 mV <i class="pre"></i>Schematic</span></figcaption><div class="plot-area" id="step-plot"><p>Waiting for the closed-loop steps</p></div></figure>
+        </div>
       </div>
-      <p id="error" class="error" role="alert" hidden></p>
-      <div class="demo-caption"><p><span class="caption-label">Watch both editors</span> xschem shows the circuit search, then holds the selected schematic while Magic opens each generated layout. Follow placement and routing changes through DRC, RC extraction and ngspice verification. The last frame restores the selected layout.</p><span class="view-only">View-only · No installation</span></div>
 
-      <div class="response-heading"><h3>Schematic simulation</h3><p>Before physical implementation</p></div><div class="plots" aria-label="Schematic simulation results">
-        <figure class="plot-card"><figcaption><div><span class="eyebrow">FREQUENCY DOMAIN</span><h3>Open-loop response</h3></div><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="ac-plot"><p>Waiting for the AC sweep</p></div></figure>
-        <figure class="plot-card"><figcaption><div><span class="eyebrow">TIME DOMAIN</span><h3>Unity-buffer response</h3></div><span class="plot-key"><i></i>+10 mV <i class="negative"></i>−10 mV</span></figcaption><div class="plot-area" id="step-plot"><p>Waiting for the closed-loop steps</p></div></figure>
-      </div>
-      <section class="physical-results" aria-labelledby="physical-title">
+      <aside class="run-panel" aria-label="Design steps and measured results">
+        <div class="panel-title"><h2>This run</h2><span id="run-state" class="state-badge">Ready</span></div>
+        <ol class="stages" id="stages">
+          <li data-stage="deciding"><span class="step-number">1</span><div><strong>Laya reads your prompt</strong><small id="laya-note">Typed decisions → topology probabilities</small></div></li>
+          <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + sizing + RC screening</small></div></li>
+          <li data-stage="netlisting"><span class="step-number">3</span><div><strong>Check every connection</strong><small>xschem netlist and geometry verification</small></div></li>
+          <li data-stage="simulating"><span class="step-number">4</span><div><strong>Verify the schematic</strong><small>AC sweep and closed-loop steps</small></div></li>
+          <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small>Matched rows, supply rails and goal-driven refinement</small></div></li>
+          <li data-stage="drc"><span class="step-number"><span>6</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Design-rule check</strong><small id="drc-note">Magic DRC · full SKY130 rule deck</small></div></li>
+          <li data-stage="lvs"><span class="step-number"><span>7</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Layout vs. schematic</strong><small id="lvs-note">Netgen LVS · every device and net</small></div></li>
+          <li data-stage="extracting"><span class="step-number">8</span><div><strong>Extract the real circuit</strong><small>Magic distributed RC parasitics</small></div></li>
+          <li data-stage="postsimulating"><span class="step-number">9</span><div><strong>Verify after layout</strong><small>ngspice AC and closed-loop steps</small></div></li>
+          <li data-stage="checking"><span class="step-number">10</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
+        </ol>
+        <progress id="progress" value="0" max="100" aria-label="Run progress"></progress>
+        <p id="run-message" class="run-message" role="status">Choose a prompt to start a fresh design.</p>
+        <p id="error" class="error" role="alert" hidden></p>
+        <div class="metrics" aria-label="Measured post-layout circuit performance">
+          <div><span>DC gain</span><strong id="gain">—<small>dB</small></strong><small class="delta" id="gain-delta"></small></div>
+          <div><span>Gain-bandwidth</span><strong id="gbw">—<small>MHz</small></strong><small class="delta" id="gbw-delta"></small></div>
+          <div><span>Phase margin</span><strong id="pm">—<small>°</small></strong><small class="delta" id="pm-delta"></small></div>
+          <div><span>Power</span><strong id="power">—<small>mW</small></strong><small class="delta" id="power-delta"></small></div>
+        </div>
+        <div class="gate-facts" aria-label="Physical verification"><div><span>Magic DRC</span><strong id="drc-result">—</strong></div><div><span>Netgen LVS</span><strong id="lvs-result">—</strong></div><div><span>Extracted R / C</span><strong id="pex-result">—</strong></div><div><span>Layout area</span><strong id="area-result">—</strong></div></div>
+        <p id="verification" class="verification">Measurements appear after simulation.</p>
+      </aside>
+    </section>
+
+    <section id="details" class="details wrap" aria-labelledby="physical-title">
+      <div class="demo-caption"><p><span class="caption-label">Watch both editors</span> xschem shows the circuit search, then holds the selected schematic while Magic opens each generated layout. Follow placement and routing changes through DRC, LVS, RC extraction and ngspice verification. The last frame restores the selected layout.</p><span class="view-only">View-only · No installation</span></div>
+      <section class="physical-results">
         <div class="response-heading"><h3 id="physical-title">After physical layout</h3><p id="physical-status" role="status">DRC, LVS and extracted measurements appear here.</p></div>
-        <div class="physical-facts" aria-label="Physical verification"><div><span>Magic DRC</span><strong id="drc-result">—</strong></div><div><span>Netgen LVS</span><strong id="lvs-result">—</strong></div><div><span>Extracted R / C</span><strong id="pex-result">—</strong></div><div><span>Layout area</span><strong id="area-result">—</strong></div></div>
         <div class="comparison-scroll"><table class="comparison"><caption>Schematic and RC post-layout performance at SKY130 TT, 1.8 V, 100 pF</caption><thead><tr><th scope="col">Measurement</th><th scope="col">Schematic</th><th scope="col">After RC extraction</th><th scope="col">Change</th></tr></thead><tbody id="comparison-body"><tr><td colspan="4">Start a design to measure both circuits.</td></tr></tbody></table></div>
-        <div class="plots" aria-label="Post-layout simulation results"><figure class="plot-card"><figcaption><h3>Extracted open-loop response</h3><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="post-ac-plot"><p>Waiting for the extracted AC sweep</p></div></figure><figure class="plot-card"><figcaption><h3>Extracted unity-buffer response</h3><span class="plot-key"><i></i>+10 mV <i class="negative"></i>−10 mV</span></figcaption><div class="plot-area" id="post-step-plot"><p>Waiting for the extracted closed-loop steps</p></div></figure></div>
         <section id="analog-quality" hidden aria-labelledby="quality-title">
           <div class="response-heading"><h3 id="quality-title">Layout decisions, measured</h3><p id="layout-plan-note"></p></div>
           <div id="analog-facts" class="physical-facts"><div><span>Input noise · 10 Hz–1 MHz</span><strong id="noise-result">—</strong></div><div><span>Minimum PSRR · same band</span><strong id="psrr-result">—</strong></div><div><span>Internal supply drop</span><strong id="ir-result">—</strong></div><div><span>Ground rise</span><strong id="ground-result">—</strong></div></div>
@@ -118,7 +127,7 @@
         </section>
         <p class="physical-scope">Nominal block verification. Supply, gate-bias sources and the 100 pF load are external. The layout loop compares real PDK geometry, extracted RC and fixed-condition simulations. Noise and supply measurements use an explicit finite-impedance fixture; no noise limit is assumed. Dimensions are snapped to the PDK grid. DRC and LVS do not establish fabrication signoff or PVT yield.</p>
       </section>
-      <div class="result-bottom"><p id="result-note">Plots and measurements come from the current ngspice run.</p><div id="downloads" class="downloads" hidden><span>Download this run</span><a id="download-sch">Schematic ↓</a><a id="download-spice">SPICE ↓</a><a id="download-json">Results ↓</a><a id="download-decisions">Laya decisions ↓</a><a id="download-search">Search trace ↓</a><a id="download-mag">Magic layout ↓</a><a id="download-gds">GDSII ↓</a><a id="download-pex">RC netlist ↓</a><a id="download-physical">Physical results ↓</a><a id="download-optimization">Layout iterations ↓</a><a id="download-evidence">DRC, LVS &amp; simulation evidence ↓</a></div></div>
+      <p id="result-note" class="result-note">Plots and measurements come from the current ngspice run.</p>
     </section>
 
     <section id="method" class="method wrap" aria-labelledby="method-title">

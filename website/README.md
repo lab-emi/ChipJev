@@ -20,6 +20,14 @@ layout/DRC, LVS/RC extraction, and post-layout simulation/refinement. Reconnecti
 The selected prompt and the actual CPU/CUDA device stay visible. The GPU launcher
 requires CUDA and fails explicitly if device access is unavailable.
 
+The first screen is one dashboard: the prompt and controls with timers and downloads,
+the live xschem + Magic panes above schematic-versus-extracted response plots, and the
+ten pipeline steps with the measured results. It is laid out in `rem`, and the root size
+follows the viewport (`min(0.833vw, 1.70vh)`, clamped to 11–34 px), so the same layout
+fits without scrolling at 1920 × ~940 (1080p), 2560 × ~1300 (2K, or 4K at 150%) and
+3840 × ~2000 (4K at 100%), down to 1280 × 600 (1080p at 150%). Narrow or portrait windows
+get a stacked, scrolling page. Detailed tables and evidence follow the dashboard.
+
 Both native editors are visible throughout the run. A single synchronized capture
 is split into adjacent panes on desktop and stacked panes on phones. Magic loads
 each generated physical candidate, with live iteration, area and acceptance status,

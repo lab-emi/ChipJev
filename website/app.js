@@ -83,7 +83,7 @@ function reset() {
   $("laya-note").textContent = "Typed decisions → topology probabilities";
   $("search-note").textContent = "Joint topology + transistor sizing";
   $("topology-note").textContent = "A fresh topology and sizing search on every run";
-  $("frame").src = $("magic-frame").src = "assets/workspace-preview.jpg";
+  $("frame").src = $("magic-frame").src = "assets/workspace-preview.jpg?v=pro-1";
   $("schematic-live-status").textContent = "Starting xschem";
   $("schematic-live-note").textContent = "Live topology and sizing candidates appear here.";
   $("magic-live-status").textContent = "Waiting for layout";
@@ -95,10 +95,10 @@ function reset() {
   $("screen-note").hidden = true; $("verification").className = "verification";
   $("verification").textContent = "Measurements appear after simulation.";
   $("result-note").textContent = "Plots and measurements come from the current ngspice run.";
-  for (const [key, unit] of [["gain", "dB"], ["gbw", "MHz"], ["pm", "°"], ["power", "mW"]]) setMetric(key, null, unit);
+  for (const [key, unit] of [["gain", "dB"], ["gbw", "MHz"], ["pm", "°"], ["power", "mW"]]) { setMetric(key, null, unit); $(`${key}-delta`).textContent = ""; }
   gates = {drc: null, lvs: null}; renderStages(null);
-  for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"], ["post-ac-plot", "Waiting for the extracted AC sweep"], ["post-step-plot", "Waiting for the extracted closed-loop steps"]]) {
-    const p = document.createElement("p"); p.textContent = text; $(key).replaceChildren(p);
+  for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"]]) {
+    const p = document.createElement("p"); p.textContent = text; $(key).replaceChildren(p); drawn.delete(key);
   }
 }
 
@@ -113,7 +113,7 @@ async function health() {
   try {
     const state = await request("/api/health");
     $("compute-device").textContent = state.compute.device;
-    $("availability").textContent = state.active_run ? "A shared run is in progress · click to watch" : `${state.compute.device} · ready to design`;
+    $("availability").textContent = state.active_run ? "A shared run is in progress · click to watch" : "Ready to design";
     return true;
   } catch {
     $("availability").textContent = "Live service unavailable · click to retry";
@@ -135,6 +135,10 @@ function showResult(data) {
   setMetric("gbw", data.metrics.gbw_mhz, "MHz");
   setMetric("pm", data.metrics.pm_deg, "°");
   setMetric("power", data.metrics.power_uw / 1000, "mW");
+  for (const [key, metric, scale, unit] of [["gain", "gain_db", 1, "dB"], ["gbw", "gbw_mhz", 1, "MHz"], ["pm", "pm_deg", 1, "°"], ["power", "power_uw", 0.001, "mW"]]) {
+    const before = data.prelayout.metrics[metric], after = data.metrics[metric];
+    $(`${key}-delta`).textContent = Number.isFinite(before) && Number.isFinite(after) ? `${after >= before ? "+" : "−"}${Math.abs((after - before) * scale).toFixed(2)}${unit === "°" ? "" : " "}${unit} vs schematic` : "";
+  }
   const physical = data.physical;
   const drcClean = physical.layout.drc_errors === 0, lvsMatched = physical.lvs.passed === true;
   $("drc-result").textContent = drcClean ? "✓ 0 errors" : `${physical.layout.drc_errors} errors`;
@@ -278,7 +282,7 @@ function event(data) {
     if (data.verification) gates = {...gates, ...data.verification};
     renderStages(data.stage);
     badge(data.stage === "complete" ? "Verified" : data.stage === "unqualified" ? "Unqualified" : "Running", data.stage === "complete" ? "success" : "");
-  } else if (data.type === "waveforms") { drawWaveforms(data); if (data.postlayout) drawWaveforms(data.postlayout, "post-"); }
+  } else if (data.type === "waveforms") drawResponses(data, data.postlayout);
   else if (data.type === "result") showResult(data);
   else if (data.type === "error") { error(data.message); complete(false); }
 }
@@ -342,6 +346,10 @@ function begin() {
 }
 
 const NS = "http://www.w3.org/2000/svg";
+const drawn = new Map();  // plot id -> its latest chart arguments, redrawn when the plot is resized
+const resized = new ResizeObserver((entries) => {
+  for (const entry of entries) { const args = drawn.get(entry.target.id); if (args) requestAnimationFrame(() => chart(...args)); }
+});
 function svgNode(name, attrs = {}, text) {
   const node = document.createElementNS(NS, name);
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
@@ -349,49 +357,56 @@ function svgNode(name, attrs = {}, text) {
   return node;
 }
 function chart(container, title, xLabel, yLabel, xDomain, yDomain, xTicks, series, rightLabel) {
-  const W = 600, H = 260, L = 52, R = rightLabel ? 52 : 20, T = 18, B = 45;
+  const node = $(container), box = node.getBoundingClientRect();
+  drawn.set(container, [container, title, xLabel, yLabel, xDomain, yDomain, xTicks, series, rightLabel]); resized.observe(node);
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, size = Math.max(9, 0.64 * rem);
+  const W = Math.max(box.width, 240), H = Math.max(box.height, 120);
+  const L = 3.2 * size, R = rightLabel ? 3.2 * size : 1.4 * size, T = 1.5 * size, B = 3 * size;
   const width = W - L - R, height = H - T - B;
   const sx = (x) => L + (x - xDomain[0]) / (xDomain[1] - xDomain[0]) * width;
   const sy = (y, domain = yDomain) => T + height - (y - domain[0]) / (domain[1] - domain[0]) * height;
   const svg = svgNode("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": title });
   const rightDomain = rightLabel ? series.find((line) => line.domain).domain : null;
   svg.append(svgNode("title", {}, title));
-  const textStyle = { fill: "#697c8e", "font-size": 11, "font-family": "Arial, sans-serif" };
+  const textStyle = { fill: "#697c8e", "font-size": size, "font-family": "Arial, sans-serif" };
   for (let i = 0; i <= 4; i++) {
     const value = yDomain[0] + i * (yDomain[1] - yDomain[0]) / 4, y = sy(value);
     svg.append(svgNode("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: "#e9eef3", "stroke-width": 1 }));
-    svg.append(svgNode("text", { x: L - 9, y: y + 4, "text-anchor": "end", ...textStyle }, String(Math.round(value))));
-    if (rightLabel) svg.append(svgNode("text", { x: W - R + 9, y: y + 4, ...textStyle }, String(Math.round(rightDomain[0] + i * (rightDomain[1] - rightDomain[0]) / 4))));
+    svg.append(svgNode("text", { x: L - 0.7 * size, y: y + 0.35 * size, "text-anchor": "end", ...textStyle }, String(Math.round(value))));
+    if (rightLabel) svg.append(svgNode("text", { x: W - R + 0.7 * size, y: y + 0.35 * size, ...textStyle }, String(Math.round(rightDomain[0] + i * (rightDomain[1] - rightDomain[0]) / 4))));
   }
   for (const [value, label] of xTicks) {
     svg.append(svgNode("line", { x1: sx(value), y1: T, x2: sx(value), y2: H - B, stroke: "#eef2f6" }));
-    svg.append(svgNode("text", { x: sx(value), y: H - B + 19, "text-anchor": "middle", ...textStyle }, label));
+    svg.append(svgNode("text", { x: sx(value), y: H - B + 1.5 * size, "text-anchor": "middle", ...textStyle }, label));
   }
   for (const line of series) {
     const points = line.x.map((x, i) => `${i ? "L" : "M"}${sx(x).toFixed(2)},${sy(line.y[i], line.domain).toFixed(2)}`).join(" ");
-    svg.append(svgNode("path", { d: points, fill: "none", stroke: line.color, "stroke-width": 2, "stroke-linejoin": "round", ...(line.dash ? { "stroke-dasharray": "5 4" } : {}) }));
+    svg.append(svgNode("path", { d: points, fill: "none", stroke: line.color, "stroke-width": line.dash ? 1.6 : 2, "stroke-linejoin": "round", ...(line.dash ? { "stroke-dasharray": "5 4" } : {}) }));
   }
-  svg.append(svgNode("text", { x: L + width / 2, y: H - 4, "text-anchor": "middle", ...textStyle }, xLabel));
-  svg.append(svgNode("text", { x: L, y: 9, ...textStyle, "font-size": 10 }, yLabel));
-  if (rightLabel) svg.append(svgNode("text", { x: W - R, y: 9, "text-anchor": "end", ...textStyle, "font-size": 10 }, rightLabel));
-  $(container).replaceChildren(svg);
+  svg.append(svgNode("text", { x: L + width / 2, y: H - 0.4 * size, "text-anchor": "middle", ...textStyle }, xLabel));
+  svg.append(svgNode("text", { x: L - 2.6 * size, y: 0.9 * size, ...textStyle }, yLabel));
+  if (rightLabel) svg.append(svgNode("text", { x: W, y: 0.9 * size, "text-anchor": "end", ...textStyle }, rightLabel));
+  node.replaceChildren(svg);
 }
-function drawWaveforms(data, prefix = "") {
-  const frequency = data.frequency_hz.map(Math.log10);
-  const gainMin = Math.floor(Math.min(...data.gain_db) / 20) * 20;
-  const gainMax = Math.ceil(Math.max(...data.gain_db) / 20) * 20;
-  const phaseDomain = [Math.floor(Math.min(...data.phase_deg) / 90) * 90, Math.ceil(Math.max(...data.phase_deg) / 90) * 90];
-  chart(`${prefix}ac-plot`, "Measured open-loop gain and phase versus frequency", "Frequency (Hz)", "Gain (dB)", [0, 11], [gainMin, gainMax], [[0, "1"], [3, "1k"], [6, "1M"], [9, "1G"], [11, "100G"]], [
-    { x: frequency, y: data.gain_db, color: "#087ebd" },
-    { x: frequency, y: data.phase_deg, color: "#8b88b7", domain: phaseDomain, dash: true },
-  ], "Phase (°)");
-  const waves = data.steps.filter((step) => step.waveform);
-  if (!waves.length) { const note = document.createElement("p"); note.textContent = "Closed-loop qualification did not produce a waveform"; $(`${prefix}step-plot`).replaceChildren(note); return; }
+// Schematic (dashed, lighter) and after RC extraction (solid) on the same axes.
+function drawResponses(pre, post) {
+  const runs = post ? [[pre, true], [post, false]] : [[pre, false]];
+  const gains = runs.flatMap(([d]) => d.gain_db), phases = runs.flatMap(([d]) => d.phase_deg);
+  const phaseDomain = [Math.floor(Math.min(...phases) / 90) * 90, Math.ceil(Math.max(...phases) / 90) * 90];
+  chart("ac-plot", "Measured open-loop gain and phase versus frequency, schematic dashed and after RC extraction solid", "Frequency (Hz)", "Gain (dB)", [0, 11],
+    [Math.floor(Math.min(...gains) / 20) * 20, Math.ceil(Math.max(...gains) / 20) * 20], [[0, "1"], [3, "1k"], [6, "1M"], [9, "1G"], [11, "100G"]],
+    runs.flatMap(([d, dash]) => { const f = d.frequency_hz.map(Math.log10); return [
+      { x: f, y: d.gain_db, color: dash ? "#8fc2e2" : "#087ebd", dash },
+      { x: f, y: d.phase_deg, color: dash ? "#c3c1de" : "#8b88b7", domain: phaseDomain, dash },
+    ]; }), "Phase (°)");
+  const waves = runs.flatMap(([d, dash]) => d.steps.filter((step) => step.waveform).map((step) => ({ ...step, dash })));
+  if (!waves.length) { const note = document.createElement("p"); note.textContent = "Closed-loop qualification did not produce a waveform"; $("step-plot").replaceChildren(note); drawn.delete("step-plot"); return; }
   const times = waves.flatMap((step) => step.waveform.t_us), low = Math.min(...times), high = Math.max(...times);
   const amplitude = Math.max(12, Math.ceil(Math.max(...waves.flatMap((step) => step.waveform.delta_mv.map(Math.abs))) / 2) * 2);
   const ticks = Array.from({ length: 5 }, (_, i) => { const n = i * high / 4; return [n, n.toFixed(1)]; });
-  chart(`${prefix}step-plot`, "Measured positive and negative 10 millivolt unity-buffer step responses", "Time after input step (µs)", "Output change (mV)", [low, high], [-amplitude, amplitude], ticks,
-    waves.map((step) => ({ x: step.waveform.t_us, y: step.waveform.delta_mv, color: step.direction > 0 ? "#087ebd" : "#de892f" })));
+  chart("step-plot", "Measured positive and negative 10 millivolt unity-buffer step responses, schematic dashed and after RC extraction solid", "Time after input step (µs)", "Output change (mV)", [low, high], [-amplitude, amplitude], ticks,
+    waves.map((step) => ({ x: step.waveform.t_us, y: step.waveform.delta_mv, dash: step.dash,
+      color: step.direction > 0 ? (step.dash ? "#8fc2e2" : "#087ebd") : (step.dash ? "#efbd8c" : "#de892f") })));
 }
 
 $("view-schematic").addEventListener("click", () => setView(false));

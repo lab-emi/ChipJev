@@ -72,8 +72,9 @@ hash, answers and prior), `search.json` (prior, settings, candidate records and
 strict checks), `circuit.sch`, `circuit.spice`, `result.json`, and `plots.png`, plus `layout.mag`,
 `layout.gds`, `layout.svg`, `pex.spice`, `physical.json`, `drc.txt`, `lvs.log` and
 `physical-evidence.zip` (all attempts, scripts, logs and waveforms).
-The idle poster is a labeled native xschem + Magic capture of the matched artifacts
-in `experiments/analog-layout/opamp-gain`. It is not a live result. The viewer
+The idle poster is a labeled native xschem + Magic capture: the final frame of a
+completed live run of the default prompt (its selected schematic and layout). It is
+not a live result. The viewer
 opens private flat-cell copies with unique names to avoid Magic's cell cache;
 it does not save or edit extraction inputs. Interactive DRC is disabled in the
 viewer; every candidate still runs the full batch DRC/LVS/PEX qualification.
