@@ -221,7 +221,14 @@ def build_array(name, polarity, w, length, sequence, circuit, dummies, prefer=()
                      rail_net=rail, strap_nets=strap_nets, rail_nets=rail_nets, name=name,
                      tap_ends=tap_ends)
     if not straps_fit(w, len(strap_nets)):
-        return None
+        # Too narrow for its straps (e.g. a 0.42 um cascode): stack them outside the
+        # diffusion on a side without a gate bar, the rail side first.
+        away = "top" if rail_side == "bottom" else "bottom"
+        free = [side for side, bar in ((rail_side, rail_bar), (away, top if away == "top" else bottom))
+                if bar is None]
+        if not free:
+            return None
+        spec.strap_side = free[0]
     return spec
 
 

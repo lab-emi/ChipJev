@@ -11,7 +11,10 @@ through a poly tab that turns outward, away from the matched fingers.
 Source/drain nets leave the array in one of two ways:
 * ``rail``: metal1 strips run straight into the rail on the rail side (only
   for the rail net, and only when that side carries no metal1 gate bar);
-* ``strap``: horizontal metal2 straps over the diffusion, via1 on each strip.
+* ``strap``: horizontal metal2 straps over the diffusion, via1 on each strip;
+  a finger too narrow for its straps stacks them just outside the diffusion on a
+  side without a gate bar (``strap_side``), with the metal1 strips extended under
+  them (metal2 crosses the other nets' strips without contact).
 
 Local frame: diffusion from x = 0 to ``length``, y = 0 to ``w`` (units).
 """
@@ -48,6 +51,7 @@ class ArraySpec:
     strap_width: int = STRAP_W
     name: str = "array"
     tap_ends: bool = False  # tall fingers: vertical tap columns at both ends (latch-up)
+    strap_side: str | None = None  # None: straps over the diffusion; else "top"/"bottom" outside
 
 
 def region_width(length, count):
@@ -100,8 +104,10 @@ class MosArray:
         needed = {n for n in s.regions if n not in s.rail_nets}
         if set(s.strap_nets) != needed:
             raise ValueError(f"Strap nets {s.strap_nets} do not cover regions {sorted(needed)}")
-        if not straps_fit(s.w, len(s.strap_nets), s.strap_width):
+        if s.strap_side is None and not straps_fit(s.w, len(s.strap_nets), s.strap_width):
             raise ValueError("Finger width cannot host the requested metal2 straps")
+        if s.strap_side is not None and (s.top_gate if s.strap_side == "top" else s.bottom_gate):
+            raise ValueError("Outside straps need a side without a gate bar")
 
     def region_x(self, j):
         return j * self.pitch
@@ -113,8 +119,17 @@ class MosArray:
         return self.region_x(j) + (self.s - T.CONT) // 2
 
     def zone(self, side):
-        """Distance from the diffusion edge to the far edge of a gate zone."""
-        return self.bar_offset(side) + 66 if self._side_used(side) else T.ENDCAP
+        """Distance from the diffusion edge to the far edge of a gate zone (or outside straps)."""
+        base = self.bar_offset(side) + 66 if self._side_used(side) else T.ENDCAP
+        return max(base, self.outside(side))
+
+    def outside(self, side):
+        """Distance from the diffusion edge to the far edge of outside straps (0: none)."""
+        n = len(self.spec.strap_nets)
+        if self.spec.strap_side != side or not n:
+            return 0
+        # The via1 metal1 pad reaches 2 units past its strap.
+        return STRAP_MARGIN + n * self.spec.strap_width + (n - 1) * T.M2_SP + 2
 
     def _side_used(self, side):
         s = self.spec
@@ -240,16 +255,23 @@ class MosArray:
         sw = s.strap_width
         used = n * sw + (n - 1) * T.M2_SP
         free = s.w - used
-        y = free // 2 + sw // 2  # centred stack of straps over the diffusion
-        for net in s.strap_nets:
+        for k, net in enumerate(s.strap_nets):
             regions = [j for j, r in enumerate(s.regions) if r == net]
             xs = [self.contact_x(j) + T.CONT // 2 for j in regions]
+            if s.strap_side is None:
+                y = free // 2 + sw // 2 + k * (sw + T.M2_SP)  # centred stack over the diffusion
+            else:
+                offset = STRAP_MARGIN + k * (sw + T.M2_SP) + sw // 2
+                y = self._y(s.strap_side, offset)
+                y0, y1 = self._span(s.strap_side, 0, offset + sw // 2 + 2)
+                for j in regions:  # the strip continues under the nearer straps to its own
+                    cx = self.contact_x(j)
+                    c.rect("metal1", cx - T.M1_SURR_MCON, y0, cx + T.CONT + T.M1_SURR_MCON, y1)
             for x in xs:
                 c.via1(x, y, m1="v", m2="h")
             x0, x1 = min(xs) - 32, max(xs) + 32
             rect = c.rect("metal2", x0, y - sw // 2, x1, y - sw // 2 + sw)
             self.pins["straps"].append({"net": net, "rect": rect, "y": y})
-            y += sw + T.M2_SP
 
     # ------------------------------------------------------------------
     def extent(self):

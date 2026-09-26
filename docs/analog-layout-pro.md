@@ -101,6 +101,12 @@
 每个决策与被评估选项的实测结果写入 `trajectory.jsonl`。demo 的 `LayoutEvaluator` 与 `worker.py` 已切换到新生成器，
 事件协议（rendered/evaluated/selected）保持兼容。
 
+停止规则（每轮开始前按此顺序检查）：已有合格版图后连续 `patience`（默认 2）轮没有更好的合格版图即收敛停止；
+已评估版图数达到 `max_evaluations`（严格生效，最后一批截断到剩余名额）；按上一轮耗时估计下一轮会超出
+`budget_seconds` 时不再开始；incumbent 的一步邻居都已试过。停止原因写入 `optimization.json` 的 `stop`，
+demo 页面在步骤 9 显示。demo 设置为 13 个版图、40 s、patience 2；CLI `chipjev layout` 默认
+`--evaluations 8 --seconds 60 --patience 2`。
+
 并行 worker 通过进程队列实时上报每个候选的验证步骤（layout → drc → lvs → extracting → postsimulating，
 DRC/LVS 带 running/passed/failed 与违例数或器件/网络数，以及 worker 端时间戳）。网页把 Magic DRC 与
 Netgen LVS 作为 layout loop（步骤 5–9）里的两个独立步骤显示，步骤 9 到 5 画有反馈箭头和迭代计数。每轮迭代
@@ -140,6 +146,13 @@ strap 与轨的重叠区内；`rail_um` = 0.6 / 1.0 / 2.0 时 135 个设计均�
 抵消它。archived 设计中共质心（ABBA）模板的差分对从 70/142 升到 110/142；高效 OTA 输入对质心误差 62.7 → 0.12 µm、
 面积 8,133 → 6,692 µm²；高增益两级 m6/m7 5.94 → 0.18 µm、面积 1,406 → 1,218 µm²；132 个干净设计的总面积 −10.7%
 （单个最多 −33%），DRC/LVS 仍为 132/135。
+
+最小宽度（0.42 µm）的 finger 放不下扩散区上方的 M2 strap（例如两级运放的共源共栅第二级、折叠共源共栅的
+NMOS 对），此前 `plan_units` 直接拒绝，版图 loop 的每个候选都失败，demo 的在线搜索也因此找不到合格设计。
+现在这类阵列把 strap 叠放在没有栅极 bar 的一侧（优先 rail 一侧）的扩散区外，M1 strip 向外延伸到各自的 strap，
+M2 从其他网络的 strip 上方跨过；`side_needs` 相应地把 rail 金属推到 strap 之外。能放下 strap 的阵列完全不变。
+结果：135 个 archived 设计全部 DRC=0 且 LVS 通过（135/135，原先的 3 个失败正是这种情况）；128 个版图面积完全不变，
+4 个因可以用更紧凑的模板而略小。
 
 ### 4.3 端到端（demo 的 3 个 prompt，新鲜搜索，版图验证在电路搜索环内）
 

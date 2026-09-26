@@ -96,6 +96,8 @@ def side_needs(array, side, rail_net, tap_polarity):
         tap = max(tap, g0 + 50 + pc, g0 + 50 + 10)
         if bar is not None and bar != rail_net:
             metal = max(metal, g0 + 60 + T.M1_SP, g0 + 61 + T.M2_SP)
+    # Outside straps (narrow fingers): the rail metal clears their metal1 and metal2.
+    metal = max(metal, array.outside(side) + T.M1_SP) if array.outside(side) else metal
     return tap, metal
 
 

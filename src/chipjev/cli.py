@@ -176,6 +176,7 @@ def _layout_pro(args, record, selected, topology):
                              vdd=record.get("vdd", 1.8), load_pf=record.get("load_pf", 100),
                              input_bias=bias, model=model, max_evaluations=args.evaluations,
                              parallel=args.parallel, budget_seconds=args.seconds,
+                             patience=args.patience,
                              finger_max_um=record.get("finger_max_um") or selected.get("finger_max_um"))["optimization"]
     except RuntimeError as exc:
         print(json.dumps({"valid": False, "error": str(exc), "output": str(args.output)}, indent=2))
@@ -347,6 +348,8 @@ def main(argv=None):
                    default=None, help="pro: quality (default), area, gain, gbw, pm")
     p.add_argument("--evaluations",type=int,default=8)
     p.add_argument("--seconds",type=float,default=60)
+    p.add_argument("--patience", type=int, default=2,
+                   help="pro: stop after this many iterations without a better qualified layout (0: off)")
     p.add_argument("--input-bias",type=float,help="fixed common-mode/input bias for every candidate")
     p.add_argument("--device",choices=("cpu","cuda","mps"))
     p.add_argument("--no-laya",action="store_true",help="ablate the typed physical-action prior")

@@ -31,6 +31,13 @@ from ..layout.pro.planner import ProPlan
 from ..simulation.sky130 import evaluate
 
 GOALS = ("quality", "area", "gbw", "gain", "pm")
+# Why the loop ended; checked before every iteration, in this order.
+STOP_TEXT = {
+    "converged": "{stale_iterations} iterations without a better qualified layout",
+    "evaluations": "layout budget reached ({evaluations}/{max_evaluations})",
+    "time": "the next iteration would exceed the {budget_seconds:g} s budget",
+    "exhausted": "no untried one-knob moves left",
+}
 STEPS = ("layout", "drc", "lvs", "extracting", "postsimulating")
 _PROGRESS = None  # per-process queue for live verification steps (pool initializer)
 
@@ -134,7 +141,7 @@ def _prior(field, value, entry, goal):
 
 def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_pf=100.0,
                  input_bias=None, prelayout=None, model=None, max_evaluations=12, parallel=4,
-                 budget_seconds=240.0, seed_plan=None, rng_seed=0, log=None,
+                 budget_seconds=240.0, patience=2, seed_plan=None, rng_seed=0, log=None,
                  candidate_observer=None, observer=None, finger_max_um=None):
     """Returns the selected candidate's physical result (search/layout.optimize's shape),
     with the search trace under ``optimization``; raises if nothing qualified.
@@ -145,7 +152,8 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
     names the candidate (index, action, plan_id) and the step's time.monotonic() "at";
     "done" ends each candidate. ``candidate_observer`` receives "batch" when an iteration
     submits its candidates, "rendered" once a candidate's cell is final (after Magic DRC),
-    "evaluated" in candidate order, and finally "selected"."""
+    "evaluated" in candidate order, "stop" with the stop rule that ended the loop (see
+    STOP_TEXT) and finally "selected"."""
     if goal not in GOALS:
         raise ValueError(f"goal must be one of {GOALS}")
     if log is None:
@@ -202,9 +210,27 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
             if step == "drc" and data.get("status") != "running":
                 rendered_event(index)
 
+    # Stop rules: ``patience`` iterations in a row without a better qualified layout
+    # (once one exists), an exact cap on evaluated layouts (the last batch is trimmed),
+    # a time budget that the next iteration, estimated by the last one, must fit, and
+    # an incumbent whose one-knob neighbourhood is exhausted.
+    stale, last_seconds, stop = 0, 0.0, None
     with ProcessPoolExecutor(max_workers=parallel, initializer=_progress_channel,
                              initargs=(progress,)) as pool:
-        while batch and len(history) < max_evaluations and time.perf_counter() - start < budget_seconds:
+        while True:
+            elapsed = time.perf_counter() - start
+            if patience and incumbent and incumbent.get("valid") and stale >= patience:
+                stop = "converged"
+            elif len(history) >= max_evaluations:
+                stop = "evaluations"
+            elif iteration and elapsed + last_seconds > budget_seconds:
+                stop = "time"
+            elif not batch:
+                stop = "exhausted"
+            if stop:
+                break
+            batch = batch[: max_evaluations - len(history)]
+            began = time.perf_counter()
             jobs = []
             for field, plan, decision in batch:
                 visited.add(plan.id)
@@ -253,11 +279,21 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
                         "quality": {"area_um2": entry.get("area_um2")},
                         "metrics": entry.get("metrics"), "critic": entry.get("critic")})
                 known.pop(index)  # late progress messages of a finished candidate are stale
+            stale = 0 if any(h["accepted"] for h in history[-len(jobs):]) else stale + 1
+            last_seconds = time.perf_counter() - began
             batch = _propose(incumbent, goal, visited, parallel, planner, decisions, rng)
     if progress is not None:
         progress.close()
+    stopped = {"reason": stop, "iterations": iteration, "evaluations": len(history),
+               "max_evaluations": max_evaluations, "patience": patience, "stale_iterations": stale,
+               "budget_seconds": budget_seconds, "elapsed_seconds": time.perf_counter() - start,
+               "last_iteration_seconds": last_seconds}
+    stopped["text"] = STOP_TEXT[stop].format(**stopped)
+    log(f"  stopped after {iteration} iterations: {stopped['text']}")
+    if candidate_observer:
+        candidate_observer({"kind": "stop", **stopped})
     trace = _finish(directory, history, decisions, incumbent, goal, input_bias, prelayout, start,
-                    planner, max_evaluations, parallel)
+                    planner, max_evaluations, parallel, stopped)
     if not incumbent or not incumbent.get("valid"):
         raise RuntimeError("No professional layout qualified; inspect optimization.json")
     result = json.loads((directory / "physical.json").read_text())
@@ -314,7 +350,7 @@ def _propose(incumbent, goal, visited, width, planner, decisions, rng):
 
 
 def _finish(directory, history, decisions, incumbent, goal, bias, prelayout, start, planner,
-            max_evaluations, parallel):
+            max_evaluations, parallel, stop=None):
     trace = {
         "goal": goal, "fixed_input_bias_v": bias, "history": history, "decisions": decisions,
         "evaluations": len(history), "max_evaluations": max_evaluations, "parallel": parallel,
@@ -323,6 +359,7 @@ def _finish(directory, history, decisions, incumbent, goal, bias, prelayout, sta
         "policy": ("Laya + knowledge-card prior" if planner else "knowledge-card prior") + ", one exploration slot",
         "schematic": {"valid": prelayout.get("valid"), "metrics": prelayout.get("metrics")},
         "selected": incumbent.get("directory") if incumbent else None,
+        "stop": stop,
     }
     (directory / "optimization.json").write_text(json.dumps(trace, indent=2, allow_nan=False, default=str))
     # Fine-tuning data: one row per decision with the measured outcome of each evaluated option.

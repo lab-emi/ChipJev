@@ -1,6 +1,7 @@
 """Professional template generator: structure, integrity, knowledge cards and EDA checks."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -112,6 +113,35 @@ def test_knowledge_cards_are_injected_per_action_and_symptom():
     assert retrieve("no_such_field", ["pm"]) == []
 
 
+def stub_evaluate(job, index=None):
+    """Stand-in for the physical flow: the seed plan is the best layout; every move is worse."""
+    directory, plan = Path(job[3]), job[4]
+    directory.mkdir(parents=True, exist_ok=True)
+    worse = plan != ProPlan().to_dict()
+    (directory / "physical.json").write_text(json.dumps({"layout": {"plan_id": ProPlan(**plan).id}}))
+    return {"valid": True, "drc": 0, "lvs": True, "metrics": {"gain_db": 60.0}, "checks": {},
+            "area_um2": 110.0 if worse else 100.0, "critic": 60.0 if worse else 70.0, "findings": [],
+            "symptoms": [], "seconds": 0.0}
+
+
+@pytest.mark.parametrize("budget, patience, reason, evaluations, iterations", [
+    (50, 2, "converged", 9, 3),   # seed, then two iterations of 4 without a better layout
+    (6, 0, "evaluations", 6, 3),  # exact cap: the third iteration is trimmed to 1 layout
+])
+def test_layout_loop_stops_on_convergence_or_an_exact_budget(tmp_path, monkeypatch, budget, patience,
+                                                            reason, evaluations, iterations):
+    import chipjev.search.pro_layout as loop
+
+    monkeypatch.setattr(loop, "_evaluate", stub_evaluate)
+    topology, values = design("ota-efficient")
+    result = loop.optimize_pro(topology, values, tmp_path / "loop", max_evaluations=budget,
+                               patience=patience, budget_seconds=600, input_bias=0.9,
+                               prelayout={"valid": True, "metrics": {"vin_dc": 0.9}}, log=lambda _: None)
+    stop = result["optimization"]["stop"]
+    assert (stop["reason"], stop["evaluations"], stop["iterations"]) == (reason, evaluations, iterations)
+    assert len(result["optimization"]["history"]) == evaluations and stop["text"]
+
+
 def test_a_failed_candidate_is_recorded_not_fatal_to_the_trace():
     from chipjev.search.pro_layout import objective, stored_objective
 
@@ -146,6 +176,36 @@ def test_shared_diffusion_pair_array_is_drc_clean(tmp_path):
     canvas.merge(array.canvas)
     x0, y0, x1, y1 = canvas.bounds()
     # A contacted tap below: the latch-up rules need one within 15 um.
+    ty = y0 - 150
+    canvas.rect("psubdiff", x0, ty, x1, ty + T.TAP_W)
+    canvas.rect("psubdiffcont", x0 + 24, ty + 24, x1 - 24, ty + 58)
+    canvas.rect("locali", x0 + 8, ty + 24, x1 - 8, ty + 58)
+    canvas.rect("viali", x0 + 24, ty + 24, x1 - 24, ty + 58)
+    canvas.rect("metal1", x0, ty + 18, x1, ty + 64)
+    for pin in array.pins["dummy_heads"]:
+        a, _, b, d = pin["rect"]
+        canvas.rect("metal1", a, ty + 18, b, d)
+    count, errors, _ = drc(canvas, directory=tmp_path)
+    assert count == 0, errors[:5]
+
+
+@pytest.mark.integration
+def test_a_minimum_width_finger_straps_outside_its_diffusion_drc_clean(tmp_path):
+    # 0.42 um fingers cannot host two metal2 straps over the diffusion (cascode and
+    # folded-cascode devices in two-stage op-amps); the straps stack below it instead.
+    if missing := readiness():
+        pytest.skip(f"missing tools: {missing}")
+    from chipjev.layout.pro.check import drc
+
+    fingers = [Finger("vss", None, "dummy"), Finger("g1", "m7"), Finger("g1", "m7"),
+               Finger("vss", None, "dummy")]
+    spec = ArraySpec("n", 84, 30, fingers, ["out", "out", "s2a", "out", "out"], top_gate="g1",
+                     strap_nets=["out", "s2a"], strap_side="bottom")
+    array = MosArray(spec)
+    assert array.outside("bottom") > 0 and all(pin["y"] < 0 for pin in array.pins["straps"])
+    canvas = Canvas()
+    canvas.merge(array.canvas)
+    x0, y0, x1, y1 = canvas.bounds()
     ty = y0 - 150
     canvas.rect("psubdiff", x0, ty, x1, ty + T.TAP_W)
     canvas.rect("psubdiffcont", x0 + 24, ty + 24, x1 - 24, ty + 58)
