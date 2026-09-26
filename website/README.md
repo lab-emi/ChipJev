@@ -34,12 +34,16 @@ each generated physical candidate, with live iteration, area and acceptance stat
 then restores the selected incumbent before capture stops. The default completed
 view preserves both editors; optional final-geometry and device-group views remain.
 
-Magic DRC and Netgen LVS are separate pipeline steps. The parallel layout workers
-stream each candidate's checks live: running, then the verdict with its violation
-count or matched device/net counts. A passed gate's step mark becomes a green check
-and stays green while later candidates are refined, because a rejected candidate
-never replaces the incumbent; a failed gate shows a red cross. The final result sets
-both gates from the selected layout's own DRC and LVS reports.
+Magic DRC and Netgen LVS are separate pipeline steps inside the layout loop (steps
+5–9), which is drawn with a feedback arrow from step 9 back to step 5 and an
+iteration counter. One iteration is one batch of candidates verified in parallel (the
+seed plan, then Laya's proposals from the incumbent); the steps follow the batch's
+slowest candidate. The active step's mark and the arrow into it light up; a new
+iteration lights the animated feedback arrow. DRC and LVS re-run every iteration and
+show that batch's verdict (checked counts, then a green check if all pass or a red
+cross with the rejected count). Fast steps are held on screen for 0.35–1.1 s so they
+can be seen; measured phase times are not affected, and replays skip the hold. The
+final result sets both gates from the selected layout's own DRC and LVS reports.
 
 The completed run offers DRC and LVS status,
 extracted R/C counts, an explicit pre/post performance table, and separate AC and

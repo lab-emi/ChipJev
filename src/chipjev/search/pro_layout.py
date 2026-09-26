@@ -56,7 +56,7 @@ def _evaluate(job, index=None):
 
     def report(name, data):
         # Only small, path-free facts cross the process boundary.
-        if _PROGRESS is not None and index is not None and name in STEPS:
+        if _PROGRESS is not None and index is not None and name in STEPS + ("done",):
             facts = {k: data[k] for k in ("status", "errors", "devices", "nets", "area_um2") if k in data}
             _PROGRESS.put((index, name, {**facts, "at": time.monotonic()}))
 
@@ -72,6 +72,7 @@ def _evaluate(job, index=None):
         result["critic"] = critic
         (directory / "physical.json").write_text(json.dumps(result, indent=2, allow_nan=False))
         post = result["postlayout"]
+        report("done", {"status": "passed" if result["valid"] else "failed"})
         return {
             "valid": result["valid"], "drc": result["layout"]["drc_errors"], "lvs": result["lvs"]["passed"],
             "lvs_devices": result["lvs"].get("devices"), "lvs_nets": result["lvs"].get("nets"),
@@ -85,6 +86,7 @@ def _evaluate(job, index=None):
             "seconds": time.perf_counter() - start,
         }
     except Exception as exc:  # a failed candidate is feedback, never a crash of the loop
+        report("done", {"status": "failed"})
         return {"valid": False, "error": f"{type(exc).__name__}: {exc}",
                 "trace": traceback.format_exc()[-2000:], "seconds": time.perf_counter() - start,
                 "symptoms": ["error"]}
@@ -105,14 +107,14 @@ def objective(entry, goal, reference_area):
     return value if isinstance(value, (int, float)) and math.isfinite(value) else -math.inf
 
 
-def _key(entry, goal, reference_area):
-    return (bool(entry.get("valid")), objective(entry, goal, reference_area))
 def stored_objective(value):
     """JSON-safe record: a candidate that produced no measurement (e.g. a routing
     failure) has no objective, instead of -inf, which the trace cannot serialize."""
     return value if math.isfinite(value) else None
 
 
+def _key(entry, goal, reference_area):
+    return (bool(entry.get("valid")), objective(entry, goal, reference_area))
 
 
 def _prior(field, value, entry, goal):
@@ -140,9 +142,10 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
     ``observer(step, data)`` receives each candidate's verification steps live from
     the worker processes: layout, drc and lvs ({"status": running|passed|failed} with
     the violation or device/net counts), extracting and postsimulating; ``data`` also
-    names the candidate (index, action, plan_id) and the step's time.monotonic() "at". ``candidate_observer`` receives
-    "rendered" once a candidate's cell is final (after Magic DRC), "evaluated" in
-    candidate order, and finally "selected"."""
+    names the candidate (index, action, plan_id) and the step's time.monotonic() "at";
+    "done" ends each candidate. ``candidate_observer`` receives "batch" when an iteration
+    submits its candidates, "rendered" once a candidate's cell is final (after Magic DRC),
+    "evaluated" in candidate order, and finally "selected"."""
     if goal not in GOALS:
         raise ValueError(f"goal must be one of {GOALS}")
     if log is None:
@@ -175,6 +178,7 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
     live = observer is not None or candidate_observer is not None
     progress = multiprocessing.get_context().Queue() if live else None
     known, rendered = {}, set()
+    iteration = 0
 
     def rendered_event(index):
         field, plan, target = known[index]
@@ -208,6 +212,11 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
                 target = directory / f"candidate-{index:02d}"
                 jobs.append((index, field, plan, decision, target))
                 known[index] = (field, plan, target)
+            iteration += 1
+            if candidate_observer:
+                candidate_observer({"kind": "batch", "iteration": iteration,
+                                    "indices": [j[0] for j in jobs], "actions": [j[1] for j in jobs],
+                                    "incumbent": incumbent["index"] if incumbent else None})
             futures = [pool.submit(_evaluate, (topology.cls, topology.id, values, str(t), p.to_dict(),
                                                vdd, load_pf, input_bias, prelayout, finger_max_um), i)
                        for i, _, p, _, t in jobs]

@@ -47,9 +47,12 @@ not themselves establish DNS or install a running production service.
    result is explicitly labeled; it is never replaced by an archived success.
 7. Generate real SKY130 PCells and routing, run full Magic DRC and Netgen LVS,
    extract distributed RC and simulate the actual extracted netlist in ngspice.
-   DRC and LVS are separate live steps: each candidate reports running, then its
-   verdict (violations, or matched devices and nets). A passed step turns into a
-   green check; the final state is that of the selected layout.
+   Steps 5–9 form the layout loop, drawn with a feedback arrow from step 9 to 5.
+   Each iteration (the seed plan, then each batch Laya proposes) walks layout, DRC,
+   LVS, RC extraction and post-layout simulation: the active step and its incoming
+   arrow light up, DRC and LVS re-run and show that batch's verdict (a green check
+   when all pass), and a new iteration lights the feedback arrow. The final state
+   is that of the selected layout.
    Bounded sizing recovery preserves every attempt; post-layout checks retain
    the original strict limits. See [physical-flow details](../../experiments/layout/README.md).
 8. Keep xschem and Magic visible together in one synchronized 1920 × 900 capture.

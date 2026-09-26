@@ -9,8 +9,8 @@
   <title>ChipJev — AI Analog Circuit Design with Open-Source EDA</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="canonical" href="https://chipjev.com/">
-  <link rel="stylesheet" href="styles.css?v=dashboard-1">
-  <script src="app.js?v=dashboard-1" type="module"></script>
+  <link rel="stylesheet" href="styles.css?v=loop-2">
+  <script src="app.js?v=loop-2" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#demo">Skip to live demo</a>
@@ -86,18 +86,22 @@
 
       <aside class="run-panel" aria-label="Design steps and measured results">
         <div class="panel-title"><h2>This run</h2><span id="run-state" class="state-badge">Ready</span></div>
+        <div class="stage-flow" id="stage-flow">
         <ol class="stages" id="stages">
           <li data-stage="deciding"><span class="step-number">1</span><div><strong>Laya reads your prompt</strong><small id="laya-note">Typed decisions → topology probabilities</small></div></li>
           <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + sizing + RC screening</small></div></li>
           <li data-stage="netlisting"><span class="step-number">3</span><div><strong>Check every connection</strong><small>xschem netlist and geometry verification</small></div></li>
           <li data-stage="simulating"><span class="step-number">4</span><div><strong>Verify the schematic</strong><small>AC sweep and closed-loop steps</small></div></li>
-          <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small>Matched rows, supply rails and goal-driven refinement</small></div></li>
+          <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small id="layout-note">Laya-guided loop over steps 5–9</small></div></li>
           <li data-stage="drc"><span class="step-number"><span>6</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Design-rule check</strong><small id="drc-note">Magic DRC · full SKY130 rule deck</small></div></li>
           <li data-stage="lvs"><span class="step-number"><span>7</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Layout vs. schematic</strong><small id="lvs-note">Netgen LVS · every device and net</small></div></li>
           <li data-stage="extracting"><span class="step-number">8</span><div><strong>Extract the real circuit</strong><small>Magic distributed RC parasitics</small></div></li>
-          <li data-stage="postsimulating"><span class="step-number">9</span><div><strong>Verify after layout</strong><small>ngspice AC and closed-loop steps</small></div></li>
+          <li data-stage="postsimulating"><span class="step-number">9</span><div><strong>Verify after layout</strong><small id="post-note">ngspice AC and closed-loop steps</small></div></li>
           <li data-stage="checking"><span class="step-number">10</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
         </ol>
+        <svg class="loop-arrow" id="loop-arrow" aria-hidden="true"></svg>
+        <span class="loop-badge" id="loop-badge" title="Layout loop: steps 5–9 repeat for every batch of layouts Laya proposes"><i aria-hidden="true">↻</i><b id="loop-count">×</b></span>
+        </div>
         <progress id="progress" value="0" max="100" aria-label="Run progress"></progress>
         <p id="run-message" class="run-message" role="status">Choose a prompt to start a fresh design.</p>
         <p id="error" class="error" role="alert" hidden></p>

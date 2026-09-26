@@ -11,7 +11,7 @@ let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false
 let timer, result, finished = false, expanded = false;
 const runKey = "chipjev-live-run-v3";
 let layoutURL, intentURL;
-let gates = {drc: null, lvs: null}, currentStage = null;
+let gates = {drc: null, lvs: null}, currentStage = null, loopState = null;
 
 function saveRun(value) {
   try { value ? sessionStorage.setItem(runKey, value) : sessionStorage.removeItem(runKey); } catch { /* Storage is optional. */ }
@@ -37,22 +37,86 @@ function renderTime() {
     $(id).textContent = phases[phase] === undefined ? "—" : `${phases[phase].toFixed(2)} s`;
   }
 }
+const span = ([a, b]) => a === b ? `layout ${a}` : `layouts ${a}–${b}`;
 function checkText(key, check) {
-  const where = check.layout ? `${check.selected ? "selected " : ""}layout ${check.layout}` : "selected layout";
-  if (check.status === "running") return `Running ${key === "drc" ? "Magic DRC" : "Netgen LVS"} · ${where}`;
-  if (key === "drc") return check.status === "passed" ? `Passed · 0 violations · ${where}` : `${check.errors ?? "Unknown"} violations · ${where} rejected`;
-  const counts = Number.isInteger(check.devices) && Number.isInteger(check.nets) ? ` · ${check.devices} devices, ${check.nets} nets` : "";
-  return check.status === "passed" ? `Matched${counts} · ${where}` : `Mismatch · ${where} rejected`;
+  const drc = key === "drc", counts = Number.isInteger(check.devices) && Number.isInteger(check.nets) ? ` · ${check.devices} devices, ${check.nets} nets` : "";
+  if (check.selected || !check.layouts) {  // the selected layout's own reports
+    const where = check.layout ? `${check.selected ? "selected " : ""}layout ${check.layout}` : "selected layout";
+    if (drc) return check.status === "passed" ? `Passed · 0 violations · ${where}` : `${check.errors ?? "Unknown"} violations · ${where} rejected`;
+    return check.status === "passed" ? `Matched${counts} · ${where}` : `Mismatch · ${where} rejected`;
+  }
+  const which = span(check.layouts);  // one loop iteration: a batch of candidate layouts
+  if (check.status === "pending") return `Next: ${drc ? "Magic DRC" : "Netgen LVS"} on ${which}`;
+  if (check.status === "running") return `Checking ${which} · ${check.checked}/${check.of} done`;
+  if (check.of === 1) return drc ? (check.status === "passed" ? `Passed · 0 violations · ${which}` : `${check.errors} violations · ${which} rejected`) : (check.status === "passed" ? `Matched${counts} · ${which}` : `Mismatch · ${which} rejected`);
+  const rejected = check.of - check.passed, unrouted = check.unrouted ? ` · ${check.unrouted} not routed` : "";
+  return `${check.passed}/${check.of} ${drc ? "clean" : "matched"}${rejected ? ` · ${rejected} rejected` : ""}${unrouted} · ${which}`;
+}
+function loopNotes(stage) {
+  const loop = loopState;
+  if (!loop) return ["Laya-guided loop over steps 5–9", "ngspice AC and closed-loop steps"];
+  if (loop.done) return [`${loop.iteration} iterations · ${loop.total} layouts · selected layout ${loop.selected}`, `Selected layout ${loop.selected} · after ${loop.iteration} iterations`];
+  const first = loop.iteration === 1 ? "Iteration 1 · initial plan · layout 1" : `Iteration ${loop.iteration} · Laya proposed ${span(loop.layouts)}`;
+  const post = Number.isInteger(loop.accepted) ? `Layout ${loop.accepted + 1} accepted → back to step 5` :
+    loop.evaluated >= loop.size && Number.isInteger(loop.incumbent) ? `No gain · incumbent layout ${loop.incumbent + 1} kept → back to step 5` :
+    stage === "postsimulating" ? `Simulating ${span(loop.layouts)} · ${Math.min(loop.finished, loop.size)}/${loop.size} done` : "ngspice AC and closed-loop steps";
+  return [first, post];
 }
 function renderStages(stage = currentStage) {
   currentStage = stage;
   const index = stageNames.indexOf(stage), ended = ["complete", "unqualified"].includes(stage);
+  const inLoop = index >= stageNames.indexOf("layout") && index <= stageNames.indexOf("postsimulating");
+  const looping = Boolean(loopState && !loopState.done && inLoop && !ended);
+  const feedback = looping && stage === "layout" && loopState.iteration > 1;  // the loop closes into step 5
   for (const [i, node] of [...document.querySelectorAll(".stages li")].entries()) {
     const key = node.dataset.stage, check = gates[key];
     node.className = ended || (index >= 0 && i < index) ? "done" : i === index ? "active" : "";
-    // A verified gate keeps its green check while later layouts are refined.
+    if (i === index - 1 && !feedback && !ended) node.classList.add("feeds");
+    // DRC and LVS show this iteration's verdict; the selected layout's own reports at the end.
     if (check && ["passed", "failed"].includes(check.status)) node.classList.add(check.status);
     if (key in checkNotes) $(`${key}-note`).textContent = check ? checkText(key, check) : checkNotes[key];
+  }
+  const [layoutNote, postNote] = loopNotes(stage);
+  $("layout-note").textContent = layoutNote; $("post-note").textContent = postNote;
+  $("stage-flow").classList.toggle("looping", looping); $("stage-flow").classList.toggle("feedback", feedback);
+  $("loop-count").textContent = loopState ? loopState.iteration : "×";
+  drawLoop();
+}
+// Feedback arrow from step 9 back into step 5, drawn at the steps' real positions.
+function drawLoop() {
+  const flow = $("stage-flow"), from = document.querySelector('.stages li[data-stage="postsimulating"] .step-number');
+  const to = document.querySelector('.stages li[data-stage="layout"] .step-number'), box = flow.getBoundingClientRect();
+  if (!box.width) return;
+  const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, a = to.getBoundingClientRect(), b = from.getBoundingClientRect();
+  const x = 0.55 * rem, r = 0.5 * rem, head = 0.34 * rem, y0 = a.top + a.height / 2 - box.top, y1 = b.top + b.height / 2 - box.top;
+  const start = b.left - box.left - 0.12 * rem, end = a.left - box.left - 0.1 * rem;
+  const svg = $("loop-arrow"); svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+  svg.replaceChildren(svgNode("path", { d: `M${start},${y1} H${x + r} Q${x},${y1} ${x},${y1 - r} V${y0 + r} Q${x},${y0} ${x + r},${y0} H${end - head}` }),
+    svgNode("path", { class: "head", d: `M${end - head},${y0 - 0.62 * head} L${end},${y0} L${end - head},${y0 + 0.62 * head} Z` }));
+  $("loop-badge").style.top = `${(y0 + y1) / 2}px`;
+}
+new ResizeObserver(() => drawLoop()).observe(document.getElementById("stage-flow"));
+// Fast loop steps (layout, DRC, LVS, RC take well under a second) stay on screen long enough
+// to be seen; the display catches up during post-layout simulation. Replays skip the wait.
+const dwell = {layout: 1100, drc: 450, lvs: 450, extracting: 350};
+let pending = [], shownStage = null, shownAt = 0, stageTimer = null, replayUntil = 0;
+function queueStage(snapshot) { pending.push(snapshot); pumpStages(); }
+function applyStage(next) {
+  if (next.stage !== shownStage) { shownStage = next.stage; shownAt = performance.now(); }
+  if (next.gates) gates = next.gates;
+  if (next.loop) loopState = next.loop;
+  $("run-message").textContent = next.message; $("progress").value = next.progress;
+  renderStages(next.stage);
+}
+function pumpStages(flush = false) {
+  if (stageTimer && !flush) return;
+  clearTimeout(stageTimer); stageTimer = null;
+  while (pending.length) {
+    const wait = (dwell[shownStage] || 0) - (performance.now() - shownAt);
+    if (!flush && pending[0].stage !== shownStage && wait > 0 && performance.now() > replayUntil && pending.length < 12) {
+      stageTimer = setTimeout(() => { stageTimer = null; pumpStages(); }, wait); return;
+    }
+    applyStage(pending.shift());
   }
 }
 function startClock() {
@@ -96,7 +160,8 @@ function reset() {
   $("verification").textContent = "Measurements appear after simulation.";
   $("result-note").textContent = "Plots and measurements come from the current ngspice run.";
   for (const [key, unit] of [["gain", "dB"], ["gbw", "MHz"], ["pm", "°"], ["power", "mW"]]) { setMetric(key, null, unit); $(`${key}-delta`).textContent = ""; }
-  gates = {drc: null, lvs: null}; renderStages(null);
+  pending = []; clearTimeout(stageTimer); stageTimer = null; shownStage = null;
+  gates = {drc: null, lvs: null}; loopState = null; renderStages(null);
   for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"]]) {
     const p = document.createElement("p"); p.textContent = text; $(key).replaceChildren(p); drawn.delete(key);
   }
@@ -140,6 +205,7 @@ function showResult(data) {
     $(`${key}-delta`).textContent = Number.isFinite(before) && Number.isFinite(after) ? `${after >= before ? "+" : "−"}${Math.abs((after - before) * scale).toFixed(2)}${unit === "°" ? "" : " "}${unit} vs schematic` : "";
   }
   const physical = data.physical;
+  pumpStages(true);  // the measured result supersedes any step still waiting to be shown
   const drcClean = physical.layout.drc_errors === 0, lvsMatched = physical.lvs.passed === true;
   $("drc-result").textContent = drcClean ? "✓ 0 errors" : `${physical.layout.drc_errors} errors`;
   $("drc-result").className = drcClean ? "pass" : "fail";
@@ -148,6 +214,7 @@ function showResult(data) {
   // The measured result is authoritative for the two gates: the selected layout's own checks.
   const chosen = Number(String(physical.optimization?.selected ?? "").split("-").pop());
   const layout = Number.isInteger(chosen) && physical.optimization?.selected ? chosen + 1 : gates.drc?.layout;
+  if (loopState) loopState = {...loopState, done: true, selected: layout, total: physical.optimization?.evaluations ?? loopState.total};
   gates = {drc: {status: drcClean ? "passed" : "failed", errors: physical.layout.drc_errors, layout, selected: true},
             lvs: {status: lvsMatched ? "passed" : "failed", devices: physical.lvs.devices, nets: physical.lvs.nets, layout, selected: true}};
   renderStages();
@@ -218,6 +285,7 @@ function showQuality(physical) {
 }
 
 function complete(ok) {
+  pumpStages(true);
   finished = true; running = false; clock.stop(); clearInterval(timer); renderTime();
   $("examples").disabled = false;
   $("live-dot").classList.remove("active");
@@ -278,9 +346,8 @@ function event(data) {
       $("magic-live-status").textContent = `Layout ${iteration.index + 1} · ${decision}`;
       $("magic-live-note").textContent = `${layoutActions[iteration.action] || iteration.action}${iteration.area_um2 == null ? "" : ` · ${iteration.area_um2.toFixed(0)} µm²`} · ${decision}`;
     }
-    $("run-message").textContent = data.message; $("progress").value = data.progress;
-    if (data.verification) gates = {...gates, ...data.verification};
-    renderStages(data.stage);
+    queueStage({stage: data.stage, message: data.message, progress: data.progress,
+      gates: data.verification ? {...data.verification} : null, loop: data.loop ? {...data.loop} : null});
     badge(data.stage === "complete" ? "Verified" : data.stage === "unqualified" ? "Unqualified" : "Running", data.stage === "complete" ? "success" : "");
   } else if (data.type === "waveforms") drawResponses(data, data.postlayout);
   else if (data.type === "result") showResult(data);
@@ -290,7 +357,7 @@ function event(data) {
 function connect() {
   const url = new URL(`${api}/api/runs/${runId}/live`); url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   socket = new WebSocket(url); socket.binaryType = "blob";
-  socket.onopen = () => { $("availability").textContent = "Connected to live xschem + Magic"; };
+  socket.onopen = () => { replayUntil = performance.now() + 1500; $("availability").textContent = "Connected to live xschem + Magic"; };
   socket.onmessage = ({ data }) => {
     if (data instanceof Blob) {
       const previous = frameURL; frameURL = URL.createObjectURL(data);

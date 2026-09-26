@@ -103,8 +103,11 @@
 
 并行 worker 通过进程队列实时上报每个候选的验证步骤（layout → drc → lvs → extracting → postsimulating，
 DRC/LVS 带 running/passed/failed 与违例数或器件/网络数，以及 worker 端时间戳）。网页把 Magic DRC 与
-Netgen LVS 作为两个独立步骤显示：通过后步骤标记变成绿色对勾，精修阶段被拒绝的候选不会撤销 incumbent 已通过的检查，
-最终状态取自被选中版图自己的 DRC/LVS 报告；阶段计时用 worker 端时间戳，不受 Magic 画面刷新阻塞的影响。
+Netgen LVS 作为 layout loop（步骤 5–9）里的两个独立步骤显示，步骤 9 到 5 画有反馈箭头和迭代计数。每轮迭代
+（种子 plan，然后是 Laya 从 incumbent 提出的一批候选，并行验证）按该批最慢的候选推进：当前步骤的标记和指向它的
+箭头高亮，新一轮开始时反馈箭头高亮并流动；DRC/LVS 每轮重新检查并显示该批的结果（全部通过为绿色对勾，否则红叉
+与被拒数量）。很快的步骤在画面上至少停留 0.35–1.1 s，不影响实测计时；最终状态取自被选中版图自己的 DRC/LVS 报告；
+阶段计时用 worker 端时间戳。任何一个候选失败（例如布线空间不足）只记为被拒，不再中断整个 demo。
 
 ## 4. 实测结果
 

@@ -377,57 +377,115 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
             raise RuntimeError(result["error"])
         live_layout = {}
         displayed_plan = None
-        steps = ("layout", "drc", "lvs", "extracting", "postsimulating")
         step_progress = {"layout": 72, "drc": 75, "lvs": 79, "extracting": 83, "postsimulating": 87}
-        furthest = -1  # the pipeline only moves forward, whichever candidate gets there
+        # One loop iteration = one batch of layout candidates (the seed plan, then Laya's
+        # proposals from the incumbent), verified in parallel. The steps follow the batch's
+        # slowest candidate, so every iteration walks layout -> DRC -> LVS -> RC ->
+        # post-layout simulation and then feeds back; DRC and LVS report per iteration.
+        ranks = {"layout": 0, "drc": 1, "lvs": 3, "extracting": 5, "postsimulating": 6, "done": 7}
+        wavefront = ("layout", "drc", "lvs", "lvs", "extracting", "extracting", "postsimulating",
+                     "postsimulating")
+        labels = {"layout": "placing matched SKY130 device rows, rails and routing",
+                  "drc": "Magic DRC with the full SKY130 rule deck",
+                  "lvs": "Netgen LVS against the schematic netlist",
+                  "extracting": "Magic distributed RC extraction",
+                  "postsimulating": "ngspice on the extracted RC netlists"}
+        actions = {"aspect": "aspect ratio", "max_finger_um": "finger folding",
+                   "pair_pattern": "matching pattern", "dummies": "edge dummies",
+                   "single_dummies": "single-device dummies", "rail_um": "rail width",
+                   "decap": "decoupling", "passives": "passive placement",
+                   "shield_inputs": "grounded separator", "refinger": "re-fingering"}
+        loop = {"iteration": 0, "members": [], "rank": {}, "generated": set(), "finished": set(),
+                "drc": {}, "lvs": {}, "errors": {}, "counts": {}, "layouts": 0, "accepted": None,
+                "incumbent": None, "evaluated": 0, "step": "layout"}
 
-        def pipeline():
-            return steps[max(furthest, 0)]
+        def span():
+            return [loop["members"][0] + 1, loop["members"][-1] + 1] if loop["members"] else [0, 0]
 
-        def step_message(name, data):
-            status, number = data.get("status"), data["index"] + 1
-            if name == "drc":
-                text = ("Magic DRC with the full SKY130 rule deck" if status == "running" else
-                        "DRC clean · 0 violations" if status == "passed" else
-                        f"{data.get('errors')} DRC violations · rejected")
-            elif name == "lvs":
-                text = ("Netgen LVS against the schematic netlist" if status == "running" else
-                        f"LVS matched · {data.get('devices')} devices, {data.get('nets')} nets"
-                        if status == "passed" else "LVS mismatch · rejected")
+        def gate(name):
+            results = loop[name]
+            size = sum(1 for i in loop["members"] if i in loop["generated"] or i not in loop["finished"])
+            checked, passed = len(results), sum(results.values())
+            if checked < size:
+                status = "running" if checked or ranks[loop["step"]] >= ranks[name] else "pending"
             else:
-                text = {"layout": "placing matched SKY130 device rows, rails and routing",
-                        "extracting": "Magic distributed RC extraction",
-                        "postsimulating": "ngspice on the extracted RC netlist"}[name]
-            return f"Layout {number}: {text}"
+                status = "passed" if size and passed == checked else "failed"
+            state = {"status": status, "checked": checked, "passed": passed, "of": size,
+                     "unrouted": len(loop["members"]) - size, "layouts": span(),
+                     "iteration": loop["iteration"]}
+            if name == "drc":
+                state["errors"] = sum(loop["errors"].values())
+            elif size == 1 and loop["counts"]:
+                state["devices"], state["nets"] = next(iter(loop["counts"].values()))
+            return state
+
+        def publish(message, at=None, moved=False, **extra):
+            data = {"message": message, "verification": {"drc": gate("drc"), "lvs": gate("lvs")},
+                    "loop": {"iteration": loop["iteration"], "layouts": span(),
+                             "size": len(loop["members"]), "total": loop["layouts"],
+                             "finished": len(loop["finished"]), "evaluated": loop["evaluated"],
+                             "accepted": loop["accepted"], "incumbent": loop["incumbent"]}, **extra}
+            data.setdefault("progress", step_progress[loop["step"]])
+            if moved:
+                stage(loop["step"], at=at, **data)
+            else:
+                emit("stage", stage=loop["step"], **data, **timing.snapshot())
 
         def physical_stage(name, data):
             """One verification step of one candidate, streamed from the layout workers."""
-            nonlocal furthest
-            changed = False
-            if name in checks and data.get("status"):
-                current = checks[name]
-                # A later rejected candidate never revokes a check the incumbent passed.
-                if current is None or current["status"] != "passed":
-                    update = {"status": data["status"], "layout": data["index"] + 1,
-                              **{k: data[k] for k in ("errors", "devices", "nets")
-                                 if data.get(k) is not None}}
-                    changed, checks[name] = update != current, update
-            shown = data["plan_id"] == displayed_plan
+            index, status = data["index"], data.get("status")
+            if index not in loop["members"]:
+                return
+            rank = ranks[name] + (1 if name in ("drc", "lvs") and status != "running" else 0)
+            loop["rank"][index] = max(loop["rank"][index], rank)
+            number, message = index + 1, None
+            if name == "drc":
+                loop["generated"].add(index)
+                if status != "running":
+                    loop["drc"][index] = status == "passed"
+                    loop["errors"][index] = data.get("errors") or 0
+                    message = f"Layout {number}: " + ("DRC clean · 0 violations" if status == "passed"
+                                                      else f"{data.get('errors')} DRC violations · rejected")
+            elif name == "lvs" and status != "running":
+                loop["lvs"][index] = status == "passed"
+                loop["counts"][index] = (data.get("devices"), data.get("nets"))
+                message = f"Layout {number}: " + (
+                    f"LVS matched · {data.get('devices')} devices, {data.get('nets')} nets"
+                    if status == "passed" else "LVS mismatch · rejected")
+            elif name == "done":
+                loop["finished"].add(index)
+            shown = data["plan_id"] == displayed_plan and name != "done"
             if shown:
                 live_layout["phase"] = name
-            message = step_message(name, data)
-            iteration = dict(live_layout) if shown else {}
-            if steps.index(name) > furthest:
-                furthest = steps.index(name)
-                stage(name, message=message, progress=step_progress[name], layout_iteration=iteration,
-                      at=data.get("at"))
-            elif changed or shown:
-                emit("stage", stage=pipeline(), message=message, progress=step_progress[pipeline()],
-                     verification=dict(checks), layout_iteration=iteration, **timing.snapshot())
+            step = wavefront[min(loop["rank"][i] for i in loop["members"])]
+            moved = step != loop["step"]
+            if moved:
+                loop["step"] = step
+                first, last = span()
+                message = (f"Iteration {loop['iteration']}: {labels[step]} · "
+                           + (f"layouts {first}–{last}" if last > first else f"layout {first}"))
+            if moved or message:
+                publish(message, at=data.get("at"), moved=moved,
+                        **({"layout_iteration": dict(live_layout)} if shown else {}))
 
         def physical_candidate(event):
             nonlocal live_layout, displayed_plan
             kind = event["kind"]
+            if kind == "batch":
+                indices = event["indices"]
+                loop.update(iteration=event["iteration"], members=indices, rank=dict.fromkeys(indices, 0),
+                            generated=set(), finished=set(), drc={}, lvs={}, errors={}, counts={},
+                            accepted=None, incumbent=event["incumbent"], evaluated=0, step="layout")
+                loop["layouts"] += len(indices)
+                first, last = span()
+                if event["incumbent"] is None:
+                    message = f"Iteration 1: the initial layout plan · {labels['layout']}"
+                else:
+                    moves = ", ".join(actions.get(a, a) for a in event["actions"])
+                    message = (f"Iteration {event['iteration']}: Laya proposes layouts {first}–{last} "
+                               f"({moves}) from incumbent layout {event['incumbent'] + 1}")
+                publish(message, moved=True)
+                return
             if kind in {"rendered", "selected"}:
                 screen.show_layout(event["directory"] / "layout.mag")
                 displayed_plan = event["plan_id"]
@@ -445,7 +503,18 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                 checks["lvs"] = {"status": "passed" if event["lvs"] else "failed", "layout": number,
                                  "devices": event.get("lvs_devices"), "nets": event.get("lvs_nets"),
                                  "selected": True}
+                # No paths or Tcl are sent to the browser. The native viewer has
+                # acknowledged the same geometry before its iteration is announced.
+                emit("stage", stage=loop["step"], message=f"Layout {number}: selected layout restored in Magic",
+                     progress=94, layout_iteration=live_layout, verification=dict(checks),
+                     loop={"iteration": loop["iteration"], "total": loop["layouts"], "selected": number,
+                           "done": True}, **timing.snapshot())
+                return
             if kind == "evaluated":
+                loop["finished"].add(event["index"])
+                loop["evaluated"] += 1
+                if event.get("accepted"):
+                    loop["accepted"] = loop["incumbent"] = event["index"]
                 outcome = ("accepted improvement" if event.get("accepted") else
                            "qualified; keeping incumbent" if event.get("valid") else
                            "rejected · verification error" if event.get("drc_errors") is None else
@@ -453,13 +522,9 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                            "rejected · LVS mismatch" if event.get("lvs") is False else
                            "rejected · post-layout checks")
             else:
-                outcome = {"rendered": "DRC complete · opened in Magic",
-                           "selected": "selected layout restored in Magic"}[kind]
-            # No paths or Tcl are sent to the browser. The native viewer has
-            # acknowledged the same geometry before its iteration is announced.
-            emit("stage", stage=pipeline(), message=f"Layout {number}: {outcome}",
-                 progress=94 if kind == "selected" else 90 if kind == "evaluated" else step_progress[pipeline()],
-                 layout_iteration=live_layout, verification=dict(checks), **timing.snapshot())
+                outcome = "DRC complete · opened in Magic"
+            publish(f"Layout {number}: {outcome}", layout_iteration=live_layout,
+                    **({"progress": 90} if kind == "evaluated" else {}))
 
         stage("layout", message="Starting the goal-driven layout loop: Laya proposes, DRC, LVS "
               "and ngspice decide", progress=71)
