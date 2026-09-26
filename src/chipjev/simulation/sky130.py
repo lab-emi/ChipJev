@@ -53,12 +53,23 @@ STRICT_LIMIT_S = 60.0
 STRICT = "reltol=1e-6 abstol=1e-12 vntol=1e-9"
 
 
+def _maker(quantize_geometry):
+    """False: continuous sizing; True: 10 nm PCell grid; a float: grid plus a
+    layout-aware unit finger of at most that many um (the physical profile)."""
+    from ..circuits.sky130_devices import build_on_grid
+
+    if not quantize_geometry:
+        return build
+    if type(quantize_geometry) is float:
+        return lambda t, v, vdd: build_on_grid(t, v, vdd, finger_max=quantize_geometry)
+    return build_on_grid
+
+
 def deck(topology, values, *, quantize_geometry=False, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qualified",
          temperature=27.0, corner="tt", circuit=None, input_bias=None, mismatch_seed=None):
     """Return (deck text, Builder): ptm45.deck with SKY130 devices."""
     target = vdd / 2
-    from ..circuits.sky130_devices import build_on_grid
-    make = build_on_grid if quantize_geometry else build
+    make = _maker(quantize_geometry)
     b = circuit if circuit is not None else make(topology, values, vdd)
     lines = [f"* ChipJev-Topo SKY130 {topology.id}", include_text(corner, mismatch=mismatch_seed is not None)]
     lines += getattr(b, "model_lines", [])
@@ -133,8 +144,7 @@ def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature,
     delay = stop / 20
     inverted = abs(metrics["dc_phase_deg"]) >= 90
     feedback, signal = ("inp", "inn") if inverted else ("inn", "inp")
-    from ..circuits.sky130_devices import build_on_grid
-    make = build_on_grid if quantize_geometry else build
+    make = _maker(quantize_geometry)
     builder = circuit if circuit is not None else make(topology, values, vdd)
     lines = [
         f"* Qualified buffer (SKY130): {topology.id}, direction {direction}",
@@ -240,6 +250,9 @@ def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF,
                        input_bias=input_bias, mismatch_seed=mismatch_seed, quantize_geometry=quantize_geometry)
         if quantize_geometry:
             record["geometry_policy"] = "10 nm symmetric PCell grid"
+            if type(quantize_geometry) is float:
+                record["geometry_policy"] += f", fingers <= {quantize_geometry:g} um (layout template)"
+                record["finger_max_um"] = quantize_geometry
         if mismatch_seed is not None:
             record["mismatch_seed"]=mismatch_seed
         if input_bias is not None:

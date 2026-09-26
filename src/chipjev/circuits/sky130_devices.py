@@ -63,11 +63,15 @@ def strength(value):
     return c + (float(value) - a) * (d - c) / (b - a)
 
 
-def geometry(ratio, length_nm):
-    """(W total um, L um, fingers) of a grammar device."""
+def geometry(ratio, length_nm, finger_max=None):
+    """(W total um, L um, fingers) of a grammar device.
+
+    ``finger_max`` (um) is the layout-aware device template of the physical
+    profile; the default keeps the frozen studies' 50 um fingers.
+    """
     length = float(length_nm) * LENGTH_SCALE / 1000.0
     width = max(float(ratio) * length, W_MIN_UM)
-    fingers = max(1, math.ceil(width / FINGER_MAX_UM - 1e-9))
+    fingers = max(1, math.ceil(width / (finger_max or FINGER_MAX_UM) - 1e-9))
     return width, length, fingers
 
 
@@ -93,13 +97,14 @@ def probe(name, kind, quantity):
 class Sky130Builder(Builder):
     """Builder whose devices are SKY130 transistors (see the module notes)."""
 
-    def __init__(self, vdd=VDD):
+    def __init__(self, vdd=VDD, finger_max=None):
         super().__init__(vdd)
         self.geometry = {}  # device name -> (W um, L um, fingers)
+        self.finger_max = finger_max
 
     def mos_(self, kind, d, g, s, ratio, length_nm):
         name = f"m{len(self.mos) + 1}"
-        width, length, fingers = geometry(ratio, length_nm)
+        width, length, fingers = geometry(ratio, length_nm, self.finger_max)
         bulk = "0" if kind == "n" else "vdd"
         extra = " ".join(f"{k}={v:.6g}" for k, v in diffusion(width, fingers).items())
         self.lines.append(
@@ -114,10 +119,10 @@ class Sky130Builder(Builder):
         return super().gate(node, kind, strength(value))
 
 
-def build(topology, values, vdd=VDD):
+def build(topology, values, vdd=VDD, finger_max=None):
     """SKY130 devices of a grammar design (the grammar's build with Sky130Builder)."""
     if hasattr(topology, "construct"):  # a published topology (published.py)
-        b = Sky130Builder(vdd)
+        b = Sky130Builder(vdd, finger_max)
         topology.construct(b, lambda slot: float(values[slot]))
         return b
     missing = [s for s in topology.slots() if s not in values]
@@ -127,7 +132,7 @@ def build(topology, values, vdd=VDD):
     def v(slot):
         return float(values[slot])
 
-    b = Sky130Builder(vdd)
+    b = Sky130Builder(vdd, finger_max)
     count = len(topology.stages)
     gain_out = [f"o{k}" for k in range(1, count + 1)]
     if topology.buffer == "none":
@@ -154,7 +159,7 @@ def build(topology, values, vdd=VDD):
     return b
 
 
-def build_on_grid(topology, values, vdd=VDD):
+def build_on_grid(topology, values, vdd=VDD, finger_max=None):
     """Manufacturable schematic sizing for the physical-search profile only.
 
     Keep the requested grammar values and finger count, but use the compiler's
@@ -163,7 +168,7 @@ def build_on_grid(topology, values, vdd=VDD):
     """
     import re
 
-    builder=build(topology,values,vdd)
+    builder=build(topology,values,vdd,finger_max)
     replacements={}
     for name, (width,length,nf) in builder.geometry.items():
         width=max(.42,round(width/nf/.01)*.01)*nf

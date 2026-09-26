@@ -65,7 +65,7 @@ class LayoutEvaluator(Evaluator):
                             record["margins"][key] -= reserve
                     if record.get("strict") and record["valid"] and self.physical_directory:
                         from chipjev.circuits.published import lookup
-                        from chipjev.layout.plan import LayoutPlan
+                        from chipjev.layout.pro.planner import ProPlan
                         from chipjev.layout.verification import verify
 
                         target = Path(mkdtemp(prefix="candidate-", dir=self.physical_directory))
@@ -94,7 +94,7 @@ class LayoutEvaluator(Evaluator):
                                 lookup(record["cls"], record["topology"]),
                                 record["values"], target, prelayout=record,
                                 vdd=record["vdd"], load_pf=record["load_pf"],
-                                plan=LayoutPlan(fingers_per_row=20),
+                                plan=ProPlan(),
                                 input_bias=record["metrics"]["vin_dc"],
                             )
                             measured = physical["postlayout"]

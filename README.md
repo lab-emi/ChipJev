@@ -197,6 +197,17 @@ The output contains native Magic, GDSII, DRC/LVS reports, the actual RC-extracte
 strict post-layout measurements and every bounded recovery attempt. A failed result exits
 with a nonzero status. The CLI requires a SKY130 result; PTM sizing is not silently converted.
 
+The default layout generator (`--generator pro`) compiles professional analog-layout
+practice into templates: shared-diffusion finger arrays with end dummies, 1-D and 2-D
+cross-coupled common-centroid pairs, rows along the DC current path with tapped rails, guard
+rings and a double guard bar, a metal3 power grid, decoupling fill, unit-tile MIM and poly
+resistor arrays, and mirror-symmetric trunk/bus routing. A goal-driven loop verifies candidate
+plans in parallel (DRC, LVS, RC, the declared physical netlist, post-layout ngspice, a rule-card
+critic) with Laya ranking actions whose option text carries the knowledge cards retrieved for
+that action. `--finger-max UM` on `chipjev design` sizes SKY130 devices with the layout's unit
+finger. Design, measurements and the knowledge-base/fine-tuning study:
+[docs/analog-layout-pro.md](docs/analog-layout-pro.md).
+
 ## Reproduce the experiments
 
 ```bash

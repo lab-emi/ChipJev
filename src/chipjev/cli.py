@@ -105,6 +105,9 @@ def layout_command(args):
         raise ValueError("Physical synthesis requires a SKY130 result, not PTM sizing")
     selected = record.get("best") or record
     topology = lookup(record["cls"], selected["topology"])
+    if not args.legacy and args.generator == "pro":
+        return _layout_pro(args, record, selected, topology)
+    args.objective = args.objective or "area"
     if args.legacy:
         result = complete(topology, selected["values"], args.output,
                           vdd=record.get("vdd", 1.8), load_pf=record.get("load_pf", 100),
@@ -151,6 +154,41 @@ def layout_command(args):
     return 0 if result["valid"] else 1
 
 
+def _layout_pro(args, record, selected, topology):
+    """Goal-driven search over the professional templates (Laya + knowledge cards)."""
+    from .search.pro_layout import GOALS, optimize_pro
+
+    goal = args.objective or "quality"
+    if goal not in GOALS:
+        raise ValueError(f"The pro generator optimizes {GOALS}; use --generator groups for {goal}")
+    if args.goal or args.corners or args.mismatch_samples or args.sizing_evaluations:
+        raise ValueError("Physical-goal files, corners and joint sizing run with --generator groups")
+    model = None
+    if not args.no_laya:
+        from .decisions.typed import TypedDecisions
+
+        weights = args.layout_policy or _weights(None)
+        model = TypedDecisions(weights=weights, device=args.device)
+        model.layout_policy = args.layout_policy is not None
+    bias = args.input_bias if args.input_bias is not None else (selected.get("metrics") or {}).get("vin_dc")
+    try:
+        trace = optimize_pro(topology, selected["values"], args.output, goal=goal,
+                             vdd=record.get("vdd", 1.8), load_pf=record.get("load_pf", 100),
+                             input_bias=bias, model=model, max_evaluations=args.evaluations,
+                             parallel=args.parallel, budget_seconds=args.seconds,
+                             finger_max_um=record.get("finger_max_um") or selected.get("finger_max_um"))["optimization"]
+    except RuntimeError as exc:
+        print(json.dumps({"valid": False, "error": str(exc), "output": str(args.output)}, indent=2))
+        return 1
+    best = next((h for h in trace["history"] if h["directory"] == trace["selected"]), {})
+    print(json.dumps({"valid": best.get("valid", False), "selected": trace["selected"],
+                      "area_um2": best.get("area_um2"), "critic": best.get("critic"),
+                      "plan": best.get("plan"), "postlayout": best.get("metrics"),
+                      "evaluations": trace["evaluations"], "wall_seconds": trace["wall_seconds"],
+                      "output": str(args.output)}, indent=2, default=str))
+    return 0 if best.get("valid") else 1
+
+
 def design(args):
     from .circuits.published import lookup
     from .search.evaluator import Evaluator
@@ -186,7 +224,14 @@ def design(args):
 
     print(f"search: {args.technology}, {args.budget} simulations, {args.workers} ngspice "
           f"workers, VDD {vdd:g} V, CL {load:g} pF", flush=True)
-    evaluator = Evaluator(args.workers, technology=args.technology, corner=args.corner)
+    options = None
+    if args.finger_max is not None:
+        if args.technology != "sky130":
+            raise ValueError("--finger-max is the SKY130 layout-aware device template")
+        # Physical profile: size the devices exactly as the layout will draw them.
+        options = {"quantize_geometry": float(args.finger_max)}
+    evaluator = Evaluator(args.workers, technology=args.technology, corner=args.corner,
+                          evaluate_options=options)
     try:
         warm(args.device, classes=(cls,))
         settings = Settings(seed=args.seed, rounds=max(1, args.budget // 8), device=args.device,
@@ -201,6 +246,8 @@ def design(args):
     result.update(request=request, technology=args.technology, corner=args.corner,
                   typed={k: answer[k] for k in ("state", "class", "objective", "answers",
                                                 "seconds")})
+    if args.finger_max is not None:
+        result["finger_max_um"] = float(args.finger_max)
     with gzip.open(output / "result.json.gz", "wt") as stream:
         json.dump(result, stream, allow_nan=False)
     best = result["best"]
@@ -277,6 +324,9 @@ def main(argv=None):
     p.add_argument("--no-prior", action="store_true",
                    help="ignore the typed topology prior (the paper's ablation)")
     p.add_argument("--output", type=Path, help="output directory (default runs/designs/...)")
+    p.add_argument("--finger-max", type=float, metavar="UM",
+                   help="SKY130 layout-aware sizing: simulate devices with fingers of at most UM um "
+                        "on the 10 nm grid, exactly as the layout generator draws them")
     p.set_defaults(run=design)
 
     p = sub.add_parser("tasks", help="AnalogCoder-Pro's twelve benchmark tasks")
@@ -287,8 +337,14 @@ def main(argv=None):
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--no-recovery", action="store_true", help="verify the supplied sizing without refinement")
     p.add_argument("--legacy", action="store_true", help="use the original single-row flow for comparison")
+    p.add_argument("--generator", choices=("pro", "groups"), default="pro",
+                   help="pro: professional template generator (default); groups: the analog-groups-v1 flow")
+    p.add_argument("--parallel", type=int, default=4, help="layout candidates verified concurrently (pro)")
+    p.add_argument("--layout-policy", type=Path,
+                   help="Laya weights fine-tuned on layout self-play (decisions.layout_selfplay train)")
     p.add_argument("--goal", type=Path, help="JSON physical goal and analog test conditions")
-    p.add_argument("--objective", choices=("area","gain","gbw","fom","noise","matching"),default="area")
+    p.add_argument("--objective", choices=("quality","area","gain","gbw","pm","fom","noise","matching"),
+                   default=None, help="pro: quality (default), area, gain, gbw, pm")
     p.add_argument("--evaluations",type=int,default=8)
     p.add_argument("--seconds",type=float,default=60)
     p.add_argument("--input-bias",type=float,help="fixed common-mode/input bias for every candidate")

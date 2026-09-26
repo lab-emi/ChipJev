@@ -208,7 +208,14 @@ class ExtractedCircuit:
         manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else None
         expected_counts = {n: g[2] for n, g in builder.geometry.items()}
         auxiliaries = Counter()
-        if manifest is not None:
+        if manifest is not None and manifest.get("generator", "").startswith("pro-rows"):
+            from .pro.integrity import validate
+
+            reference = spice_lines((path.parent / "reference.spice").read_text())
+            if inventory(reference, lambda n: n) != inventory(original, lambda n: n):
+                raise ValueError("Extracted device inventory disagrees with declared implementation")
+            expected_counts, auxiliaries = validate(builder, manifest)
+        elif manifest is not None:
             from .intent import derive
             from .plan import LayoutPlan
 
@@ -308,8 +315,13 @@ def verify(
     plan=None,
     input_bias=None,
     temperature=27.0,
+    finger_max_um=None,
 ):
-    """Write reviewable evidence for every stage, including failures."""
+    """Write reviewable evidence for every stage, including failures.
+
+    ``finger_max_um``: the layout-aware device template the schematic was sized
+    with (pro generator); the extracted devices are mapped to the same builder.
+    """
     start = time.perf_counter()
     directory = Path(directory).resolve()
 
@@ -318,8 +330,16 @@ def verify(
             observer(name, data or {})
 
     stage("layout")
+    from .pro.planner import ProPlan
+
     if plan is None:
         layout = synthesize(topology, values, directory, vdd=vdd)
+    elif isinstance(plan, ProPlan):
+        from .pro.compiler import synthesize as compile_pro
+
+        current = ((prelayout or {}).get("metrics", {}).get("power_uw") or 1800) * 1e-6 / vdd
+        layout = compile_pro(topology, values, directory, vdd=vdd, plan=plan, current_a=current,
+                             finger_max_um=finger_max_um)
     else:
         from .compiler import synthesize as compile_layout
 
@@ -329,7 +349,7 @@ def verify(
     matched = lvs(directory)
     extraction = extract_rc(directory)
     stage("postsimulating", {"layout": layout, "lvs": matched, "pex": extraction})
-    builder = build(topology, values, vdd)
+    builder = build(topology, values, vdd, finger_max=finger_max_um)
     circuit = ExtractedCircuit(builder, directory / "pex.spice")
     if prelayout is None:
         prelayout = evaluate(
@@ -356,7 +376,20 @@ def verify(
         temperature=temperature,
     )
     post.pop("pid", None)
+    physical_schematic = None
+    if (directory / "manifest.json").exists() and json.loads(
+            (directory / "manifest.json").read_text()).get("generator", "").startswith("pro-rows"):
+        # The declared physical netlist without parasitics: separates what
+        # re-fingering changed from what the layout parasitics changed.
+        from .pro.physical import PhysicalSchematic
+
+        physical_schematic = evaluate(
+            topology, values, directory=directory / "physical-schematic", strict=True, keep=True,
+            vdd=vdd, load_pf=load_pf, circuit=PhysicalSchematic(builder, directory),
+            input_bias=input_bias, temperature=temperature)
+        physical_schematic.pop("pid", None)
     result = {
+        "physical_schematic": physical_schematic,
         "valid": bool(
             prelayout["valid"] and layout["drc_errors"] == 0 and matched["passed"] and post["valid"]
         ),

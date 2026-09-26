@@ -25,7 +25,7 @@ from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build_on_grid as build
 from chipjev.paths import ROOT, magic
 from chipjev.provenance import code_hashes
-from chipjev.search.layout import optimize as physical_design
+from chipjev.search.pro_layout import optimize_pro as physical_design
 from chipjev.simulation.pdk import model_root
 from chipjev.simulation.sky130 import evaluate
 from demo import design
