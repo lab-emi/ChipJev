@@ -236,6 +236,20 @@ def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
             selected = [e for e in iterations if e["status"] == "selected"][-1]
             assert selected["plan_id"] == result["physical"]["layout"]["plan_id"]
             assert selected["valid"]
+            # DRC and LVS are separate live steps; each reports running, then its verdict.
+            stages = [e["stage"] for e in events if e["type"] == "stage"]
+            assert (stages.index("layout") < stages.index("drc") < stages.index("lvs")
+                    < stages.index("extracting") < stages.index("postsimulating"))
+            verdicts = [e["verification"] for e in events if e.get("verification")]
+            for gate in ("drc", "lvs"):
+                states = [v[gate]["status"] for v in verdicts if v.get(gate)]
+                assert states.index("running") < states.index("passed"), states
+            final = next(e for e in events if e.get("stage") == "complete")["verification"]
+            layout_number = selected["index"] + 1
+            assert final["drc"] == {"status": "passed", "errors": 0, "layout": layout_number,
+                                    "selected": True}
+            assert final["lvs"]["status"] == "passed" and final["lvs"]["layout"] == layout_number
+            assert final["lvs"]["devices"] == result["physical"]["lvs"]["devices"] > 0
             snapshots = sorted((tmp_path / ident).glob("view-*.mag"),
                                key=lambda p: int(p.stem.split("-")[-1]))
             assert len(snapshots) >= 2

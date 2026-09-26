@@ -101,6 +101,11 @@
 每个决策与被评估选项的实测结果写入 `trajectory.jsonl`。demo 的 `LayoutEvaluator` 与 `worker.py` 已切换到新生成器，
 事件协议（rendered/evaluated/selected）保持兼容。
 
+并行 worker 通过进程队列实时上报每个候选的验证步骤（layout → drc → lvs → extracting → postsimulating，
+DRC/LVS 带 running/passed/failed 与违例数或器件/网络数，以及 worker 端时间戳）。网页把 Magic DRC 与
+Netgen LVS 作为两个独立步骤显示：通过后步骤标记变成绿色对勾，精修阶段被拒绝的候选不会撤销 incumbent 已通过的检查，
+最终状态取自被选中版图自己的 DRC/LVS 报告；阶段计时用 worker 端时间戳，不受 Magic 画面刷新阻塞的影响。
+
 ## 4. 实测结果
 
 ### 4.1 同一尺寸下与当前版本对比

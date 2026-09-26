@@ -9,8 +9,8 @@
   <title>ChipJev — AI Analog Circuit Design with Open-Source EDA</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="canonical" href="https://chipjev.com/">
-  <link rel="stylesheet" href="styles.css?v=dual-eda-2">
-  <script src="app.js?v=dual-eda-2" type="module"></script>
+  <link rel="stylesheet" href="styles.css?v=drc-lvs-3">
+  <script src="app.js?v=drc-lvs-3" type="module"></script>
 </head>
 <body>
   <a class="skip-link" href="#demo">Skip to live demo</a>
@@ -57,7 +57,7 @@
               </section>
               <section class="tool-pane" aria-label="Live Magic layout">
                 <div class="tool-heading"><strong>Magic</strong><span id="magic-live-status">Reference layout</span></div>
-                <div class="tool-screen"><img id="magic-frame" src="assets/workspace-preview.jpg" width="1920" height="900" alt="Reference capture: the matching SKY130 physical layout in the native Magic editor"><div id="magic-waiting" class="magic-waiting" hidden><strong>Waiting for the selected circuit</strong><span>Each generated layout will open here as it enters DRC, PEX and post-layout verification.</span></div></div>
+                <div class="tool-screen"><img id="magic-frame" src="assets/workspace-preview.jpg" width="1920" height="900" alt="Reference capture: the matching SKY130 physical layout in the native Magic editor"><div id="magic-waiting" class="magic-waiting" hidden><strong>Waiting for the selected circuit</strong><span>Each generated layout opens here once Magic DRC has checked it, then goes through LVS, RC extraction and post-layout verification.</span></div></div>
                 <p class="tool-note" id="magic-live-note" role="status">Placement, routing and acceptance update with each layout.</p>
               </section>
             </div>
@@ -78,10 +78,12 @@
             <li data-stage="searching"><span class="step-number">2</span><div><strong>ChipJev designs the circuit</strong><small id="search-note">Joint topology + sizing + RC screening</small></div></li>
             <li data-stage="netlisting"><span class="step-number">3</span><div><strong>Check every connection</strong><small>xschem netlist and geometry verification</small></div></li>
             <li data-stage="simulating"><span class="step-number">4</span><div><strong>Verify the schematic</strong><small>AC sweep and closed-loop steps</small></div></li>
-            <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small>Matched groups, supply rails and goal-driven refinement</small></div></li>
-            <li data-stage="extracting"><span class="step-number">6</span><div><strong>Extract the real circuit</strong><small>Netgen LVS + Magic distributed RC</small></div></li>
-            <li data-stage="postsimulating"><span class="step-number">7</span><div><strong>Verify after layout</strong><small>ngspice AC and closed-loop steps</small></div></li>
-            <li data-stage="checking"><span class="step-number">8</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
+            <li data-stage="layout"><span class="step-number">5</span><div><strong>Generate the physical layout</strong><small>Matched rows, supply rails and goal-driven refinement</small></div></li>
+            <li data-stage="drc"><span class="step-number"><span>6</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Design-rule check</strong><small id="drc-note">Magic DRC · full SKY130 rule deck</small></div></li>
+            <li data-stage="lvs"><span class="step-number"><span>7</span><svg viewBox="0 0 16 16" aria-hidden="true"><path class="tick" d="M3.4 8.6 6.5 11.6 12.6 4.8"/><path class="cross" d="M4.9 4.9 11.1 11.1M11.1 4.9 4.9 11.1"/></svg></span><div><strong>Layout vs. schematic</strong><small id="lvs-note">Netgen LVS · every device and net</small></div></li>
+            <li data-stage="extracting"><span class="step-number">8</span><div><strong>Extract the real circuit</strong><small>Magic distributed RC parasitics</small></div></li>
+            <li data-stage="postsimulating"><span class="step-number">9</span><div><strong>Verify after layout</strong><small>ngspice AC and closed-loop steps</small></div></li>
+            <li data-stage="checking"><span class="step-number">10</span><div><strong>Compare performance</strong><small>Schematic vs. extracted measurements</small></div></li>
           </ol>
           <progress id="progress" value="0" max="100" aria-label="Run progress"></progress>
           <p id="run-message" class="run-message" role="status">Choose a prompt to start a fresh design.</p>
@@ -108,11 +110,11 @@
         <div class="plots" aria-label="Post-layout simulation results"><figure class="plot-card"><figcaption><h3>Extracted open-loop response</h3><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="post-ac-plot"><p>Waiting for the extracted AC sweep</p></div></figure><figure class="plot-card"><figcaption><h3>Extracted unity-buffer response</h3><span class="plot-key"><i></i>+10 mV <i class="negative"></i>−10 mV</span></figcaption><div class="plot-area" id="post-step-plot"><p>Waiting for the extracted closed-loop steps</p></div></figure></div>
         <section id="analog-quality" hidden aria-labelledby="quality-title">
           <div class="response-heading"><h3 id="quality-title">Layout decisions, measured</h3><p id="layout-plan-note"></p></div>
-          <div class="physical-facts"><div><span>Input noise · 10 Hz–1 MHz</span><strong id="noise-result">—</strong></div><div><span>Minimum PSRR · same band</span><strong id="psrr-result">—</strong></div><div><span>Internal supply drop</span><strong id="ir-result">—</strong></div><div><span>Ground rise</span><strong id="ground-result">—</strong></div></div>
+          <div id="analog-facts" class="physical-facts"><div><span>Input noise · 10 Hz–1 MHz</span><strong id="noise-result">—</strong></div><div><span>Minimum PSRR · same band</span><strong id="psrr-result">—</strong></div><div><span>Internal supply drop</span><strong id="ir-result">—</strong></div><div><span>Ground rise</span><strong id="ground-result">—</strong></div></div>
           <p id="optimization-summary" class="physical-scope"></p>
-          <div class="comparison-scroll"><table class="comparison"><caption>Same circuit and fixed input bias. Only fully qualified candidates can replace the incumbent.</caption><thead><tr><th>Iteration / action</th><th>Area (µm²)</th><th>Gain (dB)</th><th>GBW (MHz)</th><th>Decision</th></tr></thead><tbody id="optimization-body"></tbody></table></div>
+          <div class="comparison-scroll"><table class="comparison"><caption>Same circuit and fixed input bias. Only fully qualified candidates can replace the incumbent.</caption><thead><tr><th>Iteration / action</th><th>Magic DRC</th><th>Netgen LVS</th><th>Area (µm²)</th><th>Gain (dB)</th><th>GBW (MHz)</th><th>Decision</th></tr></thead><tbody id="optimization-body"></tbody></table></div>
           <p id="parasitic-note" class="physical-scope"></p>
-          <details class="analog-waveforms"><summary>Noise and supply-response measurements</summary><div class="plots"><figure class="plot-card"><figcaption><h3>Input-referred noise</h3></figcaption><div id="noise-plot" class="plot-area"></div></figure><figure class="plot-card"><figcaption><h3>Supply rejection</h3></figcaption><div id="psrr-plot" class="plot-area"></div></figure></div><p id="analog-conditions" class="physical-scope"></p></details>
+          <details id="analog-waveforms" class="analog-waveforms"><summary>Noise and supply-response measurements</summary><div class="plots"><figure class="plot-card"><figcaption><h3>Input-referred noise</h3></figcaption><div id="noise-plot" class="plot-area"></div></figure><figure class="plot-card"><figcaption><h3>Supply rejection</h3></figcaption><div id="psrr-plot" class="plot-area"></div></figure></div><p id="analog-conditions" class="physical-scope"></p></details>
         </section>
         <p class="physical-scope">Nominal block verification. Supply, gate-bias sources and the 100 pF load are external. The layout loop compares real PDK geometry, extracted RC and fixed-condition simulations. Noise and supply measurements use an explicit finite-impedance fixture; no noise limit is assumed. Dimensions are snapped to the PDK grid. DRC and LVS do not establish fabrication signoff or PVT yield.</p>
       </section>

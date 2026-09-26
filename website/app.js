@@ -1,14 +1,17 @@
 import { RunClock } from "./run-clock.mjs";
 const $ = (id) => document.getElementById(id);
 const runButton = $("run");
-const stageNames = ["deciding", "searching", "netlisting", "simulating", "layout", "extracting", "postsimulating", "checking"];
-const layoutActions = {initial: "Initial plan", columns: "Floorplan", fingers_per_row: "Row packing", pattern: "Matching pattern", split: "Unit decomposition", rail_multiplier: "Power rails", shield_inputs: "Grounded separator", decap_pf: "Decoupling", decap_location: "Decap placement", dummies: "Edge dummies"};
+const stageNames = ["deciding", "searching", "netlisting", "simulating", "layout", "drc", "lvs", "extracting", "postsimulating", "checking"];
+const checkNotes = {drc: "Magic DRC · full SKY130 rule deck", lvs: "Netgen LVS · every device and net"};
+const layoutActions = {initial: "Initial plan", columns: "Floorplan", fingers_per_row: "Row packing", pattern: "Matching pattern", split: "Unit decomposition", rail_multiplier: "Power rails", shield_inputs: "Grounded separator", decap_pf: "Decoupling", decap_location: "Decap placement", dummies: "Edge dummies",
+  seed: "Initial plan", aspect: "Aspect ratio", max_finger_um: "Finger folding", pair_pattern: "Matching pattern", single_dummies: "Single-device dummies", rail_um: "Power rail width", decap: "Decoupling", passives: "Passive placement", refinger: "Re-fingering"};
 const clock = new RunClock();
 let examples = [];
 let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false;
 let timer, result, finished = false, expanded = false;
 const runKey = "chipjev-live-run-v3";
 let layoutURL, intentURL;
+let gates = {drc: null, lvs: null}, currentStage = null;
 
 function saveRun(value) {
   try { value ? sessionStorage.setItem(runKey, value) : sessionStorage.removeItem(runKey); } catch { /* Storage is optional. */ }
@@ -34,6 +37,24 @@ function renderTime() {
     $(id).textContent = phases[phase] === undefined ? "—" : `${phases[phase].toFixed(2)} s`;
   }
 }
+function checkText(key, check) {
+  const where = check.layout ? `${check.selected ? "selected " : ""}layout ${check.layout}` : "selected layout";
+  if (check.status === "running") return `Running ${key === "drc" ? "Magic DRC" : "Netgen LVS"} · ${where}`;
+  if (key === "drc") return check.status === "passed" ? `Passed · 0 violations · ${where}` : `${check.errors ?? "Unknown"} violations · ${where} rejected`;
+  const counts = Number.isInteger(check.devices) && Number.isInteger(check.nets) ? ` · ${check.devices} devices, ${check.nets} nets` : "";
+  return check.status === "passed" ? `Matched${counts} · ${where}` : `Mismatch · ${where} rejected`;
+}
+function renderStages(stage = currentStage) {
+  currentStage = stage;
+  const index = stageNames.indexOf(stage), ended = ["complete", "unqualified"].includes(stage);
+  for (const [i, node] of [...document.querySelectorAll(".stages li")].entries()) {
+    const key = node.dataset.stage, check = gates[key];
+    node.className = ended || (index >= 0 && i < index) ? "done" : i === index ? "active" : "";
+    // A verified gate keeps its green check while later layouts are refined.
+    if (check && ["passed", "failed"].includes(check.status)) node.classList.add(check.status);
+    if (key in checkNotes) $(`${key}-note`).textContent = check ? checkText(key, check) : checkNotes[key];
+  }
+}
 function startClock() {
   $("button-timer").hidden = false;
   clearInterval(timer); renderTime(); timer = setInterval(renderTime, 100);
@@ -54,7 +75,7 @@ function reset() {
   if (intentURL) { URL.revokeObjectURL(intentURL); intentURL = null; }
   if (layoutURL) { URL.revokeObjectURL(layoutURL); layoutURL = null; }
   $("layout-frame").removeAttribute("src");
-  for (const id of ["drc-result", "lvs-result", "pex-result", "area-result"]) $(id).textContent = "—";
+  for (const id of ["drc-result", "lvs-result", "pex-result", "area-result"]) { $(id).textContent = "—"; $(id).className = ""; }
   $("physical-status").textContent = "DRC, LVS and extracted measurements appear here.";
   const row = document.createElement("tr"), cell = document.createElement("td"); cell.colSpan = 4; cell.textContent = "Start a design to measure both circuits."; row.append(cell); $("comparison-body").replaceChildren(row);
   clock.reset(); renderTime();
@@ -75,7 +96,7 @@ function reset() {
   $("verification").textContent = "Measurements appear after simulation.";
   $("result-note").textContent = "Plots and measurements come from the current ngspice run.";
   for (const [key, unit] of [["gain", "dB"], ["gbw", "MHz"], ["pm", "°"], ["power", "mW"]]) setMetric(key, null, unit);
-  for (const node of document.querySelectorAll(".stages li")) node.className = "";
+  gates = {drc: null, lvs: null}; renderStages(null);
   for (const [key, text] of [["ac-plot", "Waiting for the AC sweep"], ["step-plot", "Waiting for the closed-loop steps"], ["post-ac-plot", "Waiting for the extracted AC sweep"], ["post-step-plot", "Waiting for the extracted closed-loop steps"]]) {
     const p = document.createElement("p"); p.textContent = text; $(key).replaceChildren(p);
   }
@@ -115,8 +136,17 @@ function showResult(data) {
   setMetric("pm", data.metrics.pm_deg, "°");
   setMetric("power", data.metrics.power_uw / 1000, "mW");
   const physical = data.physical;
-  $("drc-result").textContent = `${physical.layout.drc_errors} errors`;
-  $("lvs-result").textContent = physical.lvs.passed ? "Matched" : "Failed";
+  const drcClean = physical.layout.drc_errors === 0, lvsMatched = physical.lvs.passed === true;
+  $("drc-result").textContent = drcClean ? "✓ 0 errors" : `${physical.layout.drc_errors} errors`;
+  $("drc-result").className = drcClean ? "pass" : "fail";
+  $("lvs-result").textContent = lvsMatched ? "✓ Matched" : "Failed";
+  $("lvs-result").className = lvsMatched ? "pass" : "fail";
+  // The measured result is authoritative for the two gates: the selected layout's own checks.
+  const chosen = Number(String(physical.optimization?.selected ?? "").split("-").pop());
+  const layout = Number.isInteger(chosen) && physical.optimization?.selected ? chosen + 1 : gates.drc?.layout;
+  gates = {drc: {status: drcClean ? "passed" : "failed", errors: physical.layout.drc_errors, layout, selected: true},
+            lvs: {status: lvsMatched ? "passed" : "failed", devices: physical.lvs.devices, nets: physical.lvs.nets, layout, selected: true}};
+  renderStages();
   $("pex-result").textContent = `${physical.pex.resistors} R / ${physical.pex.capacitors} C`;
   $("area-result").textContent = `${physical.layout.area_um2.toFixed(0)} µm²`;
   $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${(physical.all_physical_seconds ?? physical.total_seconds).toFixed(2)} s physical stages including candidate screening · ${physical.recovery.attempts.length} final sizing attempt(s)`;
@@ -139,23 +169,30 @@ function showResult(data) {
 
 function showQuality(physical) {
   const trace = physical.optimization, bench = physical.analog;
-  if (!trace || !bench) return;
+  if (!trace) return;
   $("analog-quality").hidden = false;
-  const plan = physical.layout.plan, metrics = bench.metrics;
-  $("layout-plan-note").textContent = `${plan.pattern} · ${plan.columns} column(s) · ${plan.dummies ? "edge dummies" : "no dummies"}`;
-  for (const [id, key, scale, unit] of [["noise-result", "input_noise_rms_v", 1e6, "µV RMS"], ["psrr-result", "psrr_min_db", 1, "dB"], ["ir-result", "internal_supply_drop_v", 1e3, "mV"], ["ground-result", "internal_ground_rise_v", 1e3, "mV"]]) {
-    $(id).textContent = Number.isFinite(metrics[key]) ? `${(metrics[key] * scale).toFixed(2)} ${unit}` : "Not measured";
-  }
+  const plan = physical.layout.plan;
+  $("layout-plan-note").textContent = plan.pair_pattern ?
+    `${plan.pair_pattern === "abba" ? "Common-centroid pairs" : "Mirrored pairs"} · ${plan.rail_um} µm rails · ${plan.dummies ? "edge dummies" : "no dummies"}${plan.decap ? " · MOS decap" : ""}` :
+    `${plan.pattern} · ${plan.columns} column(s) · ${plan.dummies ? "edge dummies" : "no dummies"}`;
+  $("analog-facts").hidden = $("analog-waveforms").hidden = !bench;
+  const area = row => row.quality?.area_um2 ?? row.area_um2;
   const first = trace.history.find(row => row.valid), chosen = physical.layout.area_um2;
-  const delta = first ? (1 - chosen / first.quality.area_um2) * 100 : 0;
-  $("optimization-summary").textContent = `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. Laya proposes actions; DRC, LVS and ngspice decide acceptance.`;
+  const delta = first ? (1 - chosen / area(first)) * 100 : 0;
+  const clean = trace.history.filter(row => row.drc === 0).length, matched = trace.history.filter(row => row.lvs === true).length;
+  $("optimization-summary").textContent = trace.pareto_plan_ids ?
+    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. Laya proposes actions; DRC, LVS and ngspice decide acceptance.` :
+    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s, ${trace.parallel} in parallel · ${clean}/${trace.evaluations} DRC clean · ${matched}/${trace.evaluations} LVS matched · ${delta.toFixed(1)}% area reduction from the first qualified layout. Laya and the layout knowledge cards propose actions; DRC, LVS and ngspice decide acceptance.`;
   $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${trace.wall_seconds.toFixed(2)} s complete layout optimization · fixed input bias ${trace.fixed_input_bias_v.toFixed(4)} V`;
   const rows = trace.history.map(item => {
     const row = document.createElement("tr");
     const reasons = Object.entries({...item.qualification_checks, ...item.checks}).filter(([, pass]) => !pass).map(([name]) => name).join(", ");
-    const decision = item.valid ? item.accepted ? (item.index === 0 ? "Initial feasible layout" : "Accepted improvement") : "Qualified; retained incumbent" : `Rejected: ${item.error || reasons}`;
+    const rejection = item.drc > 0 ? `${item.drc} DRC violations` : item.lvs === false ? "LVS mismatch" : item.error || reasons;
+    const decision = item.valid ? item.accepted ? (item.index === 0 ? "Initial feasible layout" : "Accepted improvement") : "Qualified; retained incumbent" : `Rejected: ${rejection}`;
     const number = v => Number.isFinite(v) ? v.toFixed(2) : "—";
-    for (const value of [`${item.index + 1} / ${layoutActions[item.action] || item.action}`, number(item.quality?.area_um2), number(item.metrics?.gain_db), number(item.metrics?.gbw_mhz), decision]) {
+    const drc = Number.isInteger(item.drc) ? (item.drc === 0 ? "✓ 0 errors" : `✗ ${item.drc} errors`) : "—";
+    const lvs = typeof item.lvs === "boolean" ? (item.lvs ? "✓ Matched" : "✗ Mismatch") : "—";
+    for (const value of [`${item.index + 1} / ${layoutActions[item.action] || item.action}`, drc, lvs, number(area(item)), number(item.metrics?.gain_db), number(item.metrics?.gbw_mhz), decision]) {
       const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
     }
     return row;
@@ -163,6 +200,11 @@ function showQuality(physical) {
   $("optimization-body").replaceChildren(...rows);
   const hotspots = Object.entries(physical.quality.net_capacitance_ff).filter(([n]) => !["vdd", "vss"].includes(n)).sort((a, b) => b[1] - a[1]).slice(0, 3);
   $("parasitic-note").textContent = `Largest node parasitics: ${hotspots.map(([n, c]) => `${n} ${c.toFixed(2)} fF`).join(" · ")}. Input capacitance imbalance: ${physical.quality.input_cap_imbalance_ff?.toFixed(2) ?? "—"} fF. Centroid error: ${physical.quality.centroid_error_um.toFixed(2)} µm (geometry only).`;
+  if (!bench) return;
+  const metrics = bench.metrics;
+  for (const [id, key, scale, unit] of [["noise-result", "input_noise_rms_v", 1e6, "µV RMS"], ["psrr-result", "psrr_min_db", 1, "dB"], ["ir-result", "internal_supply_drop_v", 1e3, "mV"], ["ground-result", "internal_ground_rise_v", 1e3, "mV"]]) {
+    $(id).textContent = Number.isFinite(metrics[key]) ? `${(metrics[key] * scale).toFixed(2)} ${unit}` : "Not measured";
+  }
   const waves = bench.waveforms, x = waves.frequency_hz.map(Math.log10);
   const noise = waves.input_noise_v_sqrt_hz.map(v => v * 1e9), psrr = waves.psrr_db;
   chart("noise-plot", "Measured input noise density", "Frequency (Hz)", "nV/√Hz", [x[0], x.at(-1)], [0, Math.max(...noise) * 1.05], [[1, "10"], [3, "1k"], [6, "1M"]], [{x, y: noise, color: "#087ebd"}]);
@@ -226,17 +268,15 @@ function event(data) {
     const iteration = data.layout_iteration;
     if (iteration && iteration.displayed !== false && Number.isInteger(iteration.index)) {
       $("magic-waiting").hidden = true;
-      const phase = {layout: "Generating next layout", extracting: "LVS + RC extraction", postsimulating: "Post-layout simulation"};
+      const phase = {layout: "Generating next layout", drc: "Magic DRC", lvs: "Netgen LVS", extracting: "RC extraction", postsimulating: "Post-layout simulation"};
       const decision = iteration.status === "selected" ? "Selected layout" : iteration.status === "evaluated" ?
         (iteration.accepted ? "Accepted improvement" : iteration.valid ? "Qualified · keeping incumbent" : "Rejected") : (phase[iteration.phase] || "Layout + DRC complete");
       $("magic-live-status").textContent = `Layout ${iteration.index + 1} · ${decision}`;
       $("magic-live-note").textContent = `${layoutActions[iteration.action] || iteration.action}${iteration.area_um2 == null ? "" : ` · ${iteration.area_um2.toFixed(0)} µm²`} · ${decision}`;
     }
     $("run-message").textContent = data.message; $("progress").value = data.progress;
-    const index = stageNames.indexOf(data.stage);
-    for (const [i, node] of [...document.querySelectorAll(".stages li")].entries()) {
-      node.className = ["complete", "unqualified"].includes(data.stage) || i < index ? "done" : i === index ? "active" : "";
-    }
+    if (data.verification) gates = {...gates, ...data.verification};
+    renderStages(data.stage);
     badge(data.stage === "complete" ? "Verified" : data.stage === "unqualified" ? "Unqualified" : "Running", data.stage === "complete" ? "success" : "");
   } else if (data.type === "waveforms") { drawWaveforms(data); if (data.postlayout) drawWaveforms(data.postlayout, "post-"); }
   else if (data.type === "result") showResult(data);

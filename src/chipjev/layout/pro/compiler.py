@@ -48,7 +48,9 @@ save layout
 
 
 def synthesize(topology, values, directory, *, vdd=1.8, plan=None, current_a=1e-3, run=True,
-               finger_max_um=None):
+               finger_max_um=None, observer=None):
+    """``observer("drc", {"status": "running"})`` fires once the cell is written and
+    Magic starts the full DRC deck (verification.verify reports the verdict)."""
     start = time.perf_counter()
     plan = plan or ProPlan()
     directory = Path(directory).resolve()
@@ -132,6 +134,8 @@ def synthesize(topology, values, directory, *, vdd=1.8, plan=None, current_a=1e-
         "routing_retries": result_notes,
     }
     if run:
+        if observer:
+            observer("drc", {"status": "running", "area_um2": result["area_um2"]})
         output = run_magic(directory, MAGIC, "layout")
         match = re.search(r"@@DRC (\d+)", output)
         if not match:

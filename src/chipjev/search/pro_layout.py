@@ -15,6 +15,8 @@ trajectory.jsonl, the training data for Laya's layout policy.
 
 import json
 import math
+import multiprocessing
+import queue
 import random
 import shutil
 import sys
@@ -29,9 +31,16 @@ from ..layout.pro.planner import ProPlan
 from ..simulation.sky130 import evaluate
 
 GOALS = ("quality", "area", "gbw", "gain", "pm")
+STEPS = ("layout", "drc", "lvs", "extracting", "postsimulating")
+_PROGRESS = None  # per-process queue for live verification steps (pool initializer)
 
 
-def _evaluate(job):
+def _progress_channel(channel):
+    global _PROGRESS
+    _PROGRESS = channel
+
+
+def _evaluate(job, index=None):
     """Worker: full physical verification and critic for one plan (own process)."""
     import traceback
 
@@ -44,9 +53,16 @@ def _evaluate(job):
     directory = Path(directory)
     topology = lookup(cls, topo)
     start = time.perf_counter()
+
+    def report(name, data):
+        # Only small, path-free facts cross the process boundary.
+        if _PROGRESS is not None and index is not None and name in STEPS:
+            facts = {k: data[k] for k in ("status", "errors", "devices", "nets", "area_um2") if k in data}
+            _PROGRESS.put((index, name, {**facts, "at": time.monotonic()}))
+
     try:
         result = verify(topology, values, directory, vdd=vdd, load_pf=load, plan=ProPlan(**plan),
-                        prelayout=pre, input_bias=bias, finger_max_um=fmax)
+                        prelayout=pre, input_bias=bias, finger_max_um=fmax, observer=report)
         circuit = ExtractedCircuit(build(topology, values, vdd, finger_max=fmax), directory / "pex.spice")
         quality = assess(result["layout"], directory, circuit)
         manifest = json.loads((directory / "manifest.json").read_text())
@@ -58,6 +74,7 @@ def _evaluate(job):
         post = result["postlayout"]
         return {
             "valid": result["valid"], "drc": result["layout"]["drc_errors"], "lvs": result["lvs"]["passed"],
+            "lvs_devices": result["lvs"].get("devices"), "lvs_nets": result["lvs"].get("nets"),
             "metrics": post["metrics"], "checks": post["checks"],
             "physical_schematic_valid": (result.get("physical_schematic") or {}).get("valid"),
             "area_um2": result["layout"]["area_um2"], "width_um": result["layout"]["width_um"],
@@ -112,7 +129,14 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
                  budget_seconds=240.0, seed_plan=None, rng_seed=0, log=None,
                  candidate_observer=None, observer=None, finger_max_um=None):
     """Returns the selected candidate's physical result (search/layout.optimize's shape),
-    with the search trace under ``optimization``; raises if nothing qualified."""
+    with the search trace under ``optimization``; raises if nothing qualified.
+
+    ``observer(step, data)`` receives each candidate's verification steps live from
+    the worker processes: layout, drc and lvs ({"status": running|passed|failed} with
+    the violation or device/net counts), extracting and postsimulating; ``data`` also
+    names the candidate (index, action, plan_id) and the step's time.monotonic() "at". ``candidate_observer`` receives
+    "rendered" once a candidate's cell is final (after Magic DRC), "evaluated" in
+    candidate order, and finally "selected"."""
     if goal not in GOALS:
         raise ValueError(f"goal must be one of {GOALS}")
     if log is None:
@@ -142,7 +166,34 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
     incumbent = None
     batch = [("seed", seed, None)]
     reference_area = None
-    with ProcessPoolExecutor(max_workers=parallel) as pool:
+    live = observer is not None or candidate_observer is not None
+    progress = multiprocessing.get_context().Queue() if live else None
+    known, rendered = {}, set()
+
+    def rendered_event(index):
+        field, plan, target = known[index]
+        if index not in rendered and candidate_observer and (target / "layout.mag").exists():
+            rendered.add(index)
+            candidate_observer({"kind": "rendered", "directory": target, "index": index,
+                                "action": field, "plan_id": plan.id})
+
+    def drain():
+        while progress is not None:
+            try:
+                index, step, data = progress.get_nowait()
+            except queue.Empty:
+                return
+            if index not in known:
+                continue
+            field, plan, _ = known[index]
+            if observer:
+                observer(step, {"index": index, "action": field, "plan_id": plan.id, **data})
+            # The cell on disk is final once Magic's DRC run has saved it.
+            if step == "drc" and data.get("status") != "running":
+                rendered_event(index)
+
+    with ProcessPoolExecutor(max_workers=parallel, initializer=_progress_channel,
+                             initargs=(progress,)) as pool:
         while batch and len(history) < max_evaluations and time.perf_counter() - start < budget_seconds:
             jobs = []
             for field, plan, decision in batch:
@@ -150,11 +201,18 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
                 index = len(history) + len(jobs)
                 target = directory / f"candidate-{index:02d}"
                 jobs.append((index, field, plan, decision, target))
+                known[index] = (field, plan, target)
             futures = [pool.submit(_evaluate, (topology.cls, topology.id, values, str(t), p.to_dict(),
-                                               vdd, load_pf, input_bias, prelayout, finger_max_um))
-                       for _, _, p, _, t in jobs]
+                                               vdd, load_pf, input_bias, prelayout, finger_max_um), i)
+                       for i, _, p, _, t in jobs]
             for (index, field, plan, decision, target), future in zip(jobs, futures):
-                entry = future.result()
+                while True:  # results stay in candidate order; live steps stream meanwhile
+                    try:
+                        entry = future.result(timeout=0.05)
+                        break
+                    except TimeoutError:
+                        drain()
+                drain()
                 entry.update(index=index, action=field, plan=plan.to_dict(), plan_id=plan.id,
                              parent=incumbent["plan_id"] if incumbent else None, decision=decision,
                              directory=target.name)
@@ -167,16 +225,22 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
                     f"{entry.get('error', '')[:80]}")
                 accepted = incumbent is None or _key(entry, goal, reference_area) > _key(
                     incumbent, goal, reference_area)
+                entry["accepted"] = bool(accepted and entry.get("valid"))
                 if accepted:
                     incumbent = entry
                 if candidate_observer and (target / "layout.mag").exists():
-                    event = {"directory": target, "index": index, "action": field, "plan_id": plan.id,
-                             "valid": entry.get("valid"), "accepted": accepted and entry.get("valid"),
-                             "quality": {"area_um2": entry.get("area_um2")},
-                             "metrics": entry.get("metrics"), "critic": entry.get("critic")}
-                    candidate_observer({"kind": "rendered", **event})
-                    candidate_observer({"kind": "evaluated", **event})
+                    rendered_event(index)  # no-op when the live DRC step already showed it
+                    candidate_observer({
+                        "kind": "evaluated", "directory": target, "index": index, "action": field,
+                        "plan_id": plan.id, "valid": entry.get("valid"),
+                        "accepted": accepted and entry.get("valid"),
+                        "drc_errors": entry.get("drc"), "lvs": entry.get("lvs"),
+                        "quality": {"area_um2": entry.get("area_um2")},
+                        "metrics": entry.get("metrics"), "critic": entry.get("critic")})
+                known.pop(index)  # late progress messages of a finished candidate are stale
             batch = _propose(incumbent, goal, visited, parallel, planner, decisions, rng)
+    if progress is not None:
+        progress.close()
     trace = _finish(directory, history, decisions, incumbent, goal, input_bias, prelayout, start,
                     planner, max_evaluations, parallel)
     if not incumbent or not incumbent.get("valid"):
@@ -187,7 +251,8 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
     (directory / "physical.json").write_text(json.dumps(result, indent=2, allow_nan=False, default=str))
     if candidate_observer:
         candidate_observer({"kind": "selected", "directory": directory, **{
-            k: incumbent.get(k) for k in ("index", "action", "plan_id", "valid", "critic")}})
+            k: incumbent.get(k) for k in ("index", "action", "plan_id", "valid", "critic", "drc", "lvs",
+                                          "lvs_devices", "lvs_nets", "area_um2")}})
     return result
 
 

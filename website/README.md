@@ -26,6 +26,13 @@ each generated physical candidate, with live iteration, area and acceptance stat
 then restores the selected incumbent before capture stops. The default completed
 view preserves both editors; optional final-geometry and device-group views remain.
 
+Magic DRC and Netgen LVS are separate pipeline steps. The parallel layout workers
+stream each candidate's checks live: running, then the verdict with its violation
+count or matched device/net counts. A passed gate's step mark becomes a green check
+and stays green while later candidates are refined, because a rejected candidate
+never replaces the incumbent; a failed gate shows a red cross. The final result sets
+both gates from the selected layout's own DRC and LVS reports.
+
 The completed run offers DRC and LVS status,
 extracted R/C counts, an explicit pre/post performance table, and separate AC and
 closed-loop response plots. Magic, GDSII, PEX and the full verification ZIP are

@@ -78,7 +78,12 @@ def lvs(directory):
         and "Property errors were found" not in report
         and "do not match" not in report.lower()
     )
-    return {"passed": passed, "seconds": time.perf_counter() - start}
+    # The top cell's summary is the last one; left column = extracted layout.
+    devices = re.findall(r"^Number of devices:\s*(\d+)", report, re.M)
+    nets = re.findall(r"^Number of nets:\s*(\d+)", report, re.M)
+    return {"passed": passed, "seconds": time.perf_counter() - start,
+            "devices": int(devices[-1]) if devices else None,
+            "nets": int(nets[-1]) if nets else None}
 
 
 def extract_rc(directory):
@@ -339,14 +344,20 @@ def verify(
 
         current = ((prelayout or {}).get("metrics", {}).get("power_uw") or 1800) * 1e-6 / vdd
         layout = compile_pro(topology, values, directory, vdd=vdd, plan=plan, current_a=current,
-                             finger_max_um=finger_max_um)
+                             finger_max_um=finger_max_um, observer=stage)
     else:
         from .compiler import synthesize as compile_layout
 
         current = ((prelayout or {}).get("metrics", {}).get("power_uw") or 1800) * 1e-6 / vdd
         layout = compile_layout(topology, values, directory, vdd=vdd, plan=plan, current_a=current)
-    stage("extracting", layout)
+    # Check steps report "running" and then their verdict with the evidence counts.
+    stage("drc", {"status": "passed" if layout["drc_errors"] == 0 else "failed",
+                  "errors": layout["drc_errors"], "area_um2": layout["area_um2"]})
+    stage("lvs", {"status": "running"})
     matched = lvs(directory)
+    stage("lvs", {"status": "passed" if matched["passed"] else "failed",
+                  "devices": matched["devices"], "nets": matched["nets"]})
+    stage("extracting", layout)
     extraction = extract_rc(directory)
     stage("postsimulating", {"layout": layout, "lvs": matched, "pex": extraction})
     builder = build(topology, values, vdd, finger_max=finger_max_um)
