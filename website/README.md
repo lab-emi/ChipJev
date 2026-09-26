@@ -3,6 +3,9 @@
 Static HTML/CSS/JavaScript for GitHub Pages. No frontend build, CDN dependencies,
 visitor login, third-party fonts or tracking scripts are required.
 
+When changing the live workspace, bump the stylesheet and app-module query versions
+in `index.html` together so returning visitors do not mix cached and new UI assets.
+
 The visitor selects an allowlisted text prompt and starts a fresh Laya → ChipJev
 search → xschem → Magic layout/PEX → ngspice pipeline. Native xschem + Magic frames, actual model decisions,
 measured waveform arrays and performance arrive over a view-only WebSocket.
