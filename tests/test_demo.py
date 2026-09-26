@@ -284,6 +284,23 @@ def test_site_prompts_match_the_server_allowlist():
     assert json.loads((ROOT / "website/examples.json").read_text()) == list(EXAMPLES.values())
 
 
+def test_every_public_prompt_constrains_a_nonempty_grammar():
+    from chipjev.circuits.grammar import library
+    from demo.examples import allows
+
+    for example in EXAMPLES.values():
+        # Only one- and two-stage op-amps have wired xschem views in the live demo.
+        assert example["cls"] in ("opamp1", "opampN") and example["stages"] in (1, 2)
+        allowed = [t for t in library(example["cls"]) if len(t.stages) == example["stages"]
+                   and allows(example, t)]
+        assert allowed, example["id"]
+        if example.get("first"):
+            assert all(t.stages[0].rpartition("_")[0] in example["first"] for t in allowed)
+        if example.get("polarity"):
+            assert all(t.stages[0].endswith("_" + example["polarity"]) for t in allowed)
+        assert {"name", "title", "prompt", "seed", "headroom"} <= set(example)
+
+
 def test_exhausted_search_respects_failed_strict_remeasurement():
     from demo.design import least_violating
 

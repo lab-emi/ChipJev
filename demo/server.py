@@ -142,7 +142,7 @@ class Service:
                     sys.executable, "-m", "demo.worker", "--directory", str(run.directory),
                     "--example", run.example, "--device", self.device,
                     cwd=ROOT, env=environment, start_new_session=True,
-                    stdout=asyncio.subprocess.PIPE, stderr=log, limit=262144,
+                    stdout=asyncio.subprocess.PIPE, stderr=log, limit=1 << 20,
                 )
                 async with asyncio.timeout(RUN_TIMEOUT):
                     while line := await run.process.stdout.readline():

@@ -233,6 +233,21 @@ after 100 chipjev_tick
             log.close()
 
 
+def streamed(result):
+    """The result as streamed to browsers: every measurement the page shows, without the
+    duplicate attempt list, per-candidate critic findings and Laya's proposal texts (all
+    kept in result.json, physical.json and optimization.json)."""
+    physical = dict(result["physical"])
+    trace = dict(physical["optimization"])
+    keep = ("index", "action", "plan_id", "valid", "accepted", "drc", "lvs", "area_um2", "metrics",
+            "checks", "error", "critic", "objective")
+    trace["history"] = [{k: h[k] for k in keep if k in h} for h in trace["history"]]
+    trace.pop("decisions", None)
+    physical["optimization"] = trace
+    physical["recovery"] = {**physical["recovery"], "attempts": len(physical["recovery"]["attempts"])}
+    return {**result, "physical": physical}
+
+
 def waveforms(directory, result):
     ac = np.atleast_2d(np.loadtxt(directory / "ac.tsv", skiprows=1))
     if ac.shape[1] != 3 or not np.isfinite(ac).all():
@@ -397,7 +412,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                    "shield_inputs": "grounded separator", "refinger": "re-fingering"}
         loop = {"iteration": 0, "members": [], "rank": {}, "generated": set(), "finished": set(),
                 "drc": {}, "lvs": {}, "errors": {}, "counts": {}, "layouts": 0, "accepted": None,
-                "incumbent": None, "evaluated": 0, "step": "layout"}
+                "incumbent": None, "evaluated": 0, "step": "layout", "stop": None}
 
         def span():
             return [loop["members"][0] + 1, loop["members"][-1] + 1] if loop["members"] else [0, 0]
@@ -424,7 +439,8 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                     "loop": {"iteration": loop["iteration"], "layouts": span(),
                              "size": len(loop["members"]), "total": loop["layouts"],
                              "finished": len(loop["finished"]), "evaluated": loop["evaluated"],
-                             "accepted": loop["accepted"], "incumbent": loop["incumbent"]}, **extra}
+                             "accepted": loop["accepted"], "incumbent": loop["incumbent"],
+                             "stop": loop["stop"]}, **extra}
             data.setdefault("progress", step_progress[loop["step"]])
             if moved:
                 stage(loop["step"], at=at, **data)
@@ -486,6 +502,11 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                                f"({moves}) from incumbent layout {event['incumbent'] + 1}")
                 publish(message, moved=True)
                 return
+            if kind == "stop":
+                loop["stop"] = {k: event[k] for k in ("reason", "text", "iterations", "evaluations",
+                                                      "max_evaluations", "patience", "budget_seconds")}
+                publish(f"Layout loop stopped after {event['iterations']} iterations: {event['text']}")
+                return
             if kind in {"rendered", "selected"}:
                 screen.show_layout(event["directory"] / "layout.mag")
                 displayed_plan = event["plan_id"]
@@ -508,7 +529,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                 emit("stage", stage=loop["step"], message=f"Layout {number}: selected layout restored in Magic",
                      progress=94, layout_iteration=live_layout, verification=dict(checks),
                      loop={"iteration": loop["iteration"], "total": loop["layouts"], "selected": number,
-                           "done": True}, **timing.snapshot())
+                           "done": True, "stop": loop["stop"]}, **timing.snapshot())
                 return
             if kind == "evaluated":
                 loop["finished"].add(event["index"])
@@ -532,7 +553,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                                    vdd=example["vdd"], load_pf=example["load_pf"],
                                    observer=physical_stage, prelayout=result, model=model,
                                    candidate_observer=physical_candidate,
-                                   max_evaluations=6, budget_seconds=40)
+                                   max_evaluations=13, budget_seconds=40, patience=2)
         screens = [json.loads(p.read_text()) for p in
                    sorted((directory / "physical-search").glob("*/physical.json"))]
         physical["search_screening"] = {
@@ -588,7 +609,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
         timing.move(None)
         result.update(timing.snapshot())
         (directory / "result.json").write_text(json.dumps(result, indent=2, allow_nan=False))
-        emit("result", **result)
+        emit("result", **streamed(result))
         stage("complete" if result["valid"] else "unqualified",
               message="All circuit checks passed" if result["valid"] else "Search budget exhausted; qualification failed",
               progress=100)

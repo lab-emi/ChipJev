@@ -14,16 +14,11 @@ from chipjev.paths import ROOT
 from chipjev.search.evaluator import Evaluator
 from chipjev.search.loop import ChipJevSearch, Settings, _outputs, _score_numpy
 from chipjev.simulation.analysis import CMRR_MIN_DB, MIN_GAIN_DB, PM_MIN
+from demo.examples import allows
 
 WEIGHTS = ROOT / "experiments/ptm45/typed-decisions.pt"
 ROUNDS = 96
 SEARCH_SECONDS = 180
-SEEDS = {"opamp-gain": 0, "opamp-speed": 2, "ota-efficient": 2}
-HEADROOM = {
-    "opamp-gain": {"gain_db": 1, "pm_deg": 2, "cmrr_db": 1},
-    "opamp-speed": {},
-    "ota-efficient": {"gain_db": 1},
-}
 
 
 class LayoutEvaluator(Evaluator):
@@ -141,12 +136,12 @@ def decide(model, example):
         vdd=example["vdd"],
         load_pf=example["load_pf"],
     )
-    # The prompt's explicit stage count is a hard design constraint. Preserve the
-    # model's complete answers, and condition its prior on the allowed grammar.
+    # The prompt's explicit stage count and circuit family are hard design constraints.
+    # Preserve the model's complete answers, and condition its prior on the allowed grammar.
     topologies = [
         t
         for t in library(example["cls"])
-        if len(t.stages) == example["stages"]
+        if len(t.stages) == example["stages"] and allows(example, t)
         and len(build(t, default_values(t), example["vdd"]).mos) >= example.get("min_mosfets", 0)
     ]
     full_prior = dict(zip(answer["topologies"], answer["prior"], strict=True))
@@ -174,7 +169,7 @@ def search(answer, example, device, observer, physical_directory=None):
     evaluator = LayoutEvaluator(
         8,
         technology="sky130",
-        headroom=HEADROOM[example["id"]],
+        headroom=example["headroom"],
         # The interactive host also captures video and serves requests. Leave
         # timing headroom for ~2 s convergent DC sweeps; retain the total budget.
         evaluate_options={"quantize_geometry": example["objective"] != "gain", "online_timeout_s": 2.5},
@@ -184,7 +179,7 @@ def search(answer, example, device, observer, physical_directory=None):
     # smaller acquisition pools and stop at the first strictly verified design.
     # No archived circuit, sizing or measurement is used as a starting point.
     options = Settings(
-        seed=SEEDS[example["id"]],
+        seed=example["seed"],
         rounds=ROUNDS,
         features=256,
         random_pool=1024,
@@ -219,7 +214,7 @@ def search(answer, example, device, observer, physical_directory=None):
         }
     result["demo_stop_rule"] = "first strictly RC-qualified design or budget exhausted"
     result["physical_candidate_screening"] = physical_directory is not None
-    result["layout_headroom"] = HEADROOM[example["id"]]
+    result["layout_headroom"] = example["headroom"]
     result["exploration_geometry"] = ("continuous approximation" if example["objective"] == "gain"
                                       else "manufacturing grid")
     result["acceptance_geometry"] = "manufacturing grid, fixed shared input bias"

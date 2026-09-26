@@ -20,12 +20,38 @@ function readRun() { try { return sessionStorage.getItem(runKey); } catch { retu
 function button(label, disabled = false) { runButton.querySelector("span").textContent = label; runButton.disabled = disabled; }
 function error(message) { $("error").textContent = message; $("error").hidden = !message; }
 function badge(text, style = "") { $("run-state").textContent = text; $("run-state").className = `state-badge ${style}`; }
-function selectedExample() { return document.querySelector('input[name="example"]:checked').value; }
+let currentExample = "opamp-gain";
+function selectedExample() { return currentExample; }
 function applyExample(example) {
-  const radio = [...document.querySelectorAll('input[name="example"]')].find((node) => node.value === example.id);
-  if (radio) radio.checked = true;
+  currentExample = example.id;
+  $("prompt-name").textContent = example.name;
   $("selected-prompt").textContent = example.prompt;
-  $("circuit-title").textContent = example.stages === 2 ? "SKY130 two-stage op-amp" : "SKY130 single-stage OTA";
+  $("circuit-title").textContent = example.name;
+  for (const node of document.querySelectorAll(".prompt-option")) node.setAttribute("aria-pressed", String(node.dataset.id === example.id));
+}
+function lockPrompt(locked) {
+  $("prompt-button").disabled = locked;
+  $("prompt-hint").textContent = locked ? "Prompt fixed while this design runs" : `Click to choose from ${examples.length || "more"} design prompts`;
+}
+// The dialog tiles every public prompt, grouped by circuit class.
+function renderPromptOptions() {
+  const groups = [["opampN", "Two-stage op-amps"], ["opamp1", "Single-stage OTAs"]].map(([cls, label]) => {
+    const members = examples.filter((example) => example.cls === cls);
+    const section = document.createElement("section"), heading = document.createElement("h3"), grid = document.createElement("div");
+    section.className = "prompt-group"; grid.className = "prompt-grid"; heading.textContent = `${label} · ${members.length}`;
+    for (const example of members) {
+      const option = document.createElement("button"), name = document.createElement("strong"), tag = document.createElement("small"), text = document.createElement("span");
+      option.type = "button"; option.className = "prompt-option"; option.dataset.id = example.id;
+      option.setAttribute("aria-pressed", String(example.id === currentExample));
+      name.textContent = example.name; tag.textContent = example.title; text.textContent = example.prompt;
+      option.append(name, tag, text);
+      option.addEventListener("click", () => { chooseExample(example.id); $("prompt-dialog").close(); });
+      grid.append(option);
+    }
+    section.append(heading, grid);
+    return section;
+  });
+  $("prompt-groups").replaceChildren(...groups);
 }
 function renderTime() {
   const value = clock.sample(), phases = value.phases;
@@ -52,10 +78,15 @@ function checkText(key, check) {
   const rejected = check.of - check.passed, unrouted = check.unrouted ? ` · ${check.unrouted} not routed` : "";
   return `${check.passed}/${check.of} ${drc ? "clean" : "matched"}${rejected ? ` · ${rejected} rejected` : ""}${unrouted} · ${which}`;
 }
+function stopText(stop) {
+  return {converged: `converged · ${stop.patience} iterations without gain`, evaluations: `layout budget ${stop.evaluations}/${stop.max_evaluations} reached`,
+    time: `${stop.budget_seconds} s budget · no time for another iteration`, exhausted: "no untried layout moves left"}[stop.reason] || stop.text;
+}
 function loopNotes(stage) {
   const loop = loopState;
   if (!loop) return ["Laya-guided loop over steps 5–9", "ngspice AC and closed-loop steps"];
-  if (loop.done) return [`${loop.iteration} iterations · ${loop.total} layouts · selected layout ${loop.selected}`, `Selected layout ${loop.selected} · after ${loop.iteration} iterations`];
+  if (loop.done) return [`${loop.iteration} iterations · ${loop.total} layouts · selected layout ${loop.selected}`, loop.stop ? `Stopped: ${stopText(loop.stop)}` : `Selected layout ${loop.selected} · after ${loop.iteration} iterations`];
+  if (loop.stop) return [`${loop.iteration} iterations · ${loop.total} layouts`, `Stopped: ${stopText(loop.stop)}`];
   const first = loop.iteration === 1 ? "Iteration 1 · initial plan · layout 1" : `Iteration ${loop.iteration} · Laya proposed ${span(loop.layouts)}`;
   const post = Number.isInteger(loop.accepted) ? `Layout ${loop.accepted + 1} accepted → back to step 5` :
     loop.evaluated >= loop.size && Number.isInteger(loop.incumbent) ? `No gain · incumbent layout ${loop.incumbent + 1} kept → back to step 5` :
@@ -221,7 +252,7 @@ function showResult(data) {
   renderStages();
   $("pex-result").textContent = `${physical.pex.resistors} R / ${physical.pex.capacitors} C`;
   $("area-result").textContent = `${physical.layout.area_um2.toFixed(0)} µm²`;
-  $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${(physical.all_physical_seconds ?? physical.total_seconds).toFixed(2)} s physical stages including candidate screening · ${physical.recovery.attempts.length} final sizing attempt(s)`;
+  $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${(physical.all_physical_seconds ?? physical.total_seconds).toFixed(2)} s physical stages including candidate screening · ${physical.recovery.attempts.length ?? physical.recovery.attempts} final sizing attempt(s)`;
   showQuality(physical);
   const rows = [];
   for (const [key, label, scale] of [["gain_db", "DC gain (dB)", 1], ["gbw_mhz", "Gain-bandwidth (MHz)", 1], ["pm_deg", "Phase margin (°)", 1], ["power_uw", "Power (mW)", 0.001], ["cmrr_db", "CMRR (dB)", 1], ["buffer_gain_error", "Closed-loop gain error (%)", 100], ["vin_dc", "Input bias (V)", 1]]) {
@@ -254,7 +285,7 @@ function showQuality(physical) {
   const clean = trace.history.filter(row => row.drc === 0).length, matched = trace.history.filter(row => row.lvs === true).length;
   $("optimization-summary").textContent = trace.pareto_plan_ids ?
     `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. Laya proposes actions; DRC, LVS and ngspice decide acceptance.` :
-    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s, ${trace.parallel} in parallel · ${clean}/${trace.evaluations} DRC clean · ${matched}/${trace.evaluations} LVS matched · ${delta.toFixed(1)}% area reduction from the first qualified layout. Laya and the layout knowledge cards propose actions; DRC, LVS and ngspice decide acceptance.`;
+    `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s, ${trace.parallel} in parallel · ${clean}/${trace.evaluations} DRC clean · ${matched}/${trace.evaluations} LVS matched · ${delta.toFixed(1)}% area reduction from the first qualified layout. Laya and the layout knowledge cards propose actions; DRC, LVS and ngspice decide acceptance.${trace.stop ? ` The loop stopped after ${trace.stop.iterations} iterations: ${trace.stop.text}.` : ""}`;
   $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${trace.wall_seconds.toFixed(2)} s complete layout optimization · fixed input bias ${trace.fixed_input_bias_v.toFixed(4)} V`;
   const rows = trace.history.map(item => {
     const row = document.createElement("tr");
@@ -288,7 +319,7 @@ function showQuality(physical) {
 function complete(ok) {
   pumpStages(true);
   finished = true; running = false; clock.stop(); clearInterval(timer); renderTime();
-  $("examples").disabled = false;
+  lockPrompt(false);
   $("live-dot").classList.remove("active");
   $("stream-label").textContent = ok ? "RUN COMPLETE" : "RUN STOPPED";
   $("frame-note").textContent = ok ? "Final xschem + Magic frame · selected layout" : "Last received xschem + Magic frame";
@@ -392,13 +423,13 @@ async function launch() {
       const state = await request(`/api/runs/${runId}`);
       if (["running", "complete"].includes(state.status)) { reconnects = 0; applyExample(state.example); clock.resume(); begin(); return; }
     }
-    reset(); clock.start(); startClock(); $("examples").disabled = true;
+    reset(); clock.start(); startClock(); lockPrompt(true);
     const response = await request("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({example: selectedExample()}) });
     runId = response.id; saveRun(runId); applyExample(response.example);
     $("run-message").textContent = response.joined ? "Joining the shared live design shown above…" : "Reading the selected prompt and starting a fresh design…";
     begin();
   } catch (err) {
-    clock.stop(); clearInterval(timer); renderTime(); $("examples").disabled = false;
+    clock.stop(); clearInterval(timer); renderTime(); lockPrompt(false);
     error(err instanceof TypeError ? "The live design service could not be reached. Please retry shortly." : err.message);
     button("Retry design");
     $("availability").textContent = "Waiting for the design service";
@@ -406,7 +437,7 @@ async function launch() {
   }
 }
 function begin() {
-  running = true; finished = false; $("examples").disabled = true;
+  running = true; finished = false; lockPrompt(true);
   if (!clock.running) clock.resume();
   button("Design running…", true); badge("Running"); startClock();
   $("timing-note").textContent = "From your click to the result. Search includes candidate simulations.";
@@ -481,18 +512,24 @@ $("view-schematic").addEventListener("click", () => setView(false));
 $("view-layout").addEventListener("click", () => setView(true));
 $("view-intent").addEventListener("click", () => setView(true, true));
 runButton.addEventListener("click", launch);
-$("examples").addEventListener("change", () => {
-  const example = examples.find((item) => item.id === selectedExample());
-  if (example && !running) {
-    reset(); applyExample(example); $("button-timer").hidden = true;
-    $("stream-label").textContent = "REFERENCE CAPTURE";
-    $("frame-note").textContent = "Idle reference capture · replaced when you start";
-    $("magic-waiting").hidden = true;
-    $("schematic-live-status").textContent = "Reference schematic";
-    $("magic-live-status").textContent = "Reference layout";
-    badge("Ready"); button("Start design");
-  }
+function chooseExample(id) {
+  const example = examples.find((item) => item.id === id);
+  if (!example || running) return;
+  reset(); applyExample(example); $("button-timer").hidden = true;
+  $("stream-label").textContent = "REFERENCE CAPTURE";
+  $("frame-note").textContent = "Idle reference capture · replaced when you start";
+  $("magic-waiting").hidden = true;
+  $("schematic-live-status").textContent = "Reference schematic";
+  $("magic-live-status").textContent = "Reference layout";
+  badge("Ready"); button("Start design");
+}
+$("prompt-button").addEventListener("click", () => {
+  if (running) return;
+  const dialog = $("prompt-dialog"); dialog.showModal();
+  dialog.querySelector('.prompt-option[aria-pressed="true"]')?.focus();
 });
+$("prompt-close").addEventListener("click", () => $("prompt-dialog").close());
+$("prompt-dialog").addEventListener("click", (event) => { if (event.target === event.currentTarget) event.currentTarget.close(); });
 $("expand").addEventListener("click", async () => {
   const viewer = document.querySelector(".viewer");
   if (document.fullscreenElement) { await document.exitFullscreen(); return; }
@@ -509,6 +546,7 @@ try {
   api = local ? location.origin : new URL(config.apiBase).origin;
   if (!local && !api.startsWith("https://")) throw new Error("The demo API must use HTTPS.");
   examples = await fetch("examples.json").then((response) => response.json());
+  renderPromptOptions(); lockPrompt(false);
   applyExample(examples.find((item) => item.id === selectedExample()));
   await health();
   const previous = readRun();

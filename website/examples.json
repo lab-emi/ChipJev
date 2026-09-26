@@ -1,33 +1,283 @@
 [
   {
     "id": "opamp-gain",
-    "title": "Two-stage \u00b7 high gain",
+    "name": "Two-stage op-amp",
+    "title": "13+ MOSFETs \u00b7 maximum DC gain",
     "cls": "opampN",
     "objective": "gain",
     "stages": 2,
     "min_mosfets": 13,
     "vdd": 1.8,
     "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
     "prompt": "Design a complex SKY130 two-stage op-amp with at least 13 MOSFETs and maximum DC gain, at 1.8 V with a 100 pF load."
   },
   {
     "id": "opamp-speed",
-    "title": "Two-stage \u00b7 wide bandwidth",
+    "name": "Wideband op-amp",
+    "title": "Maximum gain-bandwidth",
     "cls": "opampN",
     "objective": "gbw",
     "stages": 2,
     "vdd": 1.8,
     "load_pf": 100.0,
+    "seed": 2,
+    "headroom": {},
     "prompt": "Design a SKY130 two-stage op-amp with maximum gain-bandwidth product, at 1.8 V with a 100 pF load."
   },
   {
     "id": "ota-efficient",
-    "title": "Single-stage \u00b7 power efficiency",
+    "name": "Efficient single-stage OTA",
+    "title": "Bandwidth per unit power",
     "cls": "opamp1",
     "objective": "fom",
     "stages": 1,
     "vdd": 1.8,
     "load_pf": 100.0,
+    "seed": 2,
+    "headroom": {
+      "gain_db": 1
+    },
     "prompt": "Design a SKY130 single-stage differential OTA that maximizes GBW times load capacitance per unit power, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "opamp-efficient",
+    "name": "Low-power two-stage op-amp",
+    "title": "Bandwidth per unit power",
+    "cls": "opampN",
+    "objective": "fom",
+    "stages": 2,
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1
+    },
+    "prompt": "Design a SKY130 two-stage op-amp that maximizes GBW times load capacitance per unit power, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "opamp-nulling",
+    "name": "Miller op-amp with nulling resistor",
+    "title": "Miller + nulling resistor \u00b7 maximum GBW",
+    "cls": "opampN",
+    "objective": "gbw",
+    "stages": 2,
+    "comp": [
+      "miller_rz"
+    ],
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {},
+    "prompt": "Design a SKY130 two-stage op-amp with Miller compensation and a nulling resistor, for maximum gain-bandwidth product, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "opamp-pmos",
+    "name": "PMOS-input op-amp",
+    "title": "PMOS input pair \u00b7 maximum DC gain",
+    "cls": "opampN",
+    "objective": "gain",
+    "stages": 2,
+    "polarity": "p",
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 two-stage op-amp with a PMOS input pair and maximum DC gain, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "opamp-folded",
+    "name": "Folded-cascode two-stage op-amp",
+    "title": "Folded-cascode input \u00b7 maximum DC gain",
+    "cls": "opampN",
+    "objective": "gain",
+    "stages": 2,
+    "first": [
+      "fc"
+    ],
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 1,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 10,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 two-stage op-amp with a folded-cascode input stage and maximum DC gain, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "opamp-10pf",
+    "name": "Fast op-amp for 10 pF",
+    "title": "Maximum gain-bandwidth \u00b7 10 pF",
+    "cls": "opampN",
+    "objective": "gbw",
+    "stages": 2,
+    "vdd": 1.8,
+    "load_pf": 10.0,
+    "seed": 0,
+    "headroom": {},
+    "prompt": "Design a SKY130 two-stage op-amp with maximum gain-bandwidth product, at 1.8 V with a 10 pF load."
+  },
+  {
+    "id": "opamp-2pf",
+    "name": "On-chip op-amp",
+    "title": "Maximum DC gain \u00b7 2 pF",
+    "cls": "opampN",
+    "objective": "gain",
+    "stages": 2,
+    "vdd": 1.8,
+    "load_pf": 2.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 two-stage op-amp for an on-chip 2 pF load with maximum DC gain, at 1.8 V."
+  },
+  {
+    "id": "ota-gain",
+    "name": "High-gain single-stage OTA",
+    "title": "Maximum DC gain",
+    "cls": "opamp1",
+    "objective": "gain",
+    "stages": 1,
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 single-stage differential OTA with maximum DC gain, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "ota-folded",
+    "name": "Folded-cascode OTA",
+    "title": "Folded cascode \u00b7 maximum DC gain",
+    "cls": "opamp1",
+    "objective": "gain",
+    "stages": 1,
+    "first": [
+      "fc"
+    ],
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 folded-cascode OTA with maximum DC gain, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "ota-telescopic",
+    "name": "Telescopic cascode OTA",
+    "title": "Telescopic cascode \u00b7 maximum DC gain",
+    "cls": "opamp1",
+    "objective": "gain",
+    "stages": 1,
+    "first": [
+      "tele"
+    ],
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 3,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 telescopic-cascode OTA with maximum DC gain, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "ota-5t",
+    "name": "Five-transistor OTA",
+    "title": "Classic 5T OTA \u00b7 maximum GBW \u00b7 10 pF",
+    "cls": "opamp1",
+    "objective": "gbw",
+    "stages": 1,
+    "first": [
+      "ota5"
+    ],
+    "vdd": 1.8,
+    "load_pf": 10.0,
+    "seed": 0,
+    "headroom": {},
+    "prompt": "Design a SKY130 five-transistor differential OTA with maximum gain-bandwidth product, at 1.8 V with a 10 pF load."
+  },
+  {
+    "id": "ota-mirror",
+    "name": "Current-mirror OTA",
+    "title": "Current-mirror OTA \u00b7 maximum GBW",
+    "cls": "opamp1",
+    "objective": "gbw",
+    "stages": 1,
+    "first": [
+      "cmota"
+    ],
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {},
+    "prompt": "Design a SKY130 current-mirror OTA with maximum gain-bandwidth product, at 1.8 V with a 100 pF load."
+  },
+  {
+    "id": "ota-1pf",
+    "name": "Wideband OTA for 1 pF",
+    "title": "Maximum GBW \u00b7 1 pF",
+    "cls": "opamp1",
+    "objective": "gbw",
+    "stages": 1,
+    "vdd": 1.8,
+    "load_pf": 1.0,
+    "seed": 0,
+    "headroom": {},
+    "prompt": "Design a SKY130 single-stage differential OTA with maximum gain-bandwidth product, at 1.8 V with a 1 pF load."
+  },
+  {
+    "id": "ota-pmos-efficient",
+    "name": "Low-power PMOS-input OTA",
+    "title": "PMOS input \u00b7 bandwidth per power \u00b7 10 pF",
+    "cls": "opamp1",
+    "objective": "fom",
+    "stages": 1,
+    "polarity": "p",
+    "vdd": 1.8,
+    "load_pf": 10.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1
+    },
+    "prompt": "Design a SKY130 single-stage OTA with a PMOS input pair that maximizes GBW times load capacitance per unit power, at 1.8 V with a 10 pF load."
+  },
+  {
+    "id": "ota-nmos-gain",
+    "name": "NMOS-input OTA",
+    "title": "NMOS input pair \u00b7 maximum DC gain",
+    "cls": "opamp1",
+    "objective": "gain",
+    "stages": 1,
+    "polarity": "n",
+    "vdd": 1.8,
+    "load_pf": 100.0,
+    "seed": 0,
+    "headroom": {
+      "gain_db": 1,
+      "pm_deg": 2,
+      "cmrr_db": 1
+    },
+    "prompt": "Design a SKY130 single-stage OTA with an NMOS input pair and maximum DC gain, at 1.8 V with a 100 pF load."
   }
 ]

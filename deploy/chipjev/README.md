@@ -21,12 +21,16 @@ not themselves establish DNS or install a running production service.
 
 ## What each click runs
 
-1. Select one of the text prompts in `demo/examples.py`: a complex two-stage
-   high-gain op-amp (at least 13 MOSFETs), a wideband two-stage op-amp, or an
-   efficient single-stage OTA. All use SKY130 TT, 1.8 V and a 100 pF load.
+1. Choose a prompt in the dialog; the allowlist is `demo/examples.py`. It covers
+   two-stage op-amps and single-stage OTAs with gain, gain-bandwidth or power-
+   efficiency objectives, named circuit families (folded cascode, telescopic
+   cascode, five-transistor, current-mirror, Miller with a nulling resistor,
+   cascoded second stage, PMOS or NMOS input) and loads from 1 pF to 100 pF, all
+   on SKY130 TT at 1.8 V. Every listed prompt has been run end to end.
 2. Load the pinned Laya checkpoint and ChipJev fine-tuned weights. Run fresh
    batched typed decisions on the exact selected prompt. Condition its topology
-   probabilities on the prompt’s hard stage-count and complexity constraints.
+   probabilities on the prompt’s hard stage-count, complexity and circuit-family
+   constraints.
 3. Pass that prior into **the actual `ChipJevSearch`**. Typed starts and the
    prior/uniform mixture guide joint topology and transistor-sizing search.
    Eight parallel ngspice workers measure every candidate batch. xschem displays
@@ -52,7 +56,10 @@ not themselves establish DNS or install a running production service.
    LVS, RC extraction and post-layout simulation: the active step and its incoming
    arrow light up, DRC and LVS re-run and show that batch's verdict (a green check
    when all pass), and a new iteration lights the feedback arrow. The final state
-   is that of the selected layout.
+   is that of the selected layout. The loop evaluates at most 13 layouts (the last
+   iteration is trimmed to the budget), stops after two iterations without a
+   better qualified layout, and does not start an iteration that the previous
+   one's duration says would pass 40 s; the page shows which rule stopped it.
    Bounded sizing recovery preserves every attempt; post-layout checks retain
    the original strict limits. See [physical-flow details](../../experiments/layout/README.md).
 8. Keep xschem and Magic visible together in one synchronized 1920 × 900 capture.

@@ -6,7 +6,8 @@ visitor login, third-party fonts or tracking scripts are required.
 When changing the live workspace, bump the stylesheet and app-module query versions
 in `index.html` together so returning visitors do not mix cached and new UI assets.
 
-The visitor selects an allowlisted text prompt and starts a fresh Laya → ChipJev
+The visitor opens the prompt dialog (every allowlisted prompt, tiled by circuit
+class) from the prominent prompt button, then starts a fresh Laya → ChipJev
 search → xschem → Magic layout/PEX → ngspice pipeline. Native xschem + Magic frames, actual model decisions,
 measured waveform arrays and performance arrive over a view-only WebSocket.
 `demo/analog_layout.py` connects differential pairs, active loads, gain stages and
@@ -43,7 +44,9 @@ iteration lights the animated feedback arrow. DRC and LVS re-run every iteration
 show that batch's verdict (checked counts, then a green check if all pass or a red
 cross with the rejected count). Fast steps are held on screen for 0.35–1.1 s so they
 can be seen; measured phase times are not affected, and replays skip the hold. The
-final result sets both gates from the selected layout's own DRC and LVS reports.
+final result sets both gates from the selected layout's own DRC and LVS reports,
+and step 9 names the rule that stopped the loop (convergence, layout budget, time
+budget or no untried moves).
 
 The completed run offers DRC and LVS status,
 extracted R/C counts, an explicit pre/post performance table, and separate AC and
