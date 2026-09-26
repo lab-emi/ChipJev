@@ -89,7 +89,8 @@ function drawLoop() {
   if (!box.width) return;
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, a = to.getBoundingClientRect(), b = from.getBoundingClientRect();
   const x = 0.55 * rem, r = 0.5 * rem, head = 0.34 * rem, y0 = a.top + a.height / 2 - box.top, y1 = b.top + b.height / 2 - box.top;
-  const start = b.left - box.left - 0.12 * rem, end = a.left - box.left - 0.1 * rem;
+  // Tail and tip stay just outside the .18rem ring an active or checked step draws.
+  const start = b.left - box.left - 0.2 * rem, end = a.left - box.left - 0.26 * rem;
   const svg = $("loop-arrow"); svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
   svg.replaceChildren(svgNode("path", { d: `M${start},${y1} H${x + r} Q${x},${y1} ${x},${y1 - r} V${y0 + r} Q${x},${y0} ${x + r},${y0} H${end - head}` }),
     svgNode("path", { class: "head", d: `M${end - head},${y0 - 0.62 * head} L${end},${y0} L${end - head},${y0 + 0.62 * head} Z` }));
