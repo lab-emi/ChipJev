@@ -112,6 +112,17 @@ def test_knowledge_cards_are_injected_per_action_and_symptom():
     assert retrieve("no_such_field", ["pm"]) == []
 
 
+def test_a_failed_candidate_is_recorded_not_fatal_to_the_trace():
+    from chipjev.search.pro_layout import objective, stored_objective
+
+    # A RoutingSpace candidate has no metrics; its -inf objective once crashed the
+    # whole demo run when optimization.json was written with allow_nan=False.
+    failed = {"valid": False, "error": "RoutingSpace: No metal3 trunk position"}
+    record = {**failed, "objective": stored_objective(objective(failed, "quality", 1.0))}
+    assert record["objective"] is None and json.loads(json.dumps(record, allow_nan=False)) == record
+    assert stored_objective(3.5) == 3.5
+
+
 def test_critic_reports_every_finding_with_a_card():
     layout = {"placements": [], "groups": [], "trunks": [], "symmetric_nets": {}, "rails": [],
               "plan": {"rail_um": 1.0}, "area_um2": 100.0, "width_um": 10.0, "height_um": 10.0}

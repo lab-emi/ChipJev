@@ -107,6 +107,12 @@ def objective(entry, goal, reference_area):
 
 def _key(entry, goal, reference_area):
     return (bool(entry.get("valid")), objective(entry, goal, reference_area))
+def stored_objective(value):
+    """JSON-safe record: a candidate that produced no measurement (e.g. a routing
+    failure) has no objective, instead of -inf, which the trace cannot serialize."""
+    return value if math.isfinite(value) else None
+
+
 
 
 def _prior(field, value, entry, goal):
@@ -218,7 +224,7 @@ def optimize_pro(topology, values, directory, *, goal="quality", vdd=1.8, load_p
                              directory=target.name)
                 if reference_area is None and entry.get("area_um2"):
                     reference_area = entry["area_um2"]
-                entry["objective"] = objective(entry, goal, reference_area or 1.0)
+                entry["objective"] = stored_objective(objective(entry, goal, reference_area or 1.0))
                 history.append(entry)
                 log(f"  {target.name} {field:14s} valid={entry.get('valid')} "
                     f"area={entry.get('area_um2', 0):7.0f} critic={entry.get('critic', 0):5.1f} "
