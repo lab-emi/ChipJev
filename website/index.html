@@ -47,7 +47,23 @@
       <div class="studio">
         <div class="viewer">
           <div class="viewer-bar"><div><span id="live-dot" class="status-dot"></span><span id="stream-label">REFERENCE CAPTURE</span></div><span class="mono">xschem / Magic / ngspice</span><button id="expand" class="icon-button" type="button" aria-label="Expand live circuit view" title="Expand view">⛶</button></div>
-          <div class="view-switch" aria-label="Circuit view"><button id="view-schematic" type="button" aria-pressed="true">Schematic</button><button id="view-layout" type="button" aria-pressed="false" disabled>Physical layout</button><button id="view-intent" type="button" aria-pressed="false" disabled>Device groups</button></div><div id="screen" class="screen"><img id="layout-frame" alt="The generated SKY130 physical layout, rendered from its Magic geometry" hidden><img id="frame" src="assets/circuit-preview.jpg" width="1440" height="900" alt="Wired SKY130 op-amp in xschem: differential input pair, connected current-mirror branches, cascoded output stage and Miller feedback loop"><div id="screen-note" class="screen-note"><span>REAL TOOLS. REAL CONNECTIONS.</span><p>Choose a prompt, then start a fresh design.</p></div></div>
+          <div class="view-switch" aria-label="Circuit view"><button id="view-schematic" type="button" aria-pressed="true">xschem + Magic</button><button id="view-layout" type="button" aria-pressed="false" disabled>Final layout</button><button id="view-intent" type="button" aria-pressed="false" disabled>Device groups</button></div>
+          <div id="screen" class="screen">
+            <div id="live-workspace" class="live-workspace">
+              <section class="tool-pane" aria-label="Live xschem schematic">
+                <div class="tool-heading"><strong>xschem</strong><span id="schematic-live-status">Reference schematic</span></div>
+                <div class="tool-screen"><img id="frame" src="assets/workspace-preview.jpg" width="1920" height="900" alt="Reference capture: connected SKY130 op-amp in the native xschem editor"></div>
+                <p class="tool-note" id="schematic-live-note">Live topology and sizing candidates appear here.</p>
+              </section>
+              <section class="tool-pane" aria-label="Live Magic layout">
+                <div class="tool-heading"><strong>Magic</strong><span id="magic-live-status">Reference layout</span></div>
+                <div class="tool-screen"><img id="magic-frame" src="assets/workspace-preview.jpg" width="1920" height="900" alt="Reference capture: the matching SKY130 physical layout in the native Magic editor"><div id="magic-waiting" class="magic-waiting" hidden><strong>Waiting for the selected circuit</strong><span>Each generated layout will open here as it enters DRC, PEX and post-layout verification.</span></div></div>
+                <p class="tool-note" id="magic-live-note" role="status">Placement, routing and acceptance update with each layout.</p>
+              </section>
+            </div>
+            <img id="layout-frame" alt="The generated SKY130 physical layout, rendered from its Magic geometry" hidden>
+            <div id="screen-note" class="screen-note"><span>REAL TOOLS. REAL CONNECTIONS.</span><p>Choose a prompt to watch both editors live.</p></div>
+          </div>
           <div class="viewer-footer"><span id="frame-note">Idle reference capture · replaced by the live session on start</span><span id="elapsed" class="mono">— s</span></div>
         </div>
         <aside class="run-panel" aria-label="Simulation progress and measurements">
@@ -79,7 +95,7 @@
         </aside>
       </div>
       <p id="error" class="error" role="alert" hidden></p>
-      <div class="demo-caption"><p><span class="caption-label">Follow the connections</span> Each frame shows an actual search candidate in xschem. Wire crossings connect only at junctions. The final schematic must pass a device-by-device connectivity check before its response is reported.</p><span class="view-only">View-only · No installation</span></div>
+      <div class="demo-caption"><p><span class="caption-label">Watch both editors</span> xschem shows the circuit search, then holds the selected schematic while Magic opens each generated layout. Follow placement and routing changes through DRC, RC extraction and ngspice verification. The last frame restores the selected layout.</p><span class="view-only">View-only · No installation</span></div>
 
       <div class="response-heading"><h3>Schematic simulation</h3><p>Before physical implementation</p></div><div class="plots" aria-label="Schematic simulation results">
         <figure class="plot-card"><figcaption><div><span class="eyebrow">FREQUENCY DOMAIN</span><h3>Open-loop response</h3></div><span class="plot-key"><i></i>Gain <i class="phase"></i>Phase</span></figcaption><div class="plot-area" id="ac-plot"><p>Waiting for the AC sweep</p></div></figure>

@@ -4,7 +4,7 @@ Static HTML/CSS/JavaScript for GitHub Pages. No frontend build, CDN dependencies
 visitor login, third-party fonts or tracking scripts are required.
 
 The visitor selects an allowlisted text prompt and starts a fresh Laya → ChipJev
-search → xschem → Magic layout/PEX → ngspice pipeline. Native xschem frames, actual model decisions,
+search → xschem → Magic layout/PEX → ngspice pipeline. Native xschem + Magic frames, actual model decisions,
 measured waveform arrays and performance arrive over a view-only WebSocket.
 `demo/analog_layout.py` connects differential pairs, active loads, gain stages and
 feedback with electrical xschem wires. Real search candidates are sampled for the live display; the selected result is netlist-verified before the final simulation.
@@ -17,7 +17,13 @@ layout/DRC, LVS/RC extraction, and post-layout simulation/refinement. Reconnecti
 The selected prompt and the actual CPU/CUDA device stay visible. The GPU launcher
 requires CUDA and fails explicitly if device access is unavailable.
 
-The completed run offers a schematic/physical-layout toggle, DRC and LVS status,
+Both native editors are visible throughout the run. A single synchronized capture
+is split into adjacent panes on desktop and stacked panes on phones. Magic loads
+each generated physical candidate, with live iteration, area and acceptance status,
+then restores the selected incumbent before capture stops. The default completed
+view preserves both editors; optional final-geometry and device-group views remain.
+
+The completed run offers DRC and LVS status,
 extracted R/C counts, an explicit pre/post performance table, and separate AC and
 closed-loop response plots. Magic, GDSII, PEX and the full verification ZIP are
 downloadable. A failed post-layout candidate cannot terminate the live search.

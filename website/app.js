@@ -2,6 +2,7 @@ import { RunClock } from "./run-clock.mjs";
 const $ = (id) => document.getElementById(id);
 const runButton = $("run");
 const stageNames = ["deciding", "searching", "netlisting", "simulating", "layout", "extracting", "postsimulating", "checking"];
+const layoutActions = {initial: "Initial plan", columns: "Floorplan", fingers_per_row: "Row packing", pattern: "Matching pattern", split: "Unit decomposition", rail_multiplier: "Power rails", shield_inputs: "Grounded separator", decap_pf: "Decoupling", decap_location: "Decap placement", dummies: "Edge dummies"};
 const clock = new RunClock();
 let examples = [];
 let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false;
@@ -40,11 +41,12 @@ function startClock() {
 function setView(layout, intent = false) {
   if (layout) $("layout-frame").src = intent ? intentURL : layoutURL;
   $("view-intent").setAttribute("aria-pressed", String(intent));
-  $("frame").hidden = layout; $("layout-frame").hidden = !layout;
+  $("live-workspace").hidden = layout; $("layout-frame").hidden = !layout;
+  $("screen").classList.toggle("static-view", layout);
   $("view-schematic").setAttribute("aria-pressed", String(!layout));
   $("view-layout").setAttribute("aria-pressed", String(layout && !intent));
   if (layout) $("frame-note").textContent = "Exact physical geometry · PDK devices, contacts and routed metal";
-  else if (finished) $("frame-note").textContent = "Final frame from this live xschem session";
+  else $("frame-note").textContent = finished ? "Final xschem + Magic frame · selected layout" : "Live xschem + Magic · synchronized capture · view-only";
 }
 function reset() {
   setView(false); $("view-layout").disabled = true; $("view-intent").disabled = true;
@@ -60,7 +62,12 @@ function reset() {
   $("laya-note").textContent = "Typed decisions → topology probabilities";
   $("search-note").textContent = "Joint topology + transistor sizing";
   $("topology-note").textContent = "A fresh topology and sizing search on every run";
-  $("frame").src = "assets/circuit-preview.jpg";
+  $("frame").src = $("magic-frame").src = "assets/workspace-preview.jpg";
+  $("schematic-live-status").textContent = "Starting xschem";
+  $("schematic-live-note").textContent = "Live topology and sizing candidates appear here.";
+  $("magic-live-status").textContent = "Waiting for layout";
+  $("magic-live-note").textContent = "Placement, routing and acceptance update with each layout.";
+  $("magic-waiting").hidden = false;
   $("stream-label").textContent = "STARTING";
   error(""); result = null; lastEvent = 0; reconnects = 0; finished = false;
   $("downloads").hidden = true; $("progress").value = 0;
@@ -143,13 +150,12 @@ function showQuality(physical) {
   const delta = first ? (1 - chosen / first.quality.area_um2) * 100 : 0;
   $("optimization-summary").textContent = `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. Laya proposes actions; DRC, LVS and ngspice decide acceptance.`;
   $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${trace.wall_seconds.toFixed(2)} s complete layout optimization · fixed input bias ${trace.fixed_input_bias_v.toFixed(4)} V`;
-  const labels = {initial: "Initial plan", columns: "Floorplan", fingers_per_row: "Row packing", pattern: "Matching pattern", split: "Unit decomposition", rail_multiplier: "Power rails", shield_inputs: "Grounded separator", decap_pf: "Decoupling", decap_location: "Decap placement", dummies: "Edge dummies"};
   const rows = trace.history.map(item => {
     const row = document.createElement("tr");
     const reasons = Object.entries({...item.qualification_checks, ...item.checks}).filter(([, pass]) => !pass).map(([name]) => name).join(", ");
     const decision = item.valid ? item.accepted ? (item.index === 0 ? "Initial feasible layout" : "Accepted improvement") : "Qualified; retained incumbent" : `Rejected: ${item.error || reasons}`;
     const number = v => Number.isFinite(v) ? v.toFixed(2) : "—";
-    for (const value of [`${item.index + 1} / ${labels[item.action] || item.action}`, number(item.quality?.area_um2), number(item.metrics?.gain_db), number(item.metrics?.gbw_mhz), decision]) {
+    for (const value of [`${item.index + 1} / ${layoutActions[item.action] || item.action}`, number(item.quality?.area_um2), number(item.metrics?.gain_db), number(item.metrics?.gbw_mhz), decision]) {
       const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
     }
     return row;
@@ -170,7 +176,7 @@ function complete(ok) {
   $("examples").disabled = false;
   $("live-dot").classList.remove("active");
   $("stream-label").textContent = ok ? "RUN COMPLETE" : "RUN STOPPED";
-  $("frame-note").textContent = ok ? "Final frame from this live xschem session" : "Last received xschem frame";
+  $("frame-note").textContent = ok ? "Final xschem + Magic frame · selected layout" : "Last received xschem + Magic frame";
   button("Run again");
   if (result) {
     badge(result.valid ? "Verified" : "Unqualified", result.valid ? "success" : "failed");
@@ -183,7 +189,7 @@ function complete(ok) {
     const completedId = runId;
     fetch(`${api}/api/runs/${runId}/artifacts/layout.svg`, {credentials: "omit"})
       .then(response => { if (!response.ok) throw new Error("Layout image unavailable"); return response.blob(); })
-      .then(blob => { if (completedId !== runId || !finished) return; if (layoutURL) URL.revokeObjectURL(layoutURL); layoutURL = URL.createObjectURL(blob); $("layout-frame").src = layoutURL; $("view-layout").disabled = false; setView(true); })
+      .then(blob => { if (completedId !== runId || !finished) return; if (layoutURL) URL.revokeObjectURL(layoutURL); layoutURL = URL.createObjectURL(blob); $("view-layout").disabled = false; })
       .catch(() => { $("physical-status").textContent += " · Preview unavailable; download the Magic or GDS file."; });
     if (result.physical.optimization) fetch(`${api}/api/runs/${runId}/artifacts/layout-intent.svg`, {credentials: "omit"})
       .then(response => { if (!response.ok) throw new Error("Overlay unavailable"); return response.blob(); })
@@ -214,6 +220,17 @@ function event(data) {
     if (data.search) {
       $("search-note").textContent = `${data.search.evaluations} circuits measured${data.search.best_gain_db == null ? "" : ` · best ${data.search.best_gain_db.toFixed(1)} dB`}`;
       if (data.search.topology) $("topology-note").textContent = `${data.search.topology} · ${data.search.mosfets} MOSFETs`;
+      $("schematic-live-status").textContent = data.stage === "searching" ? `Search round ${(data.search.round ?? 0) + 1}` : "Selected circuit";
+      if (data.search.topology) $("schematic-live-note").textContent = `${data.search.topology} · ${data.search.mosfets} MOSFETs`;
+    }
+    const iteration = data.layout_iteration;
+    if (iteration && iteration.displayed !== false && Number.isInteger(iteration.index)) {
+      $("magic-waiting").hidden = true;
+      const phase = {layout: "Generating next layout", extracting: "LVS + RC extraction", postsimulating: "Post-layout simulation"};
+      const decision = iteration.status === "selected" ? "Selected layout" : iteration.status === "evaluated" ?
+        (iteration.accepted ? "Accepted improvement" : iteration.valid ? "Qualified · keeping incumbent" : "Rejected") : (phase[iteration.phase] || "Layout + DRC complete");
+      $("magic-live-status").textContent = `Layout ${iteration.index + 1} · ${decision}`;
+      $("magic-live-note").textContent = `${layoutActions[iteration.action] || iteration.action}${iteration.area_um2 == null ? "" : ` · ${iteration.area_um2.toFixed(0)} µm²`} · ${decision}`;
     }
     $("run-message").textContent = data.message; $("progress").value = data.progress;
     const index = stageNames.indexOf(data.stage);
@@ -229,14 +246,16 @@ function event(data) {
 function connect() {
   const url = new URL(`${api}/api/runs/${runId}/live`); url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   socket = new WebSocket(url); socket.binaryType = "blob";
-  socket.onopen = () => { $("availability").textContent = "Connected to a live xschem session"; };
+  socket.onopen = () => { $("availability").textContent = "Connected to live xschem + Magic"; };
   socket.onmessage = ({ data }) => {
     if (data instanceof Blob) {
-      const previous = frameURL; frameURL = URL.createObjectURL(data); $("frame").src = frameURL;
-      $("frame").alt = "Live xschem screen from the current circuit simulation";
+      const previous = frameURL; frameURL = URL.createObjectURL(data);
+      $("frame").src = $("magic-frame").src = frameURL;
+      $("frame").alt = "Live native xschem editor showing this run’s circuit";
+      $("magic-frame").alt = "Live native Magic editor showing this run’s layout candidate";
       if (previous) URL.revokeObjectURL(previous);
-      $("stream-label").textContent = "LIVE XSCHEM"; $("live-dot").classList.add("active");
-      $("frame-note").textContent = "Live capture · private virtual display · view-only";
+      $("stream-label").textContent = "LIVE XSCHEM + MAGIC"; $("live-dot").classList.add("active");
+      $("frame-note").textContent = "Synchronized capture · private virtual display · view-only";
     } else { try { event(JSON.parse(data)); } catch { error("A stream message could not be read. Reconnect to the run."); } }
   };
   socket.onclose = () => {
@@ -345,6 +364,9 @@ $("examples").addEventListener("change", () => {
     reset(); applyExample(example); $("button-timer").hidden = true;
     $("stream-label").textContent = "REFERENCE CAPTURE";
     $("frame-note").textContent = "Idle reference capture · replaced when you start";
+    $("magic-waiting").hidden = true;
+    $("schematic-live-status").textContent = "Reference schematic";
+    $("magic-live-status").textContent = "Reference layout";
     badge("Ready"); button("Start design");
   }
 });

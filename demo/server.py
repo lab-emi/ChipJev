@@ -1,6 +1,6 @@
 """Public API for the prompt-selected, view-only ChipJev demo. Bind to loopback only.
 
-One shared run at a time. WebSocket messages carry actual xschem JPEG frames
+One shared run at a time. WebSocket messages carry actual xschem + Magic JPEG frames
 and structured simulation events; spectators have no keyboard/mouse channel.
 """
 

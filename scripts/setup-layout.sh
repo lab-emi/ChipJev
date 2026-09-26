@@ -19,9 +19,9 @@ git -C .tools/src/magic-layout fetch origin "$revision"
 git -C .tools/src/magic-layout checkout --detach "$revision"
 (
   cd .tools/src/magic-layout
-  ./configure --prefix="$layout_root/.tools/magic" --disable-opengl
+  ./configure --prefix="$layout_root/.tools/magic" --with-opengl
   make -j4
   make install
 ) > .tools/build-magic-layout.log 2>&1
 .tools/magic/bin/magic --version
-echo 'Magic installed. Build prerequisites: Tcl/Tk development headers, X11, Cairo, make, gcc.'
+echo 'Magic installed. Build prerequisites: Tcl/Tk development headers, X11, OpenGL/Mesa, Cairo, make, gcc.'

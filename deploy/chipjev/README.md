@@ -12,7 +12,7 @@ Browser → GitHub Pages (chipjev.com)
                            ├── Laya typed decisions on CUDA
                            ├── ChipJev topology/sizing search on CUDA
                            ├── 8 CPU ngspice workers
-                           └── private Xvfb + wired xschem + measured plots
+                           └── private Xvfb + live xschem / Magic + measured plots
 ```
 
 The registrar can remain Squarespace. A named Cloudflare Tunnel requires the
@@ -49,8 +49,13 @@ not themselves establish DNS or install a running production service.
    extract distributed RC and simulate the actual extracted netlist in ngspice.
    Bounded sizing recovery preserves every attempt; post-layout checks retain
    the original strict limits. See [physical-flow details](../../experiments/layout/README.md).
-8. Display the exact layout geometry, R/C counts, schematic/post-layout metrics
-   and both sets of AC and closed-loop waveforms.
+8. Keep xschem and Magic visible together in one synchronized 1920 × 900 capture.
+   Each physical candidate opens in native Magic before LVS/RC extraction; the
+   stream reports its plan, iteration and measured acceptance. After optimization,
+   restore the selected layout, which can differ from the last attempted candidate.
+   The browser splits that single frame into two panes, stacked on small screens.
+   Final geometry and device-group views remain available beside the live view.
+   R/C counts, schematic/post-layout metrics and both sets of waveforms follow.
 
 The phase clocks report Laya (including load), design search (including candidate
 simulations), schematic simulation, layout/DRC, LVS/RC extraction, and post-layout
@@ -64,18 +69,23 @@ hash, answers and prior), `search.json` (prior, settings, candidate records and
 strict checks), `circuit.sch`, `circuit.spice`, `result.json`, and `plots.png`, plus `layout.mag`,
 `layout.gds`, `layout.svg`, `pex.spice`, `physical.json`, `drc.txt`, `lvs.log` and
 `physical-evidence.zip` (all attempts, scripts, logs and waveforms).
-The idle poster remains a labeled reference capture from the archived complex
-example described in `demo/fixtures/sky130-opamp.json`. It is not a live result.
+The idle poster is a labeled native xschem + Magic capture of the matched artifacts
+in `experiments/analog-layout/opamp-gain`. It is not a live result. The viewer
+opens private flat-cell copies with unique names to avoid Magic's cell cache;
+it does not save or edit extraction inputs. Interactive DRC is disabled in the
+viewer; every candidate still runs the full batch DRC/LVS/PEX qualification.
 
 ## Local setup and GPU access
 
 Requirements: Linux, NVIDIA GPU with a driver compatible with the locked PyTorch
 CUDA 13.0 runtime, Python 3.13, ngspice 47, xschem, Xvfb, xauth, ffmpeg,
 Magic ≥8.3.684 and LVS Netgen. `setup-demo.sh` builds the pinned local Magic;
-install Tcl/Tk, X11 and Cairo development headers and the Netgen LVS tool first.
+install Tcl/Tk, X11, OpenGL/Mesa and Cairo development headers and the Netgen LVS
+tool first. The live viewer requires Magic's OpenGL backend and Xvfb GLX support.
+Mesa software rendering uses two llvmpipe rendering threads and does not occupy the CUDA GPU.
 
 ```bash
-sudo apt-get install -y build-essential curl ripgrep xschem xvfb xauth ffmpeg util-linux
+sudo apt-get install -y build-essential curl ripgrep xschem xvfb xauth ffmpeg util-linux libgl-dev libglx-mesa0 libgl1-mesa-dri
 # Install uv from https://docs.astral.sh/uv/getting-started/installation/ if needed.
 bash scripts/setup-demo.sh
 bash scripts/run-demo-gpu.sh
@@ -118,9 +128,12 @@ CHIPJEV_SKY130_XSCHEM="$PWD/.tools/xschem" .venv/bin/python -m pytest -q tests/t
 node --test tests/browser/run-clock.test.mjs
 ```
 
-The integration test runs real Laya, the real search, xschem and ngspice. It decodes
-changing JPEGs, checks that the measured prior is the one used by search, verifies
-qualification and downloads/replays results. A routing test checks all 190 public
+The integration test runs real Laya, the real search, xschem, Magic and ngspice. It decodes
+changing dual-editor JPEGs, checks that the measured prior is the one used by search,
+matches live iteration events to the measured optimization history, verifies the
+restored Magic cell against the selected artifact, and downloads/replays results.
+A native display test compares changed and restored layout pixels without touching
+the extraction inputs. A routing test checks all 190 public
 grammar layouts with xschem. Removing signal wires must break connectivity.
 Other tests cover prompt allowlisting, origins, shared admission, body/resource
 limits, private artifacts, expiry, view-only sockets, and reconnecting timers.

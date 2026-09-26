@@ -129,12 +129,15 @@ def optimize(
     max_evaluations=8,
     budget_seconds=60,
     observer=None,
+    candidate_observer=None,
     initial_plan=None,
 ):
     """Each candidate changes only physical variables. Sizing stays fixed and traceable.
 
     Deadline is checked between bounded EDA stages; a running qualification is
     allowed to finish. No unmeasured surrogate prediction becomes an incumbent.
+    candidate_observer receives rendered, evaluated and selected events with the
+    actual candidate directory, plan identity and measured acceptance decision.
     """
     if max_evaluations < 1 or not math.isfinite(budget_seconds) or budget_seconds <= 0:
         raise ValueError("A positive layout evaluation/time budget is required")
@@ -297,6 +300,15 @@ def optimize(
             "objective": None,
             "fidelity": "full RC + fixed-condition ngspice + analog fixture",
         }
+
+        def candidate_stage(name, data):
+            if name == "extracting" and candidate_observer:
+                candidate_observer({"kind": "rendered", "directory": candidate,
+                                    "index": index, "action": action, "plan_id": plan.id,
+                                    "layout": data})
+            if observer:
+                observer(name, data)
+
         try:
             physical = verify(
                 topology,
@@ -308,7 +320,7 @@ def optimize(
                 input_bias=input_bias,
                 prelayout=prelayout,
                 temperature=goal.analog.temperature_c,
-                observer=observer,
+                observer=candidate_stage,
             )
             circuit = ExtractedCircuit(builder, candidate / "pex.spice")
             physical["quality"] = assess(physical["layout"], candidate, circuit)
@@ -351,6 +363,8 @@ def optimize(
             entry["error"] = str(exc)
         entry["seconds"] = time.perf_counter() - before
         history.append(entry)
+        if candidate_observer:
+            candidate_observer({"kind": "evaluated", "directory": candidate, **entry})
         add_neighbors(plan)
         (directory / "optimization.json").write_text(
             json.dumps(
@@ -417,4 +431,7 @@ def optimize(
         recovery={"changed": False, "attempts": history, "max_candidates": max_evaluations},
     )
     (directory / "physical.json").write_text(json.dumps(result, indent=2, allow_nan=False))
+    if candidate_observer:
+        chosen = next(h for h in history if h["plan_id"] == result["layout"]["plan_id"])
+        candidate_observer({"kind": "selected", "directory": directory, **chosen})
     return result

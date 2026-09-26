@@ -1,4 +1,4 @@
-"""One bounded live run: real xschem on a private X server, then real ngspice.
+"""One bounded live run: real xschem and Magic on a private X server, plus ngspice.
 
 Only the server starts this process. No browser-supplied paths, Tcl, SPICE, or
 parameters reach it. stdout is a JSON-lines event channel; tool logs stay local.
@@ -23,16 +23,18 @@ import numpy as np
 from chipjev import xschem
 from chipjev.circuits.published import lookup
 from chipjev.circuits.sky130_devices import build_on_grid as build
-from chipjev.paths import ROOT
+from chipjev.paths import ROOT, magic
 from chipjev.provenance import code_hashes
 from chipjev.search.layout import optimize as physical_design
+from chipjev.simulation.pdk import model_root
 from chipjev.simulation.sky130 import evaluate
 from demo import design
 from demo.examples import DEFAULT_EXAMPLE, EXAMPLES
 from demo.schematic import routed_schematic, text
 from demo.timing import RunTiming
 
-WIDTH, HEIGHT = 1440, 900
+PANE_WIDTH, HEIGHT = 960, 900
+WIDTH = PANE_WIDTH * 2
 
 
 def emit(kind, **data):
@@ -55,6 +57,8 @@ class Screen:
         self.logs = []
         self.capture_error = None
         self.first_frame = threading.Event()
+        self.frame_count = 0
+        self.layout_sequence = 0
         self.closed = False
 
     def launch(self, command, **kwargs):
@@ -74,7 +78,7 @@ class Screen:
         read_fd, write_fd = os.pipe()
         try:
             self.launch(["Xvfb", "-displayfd", str(write_fd), "-screen", "0",
-                         f"{WIDTH}x{HEIGHT}x24", "-nolisten", "tcp", "-extension", "GLX",
+                         f"{WIDTH}x{HEIGHT}x24", "-nolisten", "tcp", "+extension", "GLX",
                          "-auth", str(auth)],
                         pass_fds=(write_fd,))
             os.close(write_fd)
@@ -96,6 +100,7 @@ class Screen:
         config = self.directory / "xschem-config"
         config.mkdir()
         rc.write_text(f"set USER_CONF_DIR {{{config}}}\n"
+                      f"set canvas_width {PANE_WIDTH}\nset canvas_height {HEIGHT - 100}\n"
                       "set XSCHEM_LIBRARY_PATH {}\n"
                       "append XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library\n"
                       f"append XSCHEM_LIBRARY_PATH :{xschem.library()}\n"
@@ -105,8 +110,7 @@ class Screen:
                       "set change_lw 0\nset line_width 1.8\n"
                       "set enable_layer(5) 0\n")
         driver = self.directory / "display.tcl"
-        driver.write_text('''
-wm geometry . 1440x900+0+0
+        driver.write_text(f"wm geometry . {PANE_WIDTH}x{HEIGHT}+0+0\n" + '''
 wm title . {ChipJev | LIVE xschem | SKY130}
 set chipjev_stage -1
 proc chipjev_tick {} {
@@ -118,7 +122,8 @@ proc chipjev_tick {} {
         if {[regexp {^[0-9]{1,3}$} $next] && $next != $chipjev_stage} {
             set chipjev_stage $next
             xschem load [file normalize step-$next.sch]
-            xschem zoom_full
+            update
+            xschem zoom_full center
             xschem redraw
             set fd [open shown.txt w]
             puts $fd $next
@@ -131,8 +136,20 @@ after 100 chipjev_tick
 ''')
         self.launch(["xschem", "-r", "--rcfile", str(rc), "--script", str(driver),
                      str(self.directory / "step-0.sch")], env=env, stdin=subprocess.DEVNULL)
+        # Both native editors share one capture. Unique cell names prevent Magic
+        # from showing a cached layout when successive candidates use layout.mag.
+        magic_driver = self.directory / "magic-display.tcl"
+        magic_driver.write_text(
+            f"set chipjev_geometry {PANE_WIDTH}x{HEIGHT}+{PANE_WIDTH}+0\n"
+            + (ROOT / "demo/magic-display.tcl").read_text())
+        self.launch([magic(), "-d", "OGL", "-noconsole", "-rcfile", "/dev/null",
+                     "-T", str(model_root() / "libs.tech/magic/sky130A.tech"),
+                     str(magic_driver)],
+                    env={**env, "LIBGL_ALWAYS_SOFTWARE": "1", "LP_NUM_THREADS": "2",
+                         "MESA_SHADER_CACHE_DIR": str(self.directory / "mesa-cache")},
+                    stdin=subprocess.DEVNULL)
         ffmpeg = self.launch(["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
-                              "-f", "x11grab", "-framerate", "8", "-video_size",
+                              "-f", "x11grab", "-draw_mouse", "0", "-framerate", "8", "-video_size",
                               f"{WIDTH}x{HEIGHT}", "-i", display, "-an", "-threads", "1",
                               "-c:v", "mjpeg", "-q:v", "5", "-f", "image2pipe", "pipe:1"],
                              env=env, stdout=subprocess.PIPE)
@@ -149,6 +166,7 @@ after 100 chipjev_tick
                         start = frame.find(b"\xff\xd8")
                         if start >= 0:
                             atomic_write(self.directory / "frame.jpg", frame[start:])
+                            self.frame_count += 1
                             self.first_frame.set()
             except Exception as exc:
                 self.capture_error = exc
@@ -158,6 +176,7 @@ after 100 chipjev_tick
         if not self.first_frame.wait(10):
             raise RuntimeError("No live display frame arrived")
         self.check()
+        self.await_ack("magic-shown.txt", "0", "Magic")
 
     def check(self):
         if self.capture_error or any(p.poll() is not None for p in self.processes):
@@ -166,13 +185,36 @@ after 100 chipjev_tick
     def show(self, index):
         self.check()
         atomic_write(self.directory / "stage.txt", str(index))
+        self.await_ack("shown.txt", str(index), "xschem")
+
+    def await_ack(self, filename, expected, tool):
         deadline = time.monotonic() + 3
-        shown = self.directory / "shown.txt"
+        shown = self.directory / filename
         while time.monotonic() < deadline:
-            if shown.exists() and shown.read_text().strip() == str(index):
+            self.check()
+            if shown.exists() and shown.read_text().strip() == expected:
                 return
             time.sleep(0.025)
-        raise RuntimeError("xschem did not acknowledge the schematic update")
+        raise RuntimeError(f"{tool} did not acknowledge the display update")
+
+    def show_layout(self, path):
+        self.check()
+        self.layout_sequence += 1
+        index = self.layout_sequence
+        # The compiler emits a flat cell. Display a private, immutable copy so
+        # the viewer cannot change extraction evidence or reuse an older cell.
+        atomic_write(self.directory / f"view-{index}.mag", Path(path).read_bytes())
+        atomic_write(self.directory / "magic-stage.txt", str(index))
+        self.await_ack("magic-shown.txt", str(index), "Magic")
+        # Capture the acknowledged repaint before the next candidate, including
+        # the final incumbent before this worker closes the two editor windows.
+        target = self.frame_count + 2
+        deadline = time.monotonic() + 3
+        while self.frame_count < target:
+            self.check()
+            if time.monotonic() >= deadline:
+                raise RuntimeError("The updated Magic frame was not captured")
+            time.sleep(0.025)
 
     def close(self):
         self.closed = True
@@ -236,7 +278,8 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
     example = EXAMPLES[example_id]
     source_hashes = code_hashes()
     source_hashes.update({str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-                          for p in sorted((ROOT / "demo").glob("*.py"))})
+                          for p in sorted((ROOT / "demo").iterdir())
+                          if p.suffix in {".py", ".tcl"}})
 
     def stage(name, **data):
         phase = {"starting": "startup", "deciding": "laya", "searching": "search",
@@ -254,7 +297,7 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
     screen = Screen(directory)
     renderer = ThreadPoolExecutor(max_workers=1)
     frame_update = None
-    stage("starting", message="Starting a fresh design and private xschem display",
+    stage("starting", message="Starting a fresh design and private xschem + Magic displays",
           progress=2, example=example)
     try:
         screen.start()
@@ -325,16 +368,46 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
                           input_bias=selected.get("metrics",{}).get("vin_dc"))
         if result["error"]:
             raise RuntimeError(result["error"])
+        live_layout = {}
+        displayed_plan = None
+
         def physical_stage(name, data):
             messages = {"layout": (75, "Generating SKY130 devices, routing and checking Magic DRC"),
                         "extracting": (82, "Netgen LVS and Magic distributed RC extraction"),
                         "postsimulating": (90, "Simulating the extracted RC netlist in ngspice")}
             progress, message = messages[name]
-            stage(name, message=message, progress=progress)
+            if live_layout:
+                live_layout["phase"] = name
+            stage(name, message=message, progress=progress, layout_iteration=live_layout)
+
+        def physical_candidate(event):
+            nonlocal live_layout, displayed_plan
+            kind = event["kind"]
+            if kind in {"rendered", "selected"}:
+                screen.show_layout(event["directory"] / "layout.mag")
+                displayed_plan = event["plan_id"]
+            live_layout = {
+                "index": event["index"], "action": event["action"],
+                "plan_id": event["plan_id"], "status": kind,
+                "accepted": bool(event.get("accepted")), "valid": event.get("valid"),
+                "displayed": event["plan_id"] == displayed_plan,
+                "area_um2": (event.get("quality") or event.get("layout", {})).get("area_um2"),
+            }
+            # No paths or Tcl are sent to the browser. The native viewer has
+            # acknowledged the same geometry before its iteration is announced.
+            emit("stage", stage="postsimulating" if kind == "evaluated" else "layout",
+                 message=(f"Layout {event['index'] + 1}: " +
+                          {"rendered": "checking extracted performance",
+                           "evaluated": "accepted improvement" if event.get("accepted") else
+                                        "qualified; keeping incumbent" if event.get("valid") else "rejected",
+                           "selected": "selected layout restored in Magic"}[kind]),
+                 progress=94 if kind == "selected" else 90 if kind == "evaluated" else 80,
+                 layout_iteration=live_layout, **timing.snapshot())
 
         physical = physical_design(topology, selected["values"], directory / "physical",
                                    vdd=example["vdd"], load_pf=example["load_pf"],
                                    observer=physical_stage, prelayout=result, model=model,
+                                   candidate_observer=physical_candidate,
                                    max_evaluations=6, budget_seconds=40)
         screens = [json.loads(p.read_text()) for p in
                    sorted((directory / "physical-search").glob("*/physical.json"))]

@@ -18,6 +18,7 @@ from chipjev.paths import ROOT
 from demo.examples import EXAMPLES
 from demo.schematic import routed_schematic, schematic_steps
 from demo.server import FIXTURE, MAX_VIEWERS, RUN_TTL, SERVICE, Service, create_app
+from demo.worker import HEIGHT, PANE_WIDTH, WIDTH, Screen
 
 ORIGIN = "https://chipjev.com"
 
@@ -160,6 +161,43 @@ def test_wired_schematic_requires_physical_signal_connections(tmp_path):
 
 
 @pytest.mark.integration
+def test_native_dual_view_reloads_cells_and_restores_selected_geometry(tmp_path):
+    import shutil
+
+    import numpy as np
+    from PIL import Image
+
+    service = Service(tmp_path / "service", {ORIGIN})
+    try:
+        if missing := service.readiness():
+            pytest.skip("Demo dependencies missing: " + ", ".join(missing))
+    finally:
+        service.lock.close()
+    source = ROOT / "experiments/analog-layout/opamp-gain"
+    shutil.copyfile(source / "circuit.sch", tmp_path / "step-0.sch")
+    screen = Screen(tmp_path)
+    frames = []
+    try:
+        screen.start()
+        screen.show(0)
+        for name in ("initial-layout.mag", "layout.mag", "initial-layout.mag"):
+            screen.show_layout(source / name)
+            frame = Image.open(tmp_path / "frame.jpg")
+            assert frame.size == (WIDTH, HEIGHT)
+            # Exclude native menus/cell titles: compare actual layout geometry.
+            frames.append(np.array(frame.crop((PANE_WIDTH + 30, 60, WIDTH - 205, HEIGHT - 30)),
+                                   dtype=float))
+            assert (tmp_path / f"view-{screen.layout_sequence}.mag").read_bytes() == (source / name).read_bytes()
+        assert frames[0].std() > 20, "Magic must draw real, nonblank geometry"
+        change = np.abs(frames[1] - frames[0]).mean()
+        assert change > 2, "A new layout.mag must not reuse Magic's previous cell cache"
+        assert np.abs(frames[2] - frames[0]).mean() < change / 4, "Restore the selected geometry"
+    finally:
+        screen.close()
+    assert all(p.poll() is not None for p in screen.processes)
+
+
+@pytest.mark.integration
 def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
     async def scenario():
         app = create_app(tmp_path, device="cpu")
@@ -178,10 +216,10 @@ def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
                     async for message in ws:
                         if message.type == WSMsgType.BINARY:
                             frames.append(hashlib.sha256(message.data).hexdigest())
-                            assert Image.open(io.BytesIO(message.data)).size == (1440, 900)
+                            assert Image.open(io.BytesIO(message.data)).size == (WIDTH, HEIGHT)
                         elif message.type == WSMsgType.TEXT:
                             events.append(json.loads(message.data))
-            assert len(set(frames)) >= 6, "Expected changing, live xschem frames"
+            assert len(set(frames)) >= 6, "Expected changing, live xschem + Magic frames"
             assert not any(e["type"] == "error" for e in events), events
             result = next(e for e in events if e["type"] == "result")
             assert result["valid"] and result["netlist_match"]
@@ -190,6 +228,18 @@ def test_real_xschem_ngspice_and_reconnectable_video(tmp_path):
             assert result["laya_inference_seconds"] > 0
             assert result["search"]["typed_prior"] and result["search"]["evaluations"] >= 8
             assert result["timings_seconds"]["search"] > 0
+            iterations = [e["layout_iteration"] for e in events if e.get("layout_iteration")]
+            evaluated = [e for e in iterations if e["status"] == "evaluated" and "phase" not in e]
+            history = result["physical"]["optimization"]["history"]
+            assert len(evaluated) == len(history)
+            assert [e["plan_id"] for e in evaluated] == [h["plan_id"] for h in history]
+            selected = [e for e in iterations if e["status"] == "selected"][-1]
+            assert selected["plan_id"] == result["physical"]["layout"]["plan_id"]
+            assert selected["valid"]
+            snapshots = sorted((tmp_path / ident).glob("view-*.mag"),
+                               key=lambda p: int(p.stem.split("-")[-1]))
+            assert len(snapshots) >= 2
+            assert snapshots[-1].read_bytes() == (tmp_path / ident / "layout.mag").read_bytes()
             decisions = await (await client.get(f"/api/runs/{ident}/artifacts/decisions.json")).json()
             trace = await (await client.get(f"/api/runs/{ident}/artifacts/search.json")).json()
             assert decisions["search_prior"] == trace["prior"]
