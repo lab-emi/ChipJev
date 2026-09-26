@@ -404,10 +404,17 @@ class Floorplan:
             for x in (a, b):
                 strap = c.vwire(3, x, y0 - rw // 2, y1 + rw // 2, width, net)
                 for r in rails:
-                    # via2 array where the strap crosses each rail's metal2.
-                    for dx in range(-(width // 2) + 60, width // 2 - 59, 90):
+                    # via2 array where the strap crosses each rail's metal2. Only
+                    # over the rail itself: a via pad past the rail's end is an
+                    # isolated metal2 sliver 0.08 um from its neighbour (met2.2).
+                    lo, hi = max(x - width // 2, r["rect"][0]), min(x + width // 2, r["rect"][2])
+                    if hi - lo < T.V2 + 2 * T.V2_SURR_M2:
+                        continue
+                    count = max(1, (hi - lo - 120) // 90 + 1)
+                    start = (lo + hi) // 2 - (count - 1) * 90 // 2
+                    for i in range(count):
                         for dy in range(-(rw // 2) + 60, rw // 2 - 59, 90):
-                            c.via2(x + dx, r["y"] + dy)
+                            c.via2(start + i * 90, r["y"] + dy)
                 self.power_straps.append({"net": net, "x": x, "rect": strap, "y0": y0, "y1": y1})
 
     def _tap_strip(self, net, y, polarity, x0, x1, rw):

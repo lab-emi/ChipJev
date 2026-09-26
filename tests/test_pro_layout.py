@@ -14,7 +14,14 @@ from chipjev.layout.pro.canvas import Canvas
 from chipjev.layout.pro.integrity import validate
 from chipjev.layout.pro.knowledge import CARDS, retrieve, review
 from chipjev.layout.pro.mos import ArraySpec, Finger, MosArray
-from chipjev.layout.pro.planner import ProPlan, faithful, orient, plan_units, segments
+from chipjev.layout.pro.planner import (
+    ProPlan,
+    faithful,
+    orient,
+    pair_sequence,
+    plan_units,
+    segments,
+)
 from chipjev.paths import ROOT
 
 
@@ -50,6 +57,21 @@ def test_orientation_shares_diffusion_and_prefers_source_ends():
     assert regions == ["t1", "x1", "t1", "out", "t1", "out", "t1", "x1", "t1"]
     # Two devices without a common net cannot share one diffusion.
     assert orient(["a", "b"], {"a": ("a1", "x1"), "b": ("a2", "out")}, set()) is None
+
+
+def test_odd_finger_pairs_stay_interdigitated_with_shared_diffusion():
+    terms = {"a": ("t1", "x1"), "b": ("t1", "out")}
+    for count in (1, 2, 3, 5, 21):
+        seq = ["a" if s == "A" else "b" for s in pair_sequence(count, "abba")]
+        assert seq.count("a") == seq.count("b") == count
+        # A..AB..BA..A could not share diffusion for odd counts: pairs fell back to A|B.
+        assert orient(seq, terms, {"t1"}) is not None
+        moment = {d: sum(i for i, s in enumerate(seq) if s == d) for d in "ab"}
+        assert abs(moment["a"] - moment["b"]) == count % 2  # odd counts: the one-pitch minimum
+    topology, values = design("ota-efficient")  # 21-finger input pair cut into [4,4,4,3,3,3]
+    c = analyse(build(topology, values), topology)
+    units = plan_units(c, ProPlan(), fold=1)
+    assert next(u for u in units if set(u.devices) == set(c.pairs[0])).pattern == "abba"
 
 
 def test_faithful_mode_keeps_the_simulated_finger():
@@ -146,3 +168,18 @@ def test_generated_layout_is_drc_and_lvs_clean_with_declared_integrity(tmp_path,
     manifest["devices"][ident]["nets"][1] = "vdd"
     with pytest.raises(ValueError):
         validate(build(topology, values), manifest)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("rail", [0.6, 2.0])
+def test_every_power_rail_width_is_drc_and_lvs_clean(tmp_path, rail):
+    # 2 um rails once hung power-strap via2 pads past the rail ends: 128 met2.2 slivers.
+    if missing := readiness():
+        pytest.skip(f"missing tools: {missing}")
+    from chipjev.layout.pro.compiler import synthesize
+    from chipjev.layout.verification import lvs
+
+    topology, values = design("opamp-speed")
+    result = synthesize(topology, values, tmp_path, plan=ProPlan(rail_um=rail))
+    assert result["drc_errors"] == 0
+    assert lvs(tmp_path)["passed"]

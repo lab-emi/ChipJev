@@ -228,10 +228,11 @@ def build_array(name, polarity, w, length, sequence, circuit, dummies, prefer=()
 def pair_sequence(count, pattern):
     """Finger order (A/B) for a pair with ``count`` fingers per device."""
     if pattern == "abba":
-        if count % 2 == 0:
-            return ["A", "B", "B", "A"] * (count // 2)
-        half = count // 2
-        return ["A"] * half + ["B"] * count + ["A"] * (count - half)
+        # An odd count cannot be exactly common-centroid in one row (the position
+        # sums differ by an odd number); ABBA..AB reaches that one-pitch minimum and
+        # keeps shared diffusion, and cross-coupled rows/segments cancel it. (A run
+        # of three Bs cannot share diffusion, so A..AB..BA..A fell back to A|B.)
+        return ["A", "B", "B", "A"] * (count // 2) + (["A", "B"] if count % 2 else [])
     raise ValueError(pattern)
 
 
