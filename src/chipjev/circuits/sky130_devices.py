@@ -34,7 +34,7 @@ DEVICE = {"n": "sky130_fd_pr__nfet_01v8", "p": "sky130_fd_pr__pfet_01v8"}
 CORNERS = ("tt", "ss", "ff", "sf", "fs")
 
 
-def include_text(corner="tt"):
+def include_text(corner="tt", *, mismatch=False):
     """Model includes for the two transistors at a process corner (unmodified PDK files,
     Monte Carlo switches off), with xschem's scale and bin-selection options."""
     if corner not in CORNERS:
@@ -49,7 +49,7 @@ def include_text(corner="tt"):
              pfet, spice / "sky130_fd_pr__pfet_01v8__mismatch.corner.spice"]
     lines = [
         ".option scale=1u wnflag=1",
-        ".param MC_MM_SWITCH=0 MC_PR_SWITCH=0",
+        f".param MC_MM_SWITCH={int(bool(mismatch))} MC_PR_SWITCH=0",
         ".param sky130_fd_pr__nfet_01v8__dlc_rotweak=0 sky130_fd_pr__pfet_01v8__dlc_rotweak=0",
         f'.include "{root / "libs.tech/ngspice/parameters/lod.spice"}"',
     ]
@@ -152,3 +152,26 @@ def build(topology, values, vdd=VDD):
         b.cap(last_out, last_in, v("c.cc2"))
         b.cap(gain_out[-2], gain_out[-3], v("c.cc"))
     return b
+
+
+def build_on_grid(topology, values, vdd=VDD):
+    """Manufacturable schematic sizing for the physical-search profile only.
+
+    Keep the requested grammar values and finger count, but use the compiler's
+    10 nm symmetric dimension quantum in both schematic and physical devices.
+    Frozen scientific profiles continue to call build().
+    """
+    import re
+
+    builder=build(topology,values,vdd)
+    replacements={}
+    for name, (width,length,nf) in builder.geometry.items():
+        width=max(.42,round(width/nf/.01)*.01)*nf
+        length=max(.15,round(length/.01)*.01)
+        builder.geometry[name]=(width,length,nf)
+        replacements['x'+name]={'w':width,'l':length,**diffusion(width,nf)}
+    for i,line in enumerate(builder.lines):
+        for key,value in replacements.get(line.split()[0],{}).items():
+            line=re.sub(rf'\b{key}=[^\s]+',f'{key}={value:.6g}',line)
+        builder.lines[i]=line
+    return builder

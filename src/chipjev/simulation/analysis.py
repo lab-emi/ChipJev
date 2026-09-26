@@ -169,7 +169,8 @@ def _interp_log(f1, f2, y1, y2, target):
     return 10 ** (math.log10(f1) + t * (math.log10(f2) - math.log10(f1)))
 
 
-def analyze(stdout, ac_path, b, topology, load_pf=LOAD_PF, vdd=VDD, rules="qualified"):
+def analyze(stdout, ac_path, b, topology, load_pf=LOAD_PF, vdd=VDD, rules="qualified", *,
+            fixed_bias=None):
     """Parse the echoed operating point and AC data; apply checks; compute metrics."""
     if rules not in RULES:
         raise ValueError(f"unknown rules {rules!r}")
@@ -200,7 +201,7 @@ def analyze(stdout, ac_path, b, topology, load_pf=LOAD_PF, vdd=VDD, rules="quali
                 settle = float(parts[1])
         except (IndexError, ValueError) as exc:
             raise BenchError(f"unparsable simulator line: {line!r}") from exc
-    if best is None or len(sweeps) != 3:
+    if best is None or (fixed_bias is None and len(sweeps) != 3):
         raise BenchError("bias search did not complete")
     if "out" not in volts or len(currents) != len(b.mos):
         raise BenchError("operating point did not complete")
@@ -213,7 +214,9 @@ def analyze(stdout, ac_path, b, topology, load_pf=LOAD_PF, vdd=VDD, rules="quali
 
     checks = {}
     # dc_sweep_template / get_best_voltage: a flat output cannot be biased.
-    checks["bias_found"] = max(s[3] for s in sweeps) >= 1e-6
+    checks["bias_found"] = (max(s[3] for s in sweeps) >= 1e-6 if fixed_bias is None else
+                            math.isclose(best[0], fixed_bias, abs_tol=1e-8)
+                            and 0 < volts["out"] < vdd)
     # check_netlist(optimize=True) reads the operating point with six decimals.
     rounded = {k: round(v, 6) for k, v in volts.items()}
     supply = rounded.get("vdd", vdd)

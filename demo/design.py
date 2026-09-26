@@ -1,5 +1,7 @@
 """A bounded, fresh Laya + ChipJev search for a selected public prompt."""
 
+import json
+import time
 from concurrent.futures import Future
 from pathlib import Path
 from tempfile import mkdtemp
@@ -63,18 +65,48 @@ class LayoutEvaluator(Evaluator):
                             record["margins"][key] -= reserve
                     if record.get("strict") and record["valid"] and self.physical_directory:
                         from chipjev.circuits.published import lookup
+                        from chipjev.layout.plan import LayoutPlan
                         from chipjev.layout.verification import verify
 
                         target = Path(mkdtemp(prefix="candidate-", dir=self.physical_directory))
-                        physical = verify(
-                            lookup(record["cls"], record["topology"]),
-                            record["values"],
-                            target,
-                            prelayout=record,
-                            vdd=record["vdd"],
-                            load_pf=record["load_pf"],
-                        )
-                        measured = physical["postlayout"]
+                        started = time.perf_counter()
+                        if not record.get("geometry_policy"):
+                            from chipjev.simulation.sky130 import evaluate
+
+                            # Continuous sizing is a cheap exploration profile.
+                            # Acceptance always uses the manufacturable schematic
+                            # at the *same* selected input common-mode point.
+                            record = evaluate(
+                                lookup(record["cls"], record["topology"]), record["values"],
+                                target/"schematic-grid", strict=True, keep=True,
+                                vdd=record["vdd"], load_pf=record["load_pf"],
+                                quantize_geometry=True, input_bias=record["metrics"]["vin_dc"],
+                            )
+                            record["valid"] = bool(record["valid"] and all(
+                                (record["metrics"].get(k) or -1e9) >= limits[k]+v
+                                for k,v in reserves.items()))
+                            if not record["valid"]:
+                                (target/"schematic-grid/result.json").write_text(json.dumps(record,indent=2))
+                                destination.set_result(record)
+                                return
+                        try:
+                            physical = verify(
+                                lookup(record["cls"], record["topology"]),
+                                record["values"], target, prelayout=record,
+                                vdd=record["vdd"], load_pf=record["load_pf"],
+                                plan=LayoutPlan(fingers_per_row=20),
+                                input_bias=record["metrics"]["vin_dc"],
+                            )
+                            measured = physical["postlayout"]
+                        except (RuntimeError, ValueError) as exc:
+                            # Illegal geometry is search feedback, never a reason
+                            # to accept a schematic-only substitute.
+                            physical = {"valid": False, "error": str(exc),
+                                        "physical_seconds": time.perf_counter()-started}
+                            (target/"physical.json").write_text(json.dumps(physical, indent=2))
+                            measured = dict(record)
+                            measured["checks"] = {**record["checks"], "function": False}
+                            measured["margins"] = {**record["margins"], "function": -1.}
                         measured["physical_screen"] = {
                             "path": str(target.relative_to(self.physical_directory.parent)),
                             "valid": physical["valid"],
@@ -82,7 +114,7 @@ class LayoutEvaluator(Evaluator):
                             "schematic_metrics": record["metrics"],
                         }
                         measured["valid"] = physical["valid"]
-                        if physical["layout"]["drc_errors"] or not physical["lvs"]["passed"]:
+                        if not physical["valid"]:
                             measured["checks"]["function"] = False
                         record = measured
                     destination.set_result(record)
@@ -143,6 +175,9 @@ def search(answer, example, device, observer, physical_directory=None):
         8,
         technology="sky130",
         headroom=HEADROOM[example["id"]],
+        # The interactive host also captures video and serves requests. Leave
+        # timing headroom for ~2 s convergent DC sweeps; retain the total budget.
+        evaluate_options={"quantize_geometry": example["objective"] != "gain", "online_timeout_s": 2.5},
         physical_directory=physical_directory,
     )
     # Interactive profile: same grammar, priors, GP and strict qualification;
@@ -185,6 +220,10 @@ def search(answer, example, device, observer, physical_directory=None):
     result["demo_stop_rule"] = "first strictly RC-qualified design or budget exhausted"
     result["physical_candidate_screening"] = physical_directory is not None
     result["layout_headroom"] = HEADROOM[example["id"]]
+    result["exploration_geometry"] = ("continuous approximation" if example["objective"] == "gain"
+                                      else "manufacturing grid")
+    result["acceptance_geometry"] = "manufacturing grid, fixed shared input bias"
+    result["online_timeout_s"] = 2.5
     # Consume each refit before the next acquisition so capture/network latency
     # cannot change which model supplies the following search round.
     result["wait_for_refit"] = True

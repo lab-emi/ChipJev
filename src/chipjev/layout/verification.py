@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import re
 import subprocess
 import time
@@ -172,6 +173,9 @@ class ExtractedCircuit:
                 raise ValueError(f"Unconnected extracted terminal {node}")
             return canonical[find(node)]
 
+        self.ports = ports
+        self.node_roots = {n: canonical.get(find(n)) for n in list(parents)}
+
         def inventory(statements, resolve):
             entries = []
             for line in statements:
@@ -200,12 +204,65 @@ class ExtractedCircuit:
         if inventory(original, lambda n: n) != inventory(statements, net):
             raise ValueError("PEX changed device connectivity, count or geometry relative to LVS")
 
+        manifest_path = path.parent / "manifest.json"
+        manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else None
+        expected_counts = {n: g[2] for n, g in builder.geometry.items()}
+        auxiliaries = Counter()
+        if manifest is not None:
+            from .intent import derive
+            from .plan import LayoutPlan
+
+            declared_plan = LayoutPlan(**manifest["plan"])
+            declared_intent = derive(builder)
+            declared_plan.validate(builder, declared_intent)
+            paired = {
+                n for g in declared_intent["groups"] if len(g["members"]) == 2 for n in g["members"]
+            }
+            reference = spice_lines((path.parent / "reference.spice").read_text())
+            if inventory(reference, lambda n: n) != inventory(original, lambda n: n):
+                raise ValueError(
+                    "Extracted device inventory disagrees with declared implementation"
+                )
+            expected_counts = Counter()
+            for entry in manifest["devices"].values():
+                if entry["kind"] not in ("n", "p"):
+                    continue
+                if entry["auxiliary"]:
+                    if len(set(entry["nets"])) != 1 or entry["nets"][0] not in ("vdd", "vss"):
+                        raise ValueError("Only explicitly rail-tied dummy MOS are supported")
+                    auxiliaries[(entry["model"], tuple(entry["nets"]))] += 1
+                else:
+                    name = entry["logical"]
+                    if name not in builder.geometry:
+                        raise ValueError("Manifest changed the logical circuit")
+                    width, length, nf = builder.geometry[name]
+                    count = nf * (declared_plan.split if name in paired else 1)
+                    expected_width = max(0.42, round(width / count / 0.01) * 0.01)
+                    expected_length = max(0.15, round(length / 0.01) * 0.01)
+                    if not (
+                        math.isclose(entry["params"]["w"], expected_width, abs_tol=1e-7)
+                        and math.isclose(entry["params"]["l"], expected_length, abs_tol=1e-7)
+                    ):
+                        raise ValueError(
+                            "Manifest geometry is not the declared sizing transformation"
+                        )
+                    expected_counts[name] += 1
+            if set(expected_counts) != set(builder.geometry):
+                raise ValueError("Manifest changed the logical circuit")
+            for name, (_, _, nf) in builder.geometry.items():
+                if expected_counts[name] != nf * (declared_plan.split if name in paired else 1):
+                    raise ValueError("Manifest finger count violates the declared plan")
+
         self.mapping = defaultdict(list)
         for line in statements:
             tok = line.split()
             if tok[0][0].lower() != "x" or len(tok) < 6 or tok[5] not in DEVICE.values():
                 continue
             d, g, s, bulk = map(net, tok[1:5])
+            aux_key = (tok[5], (d, g, s, bulk))
+            if auxiliaries[aux_key]:
+                auxiliaries[aux_key] -= 1
+                continue
             options = []
             for name, dd, gg, ss, kind in builder.mos:
                 dd, gg, ss = ("vss" if n == "0" else n for n in (dd, gg, ss))
@@ -220,8 +277,10 @@ class ExtractedCircuit:
                 raise ValueError(f"Cannot uniquely associate extracted MOS {tok[0]}: {options}")
             self.mapping[options[0]].append(tok[0].lower())
         for name in builder.geometry:
-            if len(self.mapping[name]) != builder.geometry[name][2]:
+            if len(self.mapping[name]) != expected_counts[name]:
                 raise ValueError(f"PEX changed the physical finger count of {name}")
+        if any(auxiliaries.values()):
+            raise ValueError("Missing declared dummy devices")
 
     def probe_commands(self, name, kind):
         lines = [f"let i_{name} = 0", f"let d_{name} = 1e99"]
@@ -237,7 +296,19 @@ class ExtractedCircuit:
         return lines
 
 
-def verify(topology, values, directory, *, vdd=1.8, load_pf=100, observer=None, prelayout=None):
+def verify(
+    topology,
+    values,
+    directory,
+    *,
+    vdd=1.8,
+    load_pf=100,
+    observer=None,
+    prelayout=None,
+    plan=None,
+    input_bias=None,
+    temperature=27.0,
+):
     """Write reviewable evidence for every stage, including failures."""
     start = time.perf_counter()
     directory = Path(directory).resolve()
@@ -247,7 +318,13 @@ def verify(topology, values, directory, *, vdd=1.8, load_pf=100, observer=None, 
             observer(name, data or {})
 
     stage("layout")
-    layout = synthesize(topology, values, directory, vdd=vdd)
+    if plan is None:
+        layout = synthesize(topology, values, directory, vdd=vdd)
+    else:
+        from .compiler import synthesize as compile_layout
+
+        current = ((prelayout or {}).get("metrics", {}).get("power_uw") or 1800) * 1e-6 / vdd
+        layout = compile_layout(topology, values, directory, vdd=vdd, plan=plan, current_a=current)
     stage("extracting", layout)
     matched = lvs(directory)
     extraction = extract_rc(directory)
@@ -263,6 +340,8 @@ def verify(topology, values, directory, *, vdd=1.8, load_pf=100, observer=None, 
             keep=True,
             vdd=vdd,
             load_pf=load_pf,
+            input_bias=input_bias,
+            temperature=temperature,
         )
     post = evaluate(
         topology,
@@ -273,6 +352,8 @@ def verify(topology, values, directory, *, vdd=1.8, load_pf=100, observer=None, 
         vdd=vdd,
         load_pf=load_pf,
         circuit=circuit,
+        input_bias=input_bias,
+        temperature=temperature,
     )
     post.pop("pid", None)
     result = {

@@ -91,18 +91,59 @@ def layout_command(args):
     from .circuits.published import lookup
     from .layout.flow import complete
 
+    if args.legacy and (args.corners or args.mismatch_samples or args.sizing_evaluations
+                        or args.goal or args.input_bias is not None):
+        raise ValueError("Legacy layout cannot use the new physical-goal or robustness options")
+
     opener = gzip.open if args.input.suffix == ".gz" else open
     with opener(args.input, "rt") as stream:
         record = json.load(stream)
+    if args.mismatch_samples < 0 or args.sizing_evaluations < 0:
+        raise ValueError("Sample and refinement counts cannot be negative")
     technology = record.get("technology", "")
     if not technology.startswith("sky130"):
         raise ValueError("Physical synthesis requires a SKY130 result, not PTM sizing")
     selected = record.get("best") or record
     topology = lookup(record["cls"], selected["topology"])
-    result = complete(topology, selected["values"], args.output,
-                      vdd=record.get("vdd", 1.8), load_pf=record.get("load_pf", 100),
-                      max_candidates=0 if args.no_recovery else 48,
-                      observer=lambda name, data: print(name, flush=True))
+    if args.legacy:
+        result = complete(topology, selected["values"], args.output,
+                          vdd=record.get("vdd", 1.8), load_pf=record.get("load_pf", 100),
+                          max_candidates=0 if args.no_recovery else 48,
+                          observer=lambda name, data: print(name, flush=True))
+    else:
+        from .decisions.typed import TypedDecisions
+        from .search.layout import LayoutGoal, optimize
+        from .simulation.analog import AnalogConditions
+
+        config=json.loads(args.goal.read_text()) if args.goal else {}
+        if "analog" in config:
+            config["analog"]=AnalogConditions(**config["analog"])
+        config.setdefault("objective",args.objective)
+        model=None if args.no_laya else TypedDecisions(weights=_weights(None),device=args.device)
+        result=optimize(topology,selected["values"],args.output,goal=LayoutGoal(**config),
+                        vdd=record.get("vdd",1.8),load_pf=record.get("load_pf",100),
+                        input_bias=args.input_bias,model=model,max_evaluations=args.evaluations,
+                        budget_seconds=args.seconds,
+                        observer=lambda name,data:print(name,flush=True))
+        if args.sizing_evaluations:
+            from .search.layout_joint import refine
+            result=refine(topology,result,args.output,max_evaluations=args.sizing_evaluations,
+                          budget_seconds=args.seconds,vdd=record.get("vdd",1.8),
+                          load_pf=record.get("load_pf",100))
+        if args.corners or args.mismatch_samples:
+            from .circuits.sky130_devices import build
+            from .layout.verification import ExtractedCircuit
+            from .simulation.physical_robustness import qualify
+
+            circuit=ExtractedCircuit(build(topology,result["values"],record.get("vdd",1.8)),
+                                     args.output/"pex.spice")
+            result["robustness"]=qualify(topology,result["values"],circuit,args.output/"robustness",
+                input_bias=result["optimization"]["fixed_input_bias_v"],vdd=record.get("vdd",1.8),
+                load_pf=record.get("load_pf",100),corners=tuple(args.corners or ()),
+                mismatch_seeds=range(args.mismatch_samples),conditions=LayoutGoal(**config).analog,
+                temperatures=(LayoutGoal(**config).analog.temperature_c,))
+            result["valid"] &= result["robustness"]["status"]=="pass"
+            (args.output/"physical.json").write_text(json.dumps(result,indent=2,allow_nan=False))
     print(json.dumps({"valid": result["valid"], "layout_seconds": result["layout"]["layout_seconds"],
                       "physical_seconds": result["total_seconds"],
                       "drc_errors": result["layout"]["drc_errors"], "lvs": result["lvs"]["passed"],
@@ -245,6 +286,17 @@ def main(argv=None):
     p.add_argument("input", type=Path, help="SKY130 result.json or result.json.gz")
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--no-recovery", action="store_true", help="verify the supplied sizing without refinement")
+    p.add_argument("--legacy", action="store_true", help="use the original single-row flow for comparison")
+    p.add_argument("--goal", type=Path, help="JSON physical goal and analog test conditions")
+    p.add_argument("--objective", choices=("area","gain","gbw","fom","noise","matching"),default="area")
+    p.add_argument("--evaluations",type=int,default=8)
+    p.add_argument("--seconds",type=float,default=60)
+    p.add_argument("--input-bias",type=float,help="fixed common-mode/input bias for every candidate")
+    p.add_argument("--device",choices=("cpu","cuda","mps"))
+    p.add_argument("--no-laya",action="store_true",help="ablate the typed physical-action prior")
+    p.add_argument("--corners",nargs="+",choices=("tt","ss","ff","sf","fs"))
+    p.add_argument("--mismatch-samples",type=int,default=0)
+    p.add_argument("--sizing-evaluations",type=int,default=0,help="optional separate joint sizing/layout refinement budget")
     p.set_defaults(run=layout_command)
 
     args = parser.parse_args(argv)

@@ -53,14 +53,20 @@ STRICT_LIMIT_S = 60.0
 STRICT = "reltol=1e-6 abstol=1e-12 vntol=1e-9"
 
 
-def deck(topology, values, *, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qualified",
-         temperature=27.0, corner="tt", circuit=None):
+def deck(topology, values, *, quantize_geometry=False, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qualified",
+         temperature=27.0, corner="tt", circuit=None, input_bias=None, mismatch_seed=None):
     """Return (deck text, Builder): ptm45.deck with SKY130 devices."""
     target = vdd / 2
-    b = circuit if circuit is not None else build(topology, values, vdd)
-    lines = [f"* ChipJev-Topo SKY130 {topology.id}", include_text(corner)]
+    from ..circuits.sky130_devices import build_on_grid
+    make = build_on_grid if quantize_geometry else build
+    b = circuit if circuit is not None else make(topology, values, vdd)
+    lines = [f"* ChipJev-Topo SKY130 {topology.id}", include_text(corner, mismatch=mismatch_seed is not None)]
     lines += getattr(b, "model_lines", [])
     lines.append(f".options {STRICT if strict else ONLINE}")
+    if mismatch_seed is not None:
+        # Set after startup: ngspice's Gaussian initializer can reseed after
+        # .spiceinit. A deck option is evaluated before PDK random parameters.
+        lines.append(f".options seed={mismatch_seed + 1} seedinfo")
     lines.append(f".temp {temperature:.6g}")
     lines.append(f"vdd vdd 0 DC {vdd}")
     if topology.differential:
@@ -79,8 +85,16 @@ def deck(topology, values, *, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qua
         lines += [f"iprt_{n} 0 {n} PULSE(0 1p 10n 1n 1n 1n 1)" for n in internal]
     lines.append(f"cload out 0 {load_pf * 1e-12:.6g}")
     control = ["set noaskquit", "set wr_singlescale", "set wr_vecnames", "set numdgt=10"]
-    control += _search_script(source, vdd)
+    if input_bias is None:
+        control += _search_script(source, vdd)
+    else:
+        if not np.isfinite(input_bias) or not 0 < input_bias < vdd:
+            raise ValueError("Fixed input bias must be finite and inside the supply rails")
+        control += [f"set vbest = {input_bias:.12g}"]
     control += [f"alter {source} dc = $vbest", "op"]
+    if input_bias is not None:
+        control += [f"let biaserror = abs(v(out) - {target:.12g})",
+                    f'echo "@@B {input_bias:.12g} $&biaserror"']
     nodes = sorted(b.nodes | ({"inp", "inn"} if topology.differential else {"in"}) | {"out"})
     for node in nodes:
         control.append(f'echo "@@V {node} $&v({node})"')
@@ -111,7 +125,7 @@ def deck(topology, values, *, strict=False, load_pf=LOAD_PF, vdd=VDD, rules="qua
 
 
 def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature, corner="tt",
-                 options=None, circuit=None):
+                 options=None, circuit=None, mismatch_seed=None, quantize_geometry=False):
     """ptm45.buffer_deck with SKY130 devices."""
     vin = metrics["vin_dc"]
     ugf = metrics.get("ugf_mhz")
@@ -119,11 +133,13 @@ def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature,
     delay = stop / 20
     inverted = abs(metrics["dc_phase_deg"]) >= 90
     feedback, signal = ("inp", "inn") if inverted else ("inn", "inp")
-    builder = circuit if circuit is not None else build(topology, values, vdd)
+    from ..circuits.sky130_devices import build_on_grid
+    make = build_on_grid if quantize_geometry else build
+    builder = circuit if circuit is not None else make(topology, values, vdd)
     lines = [
         f"* Qualified buffer (SKY130): {topology.id}, direction {direction}",
-        include_text(corner),
-        f".options {options or STRICT}",
+        include_text(corner, mismatch=mismatch_seed is not None),
+        f".options {options or STRICT}" + (f" seed={mismatch_seed + 1} seedinfo" if mismatch_seed is not None else ""),
         f".temp {temperature:.6g}",
         f"vdd vdd 0 DC {vdd}",
         f"vsig {signal} 0 DC {vin:.9g} PULSE({vin:.9g} "
@@ -142,7 +158,8 @@ def buffer_deck(topology, values, metrics, direction, load_pf, vdd, temperature,
 
 
 def qualify_buffer(topology, values, metrics, directory, *, load_pf=LOAD_PF, vdd=VDD,
-                   temperature=27.0, corner="tt", strict=True, circuit=None):
+                   temperature=27.0, corner="tt", strict=True, circuit=None, mismatch_seed=None, quantize_geometry=False,
+                   online_timeout_s=None):
     """ptm45.qualify_buffer with SKY130 devices (same criteria); an
     online check (strict=False) uses the online tolerances and time limit and keeps no
     waveforms."""
@@ -151,12 +168,13 @@ def qualify_buffer(topology, values, metrics, directory, *, load_pf=LOAD_PF, vdd
         try:
             text, stop, delay = buffer_deck(topology, values, metrics, direction, load_pf, vdd,
                                             temperature, corner,
-                                            options=STRICT if strict else ONLINE, circuit=circuit)
+                                            options=STRICT if strict else ONLINE, circuit=circuit,
+                                            mismatch_seed=mismatch_seed, quantize_geometry=quantize_geometry)
             path = directory / f"buffer-{direction}.cir"
             path.write_text(text)
             proc = subprocess.run([ngspice(), "-b", path.name], cwd=directory,
                                   capture_output=True, text=True,
-                                  timeout=30 if strict else ONLINE_LIMIT_S)
+                                  timeout=30 if strict else (ONLINE_LIMIT_S if online_timeout_s is None else online_timeout_s))
             if proc.returncode:
                 raise ValueError(f"buffer transient exited with code {proc.returncode}")
             data = np.atleast_2d(np.loadtxt(directory / f"buffer-{direction}.tsv"))
@@ -192,14 +210,20 @@ def qualify_buffer(topology, values, metrics, directory, *, load_pf=LOAD_PF, vdd
 
 
 def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF, vdd=VDD,
-             keep=False, rules="qualified", temperature=27.0, corner="tt", circuit=None):
+             keep=False, rules="qualified", temperature=27.0, corner="tt", circuit=None,
+             input_bias=None, mismatch_seed=None, quantize_geometry=False, online_timeout_s=None):
     """ptm45.evaluate on SKY130: one JSON-serializable record per design
     (never raises for a bad design)."""
     start = time.perf_counter()
+    if online_timeout_s is not None and (not np.isfinite(online_timeout_s) or online_timeout_s <= 0):
+        raise ValueError("Online simulation timeout must be positive and finite")
     own = directory is None
     directory = Path(directory or tempfile.mkdtemp(prefix="chipjev-sky130-"))
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / ".spiceinit").write_text(SPICEINIT)
+    if mismatch_seed is not None and (not isinstance(mismatch_seed,int) or mismatch_seed<0):
+        raise ValueError("Mismatch seed must be a nonnegative integer")
+    (directory / ".spiceinit").write_text(SPICEINIT +
+        (f"option seed={mismatch_seed + 1}\nsetseed {mismatch_seed + 1}\n" if mismatch_seed is not None else ""))
     record = {
         "topology": topology.id, "cls": topology.cls,
         "values": {k: float(v) for k, v in values.items()}, "strict": strict,
@@ -207,17 +231,26 @@ def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF,
         "technology": f"sky130-{corner}", "valid": False, "checks": {}, "metrics": {},
         "margins": {}, "error": None,
     }
+    if online_timeout_s is not None:
+        record["online_timeout_s"] = online_timeout_s
     sim_seconds = 0.0
     try:
         text, b = deck(topology, values, strict=strict, load_pf=load_pf, vdd=vdd, rules=rules,
-                       temperature=temperature, corner=corner, circuit=circuit)
+                       temperature=temperature, corner=corner, circuit=circuit,
+                       input_bias=input_bias, mismatch_seed=mismatch_seed, quantize_geometry=quantize_geometry)
+        if quantize_geometry:
+            record["geometry_policy"] = "10 nm symmetric PCell grid"
+        if mismatch_seed is not None:
+            record["mismatch_seed"]=mismatch_seed
+        if input_bias is not None:
+            record["bias_policy"] = {"mode": "fixed", "input_v": input_bias}
         record["devices"] = len(b.mos)
         (directory / "design.cir").write_text(text)
         sim_start = time.perf_counter()
         try:
             proc = subprocess.run([ngspice(), "-b", "design.cir"], cwd=directory,
                                   capture_output=True, text=True,
-                                  timeout=STRICT_LIMIT_S if strict else ONLINE_LIMIT_S)
+                                  timeout=STRICT_LIMIT_S if strict else (ONLINE_LIMIT_S if online_timeout_s is None else online_timeout_s))
         except subprocess.TimeoutExpired as exc:
             raise BenchError("simulator timeout") from exc
         finally:
@@ -229,7 +262,8 @@ def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF,
             if "@@B" not in output:
                 raise BenchError("simulator did not converge")
         valid, checks, metrics, region, margins = analyze(
-            output, directory / "ac.tsv", b, topology, load_pf, vdd, rules)
+            output, directory / "ac.tsv", b, topology, load_pf, vdd, rules,
+            fixed_bias=input_bias)
         record.update(valid=valid, checks=checks, metrics=metrics, margins=margins)
         # Unlike the PTM testbench (strict re-simulation only), the unity-buffer test also runs
         # online, so that online validity and qualification apply the same checks: on SKY130
@@ -238,7 +272,8 @@ def evaluate(topology, values, directory=None, *, strict=False, load_pf=LOAD_PF,
         if rules == "qualified" and valid and topology.differential:
             checked = qualify_buffer(topology, values, metrics, directory, load_pf=load_pf,
                                      vdd=vdd, temperature=temperature, corner=corner,
-                                     strict=strict, circuit=circuit)
+                                     strict=strict, circuit=circuit, mismatch_seed=mismatch_seed, quantize_geometry=quantize_geometry,
+                                     online_timeout_s=online_timeout_s)
             record["qualification"] = checked
             record["checks"]["closed_loop"] = checked["passed"]
             record["valid"] = bool(checked["passed"])

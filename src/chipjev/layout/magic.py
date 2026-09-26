@@ -79,11 +79,20 @@ def run_magic(directory, script, name):
 def rectangles(path):
     result = defaultdict(list)
     layer = None
+    # Magic may save an individual cell on its coarser native grid even when the
+    # active editor uses scalegrid 1 2. Normalize every file to our 5 nm grid.
+    scale = 2.0
     for line in path.read_text().splitlines():
-        if line.startswith("<< "):
+        if line.startswith("magscale "):
+            _, numerator, denominator = line.split()
+            scale = 2 * int(numerator) / int(denominator)
+        elif line.startswith("<< "):
             layer = line[3:-3]
         elif line.startswith("rect "):
-            result[layer].append(tuple(map(int, line.split()[1:])))
+            coords = [int(v) * scale for v in line.split()[1:]]
+            if any(abs(v-round(v)) > 1e-8 for v in coords):
+                raise ValueError("Geometry finer than the supported 5 nm grid")
+            result[layer].append(tuple(round(v) for v in coords))
     return dict(result)
 
 

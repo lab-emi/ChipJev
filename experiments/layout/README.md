@@ -1,5 +1,7 @@
 # SKY130 layout and post-layout demonstration
 
+This page describes the archived v1 row-generator measurements. The current CLI/demo use the goal-driven analog loop; see [implementation and scope](../../docs/analog-layout-usage.md). Use `--legacy` to reproduce the generator described below.
+
 This extension closes the live ChipJev flow:
 
 **Laya → topology/sizing search → wired xschem → Magic layout/DRC → Netgen LVS → Magic distributed RC PEX → strict ngspice.**

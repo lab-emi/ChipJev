@@ -7,7 +7,7 @@ let examples = [];
 let api, socket, runId, lastEvent = 0, frameURL, reconnects = 0, running = false;
 let timer, result, finished = false, expanded = false;
 const runKey = "chipjev-live-run-v3";
-let layoutURL;
+let layoutURL, intentURL;
 
 function saveRun(value) {
   try { value ? sessionStorage.setItem(runKey, value) : sessionStorage.removeItem(runKey); } catch { /* Storage is optional. */ }
@@ -37,15 +37,19 @@ function startClock() {
   $("button-timer").hidden = false;
   clearInterval(timer); renderTime(); timer = setInterval(renderTime, 100);
 }
-function setView(layout) {
+function setView(layout, intent = false) {
+  if (layout) $("layout-frame").src = intent ? intentURL : layoutURL;
+  $("view-intent").setAttribute("aria-pressed", String(intent));
   $("frame").hidden = layout; $("layout-frame").hidden = !layout;
   $("view-schematic").setAttribute("aria-pressed", String(!layout));
-  $("view-layout").setAttribute("aria-pressed", String(layout));
+  $("view-layout").setAttribute("aria-pressed", String(layout && !intent));
   if (layout) $("frame-note").textContent = "Exact physical geometry · PDK devices, contacts and routed metal";
   else if (finished) $("frame-note").textContent = "Final frame from this live xschem session";
 }
 function reset() {
-  setView(false); $("view-layout").disabled = true;
+  setView(false); $("view-layout").disabled = true; $("view-intent").disabled = true;
+  $("analog-quality").hidden = true;
+  if (intentURL) { URL.revokeObjectURL(intentURL); intentURL = null; }
   if (layoutURL) { URL.revokeObjectURL(layoutURL); layoutURL = null; }
   $("layout-frame").removeAttribute("src");
   for (const id of ["drc-result", "lvs-result", "pex-result", "area-result"]) $(id).textContent = "—";
@@ -109,6 +113,7 @@ function showResult(data) {
   $("pex-result").textContent = `${physical.pex.resistors} R / ${physical.pex.capacitors} C`;
   $("area-result").textContent = `${physical.layout.area_um2.toFixed(0)} µm²`;
   $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${(physical.all_physical_seconds ?? physical.total_seconds).toFixed(2)} s physical stages including candidate screening · ${physical.recovery.attempts.length} final sizing attempt(s)`;
+  showQuality(physical);
   const rows = [];
   for (const [key, label, scale] of [["gain_db", "DC gain (dB)", 1], ["gbw_mhz", "Gain-bandwidth (MHz)", 1], ["pm_deg", "Phase margin (°)", 1], ["power_uw", "Power (mW)", 0.001], ["cmrr_db", "CMRR (dB)", 1], ["buffer_gain_error", "Closed-loop gain error (%)", 100], ["vin_dc", "Input bias (V)", 1]]) {
     const before = data.prelayout.metrics[key], after = data.metrics[key];
@@ -125,6 +130,41 @@ function showResult(data) {
   $("result-note").textContent = `Fresh Laya inference ${(data.laya_inference_seconds * 1000).toFixed(0)} ms · ${data.search.evaluations} circuits measured · ${data.model.device} · post-layout ngspice ${data.wall_seconds.toFixed(2)} s. Final metrics above include the extracted RC network.`;
 }
 
+function showQuality(physical) {
+  const trace = physical.optimization, bench = physical.analog;
+  if (!trace || !bench) return;
+  $("analog-quality").hidden = false;
+  const plan = physical.layout.plan, metrics = bench.metrics;
+  $("layout-plan-note").textContent = `${plan.pattern} · ${plan.columns} column(s) · ${plan.dummies ? "edge dummies" : "no dummies"}`;
+  for (const [id, key, scale, unit] of [["noise-result", "input_noise_rms_v", 1e6, "µV RMS"], ["psrr-result", "psrr_min_db", 1, "dB"], ["ir-result", "internal_supply_drop_v", 1e3, "mV"], ["ground-result", "internal_ground_rise_v", 1e3, "mV"]]) {
+    $(id).textContent = Number.isFinite(metrics[key]) ? `${(metrics[key] * scale).toFixed(2)} ${unit}` : "Not measured";
+  }
+  const first = trace.history.find(row => row.valid), chosen = physical.layout.area_um2;
+  const delta = first ? (1 - chosen / first.quality.area_um2) * 100 : 0;
+  $("optimization-summary").textContent = `${trace.evaluations} layouts evaluated in ${trace.wall_seconds.toFixed(2)} s · ${trace.first_feasible_seconds?.toFixed(2) ?? "—"} s to first qualified layout · ${delta.toFixed(1)}% area reduction from that layout · ${trace.pareto_plan_ids.length} Pareto candidates. Laya proposes actions; DRC, LVS and ngspice decide acceptance.`;
+  $("physical-status").textContent = `${physical.layout.layout_seconds.toFixed(2)} s final layout + DRC · ${trace.wall_seconds.toFixed(2)} s complete layout optimization · fixed input bias ${trace.fixed_input_bias_v.toFixed(4)} V`;
+  const labels = {initial: "Initial plan", columns: "Floorplan", fingers_per_row: "Row packing", pattern: "Matching pattern", split: "Unit decomposition", rail_multiplier: "Power rails", shield_inputs: "Grounded separator", decap_pf: "Decoupling", decap_location: "Decap placement", dummies: "Edge dummies"};
+  const rows = trace.history.map(item => {
+    const row = document.createElement("tr");
+    const reasons = Object.entries({...item.qualification_checks, ...item.checks}).filter(([, pass]) => !pass).map(([name]) => name).join(", ");
+    const decision = item.valid ? item.accepted ? (item.index === 0 ? "Initial feasible layout" : "Accepted improvement") : "Qualified; retained incumbent" : `Rejected: ${item.error || reasons}`;
+    const number = v => Number.isFinite(v) ? v.toFixed(2) : "—";
+    for (const value of [`${item.index + 1} / ${labels[item.action] || item.action}`, number(item.quality?.area_um2), number(item.metrics?.gain_db), number(item.metrics?.gbw_mhz), decision]) {
+      const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
+    }
+    return row;
+  });
+  $("optimization-body").replaceChildren(...rows);
+  const hotspots = Object.entries(physical.quality.net_capacitance_ff).filter(([n]) => !["vdd", "vss"].includes(n)).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  $("parasitic-note").textContent = `Largest node parasitics: ${hotspots.map(([n, c]) => `${n} ${c.toFixed(2)} fF`).join(" · ")}. Input capacitance imbalance: ${physical.quality.input_cap_imbalance_ff?.toFixed(2) ?? "—"} fF. Centroid error: ${physical.quality.centroid_error_um.toFixed(2)} µm (geometry only).`;
+  const waves = bench.waveforms, x = waves.frequency_hz.map(Math.log10);
+  const noise = waves.input_noise_v_sqrt_hz.map(v => v * 1e9), psrr = waves.psrr_db;
+  chart("noise-plot", "Measured input noise density", "Frequency (Hz)", "nV/√Hz", [x[0], x.at(-1)], [0, Math.max(...noise) * 1.05], [[1, "10"], [3, "1k"], [6, "1M"]], [{x, y: noise, color: "#087ebd"}]);
+  chart("psrr-plot", "Measured supply rejection", "Frequency (Hz)", "PSRR (dB)", [x[0], x.at(-1)], [Math.floor(Math.min(...psrr) / 10) * 10, Math.ceil(Math.max(...psrr) / 10) * 10 + 1], [[1, "10"], [3, "1k"], [6, "1M"]], [{x, y: psrr, color: "#087ebd"}]);
+  const c = bench.conditions;
+  $("analog-conditions").textContent = `Fixture: ${c.supply_resistance_ohm} Ω supply impedance, ${c.load_step_a * 1e6} µA load step, ${c.temperature_c} °C. Peak supply droop: ${(metrics.supply_droop_v * 1e3).toFixed(3)} mV. These measurements do not establish substrate-noise, thermal, EM or mismatch signoff.`;
+}
+
 function complete(ok) {
   finished = true; running = false; clock.stop(); clearInterval(timer); renderTime();
   $("examples").disabled = false;
@@ -136,7 +176,7 @@ function complete(ok) {
     badge(result.valid ? "Verified" : "Unqualified", result.valid ? "success" : "failed");
   } else if (!ok) badge("Stopped", "failed");
   if (ok && result) {
-    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"], ["decisions", "decisions.json"], ["search", "search.json"], ["mag", "layout.mag"], ["gds", "layout.gds"], ["pex", "pex.spice"], ["physical", "physical.json"], ["evidence", "physical-evidence.zip"]]) {
+    for (const [id, name] of [["sch", "circuit.sch"], ["spice", "circuit.spice"], ["json", "result.json"], ["decisions", "decisions.json"], ["search", "search.json"], ["mag", "layout.mag"], ["gds", "layout.gds"], ["pex", "pex.spice"], ["physical", "physical.json"], ["optimization", "optimization.json"], ["evidence", "physical-evidence.zip"]]) {
       const link = $(`download-${id}`); link.href = `${api}/api/runs/${runId}/artifacts/${name}`; link.download = name;
     }
     $("downloads").hidden = false;
@@ -145,6 +185,9 @@ function complete(ok) {
       .then(response => { if (!response.ok) throw new Error("Layout image unavailable"); return response.blob(); })
       .then(blob => { if (completedId !== runId || !finished) return; if (layoutURL) URL.revokeObjectURL(layoutURL); layoutURL = URL.createObjectURL(blob); $("layout-frame").src = layoutURL; $("view-layout").disabled = false; setView(true); })
       .catch(() => { $("physical-status").textContent += " · Preview unavailable; download the Magic or GDS file."; });
+    if (result.physical.optimization) fetch(`${api}/api/runs/${runId}/artifacts/layout-intent.svg`, {credentials: "omit"})
+      .then(response => { if (!response.ok) throw new Error("Overlay unavailable"); return response.blob(); })
+      .then(blob => { if (completedId !== runId || !finished) return; intentURL = URL.createObjectURL(blob); $("view-intent").disabled = false; }).catch(() => {});
     $("availability").textContent = "Run complete · 15-second cooldown before restarting";
   }
   saveRun(null);
@@ -294,6 +337,7 @@ function drawWaveforms(data, prefix = "") {
 
 $("view-schematic").addEventListener("click", () => setView(false));
 $("view-layout").addEventListener("click", () => setView(true));
+$("view-intent").addEventListener("click", () => setView(true, true));
 runButton.addEventListener("click", launch);
 $("examples").addEventListener("change", () => {
   const example = examples.find((item) => item.id === selectedExample());
@@ -312,7 +356,7 @@ $("expand").addEventListener("click", async () => {
   $("expand").setAttribute("aria-label", expanded ? "Exit expanded view" : "Expand live circuit view");
 });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape" && expanded) { expanded = false; document.querySelector(".viewer").classList.remove("expanded"); } });
-window.addEventListener("pagehide", () => { running = false; clearInterval(timer); socket?.close(); if (frameURL) URL.revokeObjectURL(frameURL); if (layoutURL) URL.revokeObjectURL(layoutURL); });
+window.addEventListener("pagehide", () => { running = false; clearInterval(timer); socket?.close(); if (frameURL) URL.revokeObjectURL(frameURL); if (layoutURL) URL.revokeObjectURL(layoutURL); if (intentURL) URL.revokeObjectURL(intentURL); });
 
 try {
   const config = await fetch("config.json", { cache: "no-store" }).then((response) => { if (!response.ok) throw new Error("Missing demo configuration"); return response.json(); });

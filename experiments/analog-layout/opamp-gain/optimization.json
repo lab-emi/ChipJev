@@ -1,0 +1,2208 @@
+{
+  "goal": {
+    "objective": "area",
+    "minimum": {},
+    "maximum": {},
+    "analog": {
+      "noise_low_hz": 10.0,
+      "noise_high_hz": 1000000.0,
+      "supply_resistance_ohm": 20.0,
+      "load_step_a": 5e-05,
+      "pulse_rise_s": 1e-10,
+      "temperature_c": 27.0
+    },
+    "require_dummies": true
+  },
+  "history": [
+    {
+      "index": 0,
+      "action": "initial",
+      "plan": {
+        "pattern": "interdigitated",
+        "fingers_per_row": 20,
+        "columns": 2,
+        "split": 1,
+        "rail_multiplier": 1,
+        "dummies": true,
+        "shield_inputs": false,
+        "decap_pf": 0.0,
+        "decap_location": "supply"
+      },
+      "plan_id": "6239adcf008b9bb5",
+      "parent": null,
+      "proxy": {
+        "area_um2_proxy": 20121.597265296296,
+        "fidelity": "uncalibrated geometry proxy; excludes passive placement detail",
+        "centroid_exact_by_construction": false
+      },
+      "features": [
+        2,
+        0.625,
+        1,
+        1,
+        1,
+        0,
+        0.0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "valid": true,
+      "error": null,
+      "objective": -4.120430848733077,
+      "fidelity": "full RC + fixed-condition ngspice + analog fixture",
+      "checks": {
+        "physical": true,
+        "analog_measured": true,
+        "required_dummies": true
+      },
+      "qualification_checks": {
+        "bias_found": true,
+        "operating_point": true,
+        "currents": true,
+        "function": true,
+        "bandwidth": true,
+        "power": true,
+        "stability": true,
+        "gain": true,
+        "saturation": true,
+        "settles": true,
+        "cmrr": true,
+        "closed_loop": true
+      },
+      "metrics": {
+        "vin_dc": 0.2875,
+        "vout_dc": 1.24131,
+        "bias_error_v": 0.34131,
+        "gain_db": 69.14714929245929,
+        "cm_gain_db": 16.388496344718465,
+        "dc_phase_deg": 179.9823735,
+        "power_uw": 297.5706,
+        "ugf_mhz": 8.504524355140612,
+        "pm_deg": 62.68521553273378,
+        "bw_mhz": 0.0032493316811551248,
+        "gbw_def_mhz": 9.314327618988054,
+        "gbw_mhz": 8.504524355140612,
+        "fom": 2857.9854176254685,
+        "settle_v": 2.9505e-08,
+        "cmrr_db": 52.75454660465215,
+        "buffer_gain_error": 0.003207894389999577,
+        "buffer_ringing": 2.599975790218423e-10,
+        "buffer_dc_error_v": 0.0002959954890000005,
+        "input_noise_rms_v": 0.0001714720511417503,
+        "output_noise_rms_v": 0.33991081078175217,
+        "psrr_min_db": 33.49951212510299,
+        "supply_droop_v": 0.000984338277000063,
+        "supply_early_droop_v": 0.0009808391910000047,
+        "supply_dc_drop_v": 0.003217957734999999,
+        "input_offset_v": 2.5837797731866326e-05,
+        "input_offset_abs_v": 2.5837797731866326e-05,
+        "internal_supply_drop_v": 0.0026097619420000218,
+        "internal_ground_rise_v": 0.001856838988928
+      },
+      "quality": {
+        "area_um2": 13195.65185,
+        "centroid_error_um": 3.1899999999999977,
+        "input_cap_imbalance_ff": 1.2567899999999987
+      },
+      "accepted": true,
+      "seconds": 4.614179647993296
+    },
+    {
+      "index": 1,
+      "action": "columns",
+      "plan": {
+        "pattern": "interdigitated",
+        "fingers_per_row": 20,
+        "columns": 1,
+        "split": 1,
+        "rail_multiplier": 1,
+        "dummies": true,
+        "shield_inputs": false,
+        "decap_pf": 0.0,
+        "decap_location": "supply"
+      },
+      "plan_id": "4288830cf791cd46",
+      "parent": "6239adcf008b9bb5",
+      "proxy": {
+        "area_um2_proxy": 8749.519549333332,
+        "fidelity": "uncalibrated geometry proxy; excludes passive placement detail",
+        "centroid_exact_by_construction": false
+      },
+      "features": [
+        1,
+        0.625,
+        1,
+        1,
+        1,
+        0,
+        0.0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "valid": true,
+      "error": null,
+      "objective": -3.9388162750568068,
+      "fidelity": "full RC + fixed-condition ngspice + analog fixture",
+      "checks": {
+        "physical": true,
+        "analog_measured": true,
+        "required_dummies": true
+      },
+      "qualification_checks": {
+        "bias_found": true,
+        "operating_point": true,
+        "currents": true,
+        "function": true,
+        "bandwidth": true,
+        "power": true,
+        "stability": true,
+        "gain": true,
+        "saturation": true,
+        "settles": true,
+        "cmrr": true,
+        "closed_loop": true
+      },
+      "metrics": {
+        "vin_dc": 0.2875,
+        "vout_dc": 1.23014,
+        "bias_error_v": 0.330139,
+        "gain_db": 69.47960843095252,
+        "cm_gain_db": 16.715117385144435,
+        "dc_phase_deg": 179.98168505,
+        "power_uw": 297.62100000000004,
+        "ugf_mhz": 8.554236873412494,
+        "pm_deg": 63.69487149519614,
+        "bw_mhz": 0.0031279589551378925,
+        "gbw_def_mhz": 9.31625714231343,
+        "gbw_mhz": 8.554236873412494,
+        "fom": 2874.2047346835384,
+        "settle_v": 2.66843e-08,
+        "cmrr_db": 52.76005769908946,
+        "buffer_gain_error": 0.0032075005800038525,
+        "buffer_ringing": 1.5999979119385443e-10,
+        "buffer_dc_error_v": 0.0002923769031999979,
+        "input_noise_rms_v": 0.00017147084457564055,
+        "output_noise_rms_v": 0.34088517687507924,
+        "psrr_min_db": 33.51181013065593,
+        "supply_droop_v": 0.00098441670799998,
+        "supply_early_droop_v": 0.0009814194834998347,
+        "supply_dc_drop_v": 0.0032184382360000985,
+        "input_offset_v": 2.2251149124865465e-05,
+        "input_offset_abs_v": 2.2251149124865465e-05,
+        "internal_supply_drop_v": 0.0026117373579999104,
+        "internal_ground_rise_v": 0.00186577999203
+      },
+      "quality": {
+        "area_um2": 8685.929,
+        "centroid_error_um": 3.1900000000000013,
+        "input_cap_imbalance_ff": 1.2637399999999985
+      },
+      "accepted": true,
+      "seconds": 4.580178488016827
+    },
+    {
+      "index": 2,
+      "action": "pattern",
+      "plan": {
+        "pattern": "clustered",
+        "fingers_per_row": 20,
+        "columns": 1,
+        "split": 1,
+        "rail_multiplier": 1,
+        "dummies": true,
+        "shield_inputs": false,
+        "decap_pf": 0.0,
+        "decap_location": "supply"
+      },
+      "plan_id": "f06ef91c3c4318b6",
+      "parent": "4288830cf791cd46",
+      "proxy": {
+        "area_um2_proxy": 8749.519549333332,
+        "fidelity": "uncalibrated geometry proxy; excludes passive placement detail",
+        "centroid_exact_by_construction": false
+      },
+      "features": [
+        1,
+        0.625,
+        1,
+        1,
+        1,
+        0,
+        0.0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "valid": true,
+      "error": null,
+      "objective": -3.9388162750568068,
+      "fidelity": "full RC + fixed-condition ngspice + analog fixture",
+      "checks": {
+        "physical": true,
+        "analog_measured": true,
+        "required_dummies": true
+      },
+      "qualification_checks": {
+        "bias_found": true,
+        "operating_point": true,
+        "currents": true,
+        "function": true,
+        "bandwidth": true,
+        "power": true,
+        "stability": true,
+        "gain": true,
+        "saturation": true,
+        "settles": true,
+        "cmrr": true,
+        "closed_loop": true
+      },
+      "metrics": {
+        "vin_dc": 0.2875,
+        "vout_dc": 1.23014,
+        "bias_error_v": 0.330139,
+        "gain_db": 69.47960843095252,
+        "cm_gain_db": 16.715117385144435,
+        "dc_phase_deg": 179.98168505,
+        "power_uw": 297.62100000000004,
+        "ugf_mhz": 8.554236873412494,
+        "pm_deg": 63.69487149519614,
+        "bw_mhz": 0.0031279589551378925,
+        "gbw_def_mhz": 9.31625714231343,
+        "gbw_mhz": 8.554236873412494,
+        "fom": 2874.2047346835384,
+        "settle_v": 2.65265e-08,
+        "cmrr_db": 52.76005769908946,
+        "buffer_gain_error": 0.003207500619999637,
+        "buffer_ringing": 1.5999979119385443e-10,
+        "buffer_dc_error_v": 0.0002923769030000467,
+        "input_noise_rms_v": 0.00017147084457564055,
+        "output_noise_rms_v": 0.34088517687507924,
+        "psrr_min_db": 33.51181013065593,
+        "supply_droop_v": 0.00098441670799998,
+        "supply_early_droop_v": 0.0009814194834998347,
+        "supply_dc_drop_v": 0.0032184382360000985,
+        "input_offset_v": 2.2251149124865465e-05,
+        "input_offset_abs_v": 2.2251149124865465e-05,
+        "internal_supply_drop_v": 0.0026117373579999104,
+        "internal_ground_rise_v": 0.00186577999203
+      },
+      "quality": {
+        "area_um2": 8685.929,
+        "centroid_error_um": 3.1900000000000013,
+        "input_cap_imbalance_ff": 1.2637399999999985
+      },
+      "seconds": 4.54717275800067
+    },
+    {
+      "index": 3,
+      "action": "split",
+      "plan": {
+        "pattern": "interdigitated",
+        "fingers_per_row": 20,
+        "columns": 1,
+        "split": 2,
+        "rail_multiplier": 1,
+        "dummies": true,
+        "shield_inputs": false,
+        "decap_pf": 0.0,
+        "decap_location": "supply"
+      },
+      "plan_id": "54f30487511d2945",
+      "parent": "4288830cf791cd46",
+      "proxy": {
+        "area_um2_proxy": 8653.34521156111,
+        "fidelity": "uncalibrated geometry proxy; excludes passive placement detail",
+        "centroid_exact_by_construction": false
+      },
+      "features": [
+        1,
+        0.625,
+        2,
+        1,
+        1,
+        0,
+        0.0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "valid": false,
+      "error": null,
+      "objective": null,
+      "fidelity": "full RC + fixed-condition ngspice + analog fixture",
+      "checks": {
+        "physical": false,
+        "analog_measured": true,
+        "required_dummies": true
+      },
+      "qualification_checks": {
+        "bias_found": true,
+        "operating_point": true,
+        "currents": true,
+        "function": true,
+        "bandwidth": true,
+        "power": true,
+        "stability": true,
+        "gain": false,
+        "saturation": false,
+        "settles": true,
+        "cmrr": true
+      },
+      "metrics": {
+        "vin_dc": 0.2875,
+        "vout_dc": 1.47908,
+        "bias_error_v": 0.579082,
+        "gain_db": 49.80350729259701,
+        "cm_gain_db": -2.6294387511603388,
+        "dc_phase_deg": 179.99787776,
+        "power_uw": 309.7998,
+        "ugf_mhz": 7.7973121059668395,
+        "pm_deg": 66.3591097099259,
+        "bw_mhz": 0.027016932510547258,
+        "gbw_def_mhz": 8.352402266027664,
+        "gbw_mhz": 7.7973121059668395,
+        "fom": 2516.8873917823184,
+        "settle_v": 2.05117e-09,
+        "cmrr_db": 52.43288664487423,
+        "input_noise_rms_v": 0.00017897344659737046,
+        "output_noise_rms_v": 0.04828772867039613,
+        "psrr_min_db": 32.47789410147005,
+        "supply_droop_v": 0.0009845691209999785,
+        "supply_early_droop_v": 0.0009819276249998232,
+        "supply_dc_drop_v": 0.003348579610000124,
+        "input_offset_v": 0.00032261147819318003,
+        "input_offset_abs_v": 0.00032261147819318003,
+        "internal_supply_drop_v": 0.0024335505310000283,
+        "internal_ground_rise_v": 0.001891827937156
+      },
+      "quality": {
+        "area_um2": 9106.0952,
+        "centroid_error_um": 3.1900000000000013,
+        "input_cap_imbalance_ff": 1.4707500000000024
+      },
+      "seconds": 2.7681584110250697
+    },
+    {
+      "index": 4,
+      "action": "fingers_per_row",
+      "plan": {
+        "pattern": "interdigitated",
+        "fingers_per_row": 32,
+        "columns": 1,
+        "split": 2,
+        "rail_multiplier": 1,
+        "dummies": true,
+        "shield_inputs": false,
+        "decap_pf": 0.0,
+        "decap_location": "supply"
+      },
+      "plan_id": "394a53d1492bc525",
+      "parent": "54f30487511d2945",
+      "proxy": {
+        "area_um2_proxy": 8653.34521156111,
+        "fidelity": "uncalibrated geometry proxy; excludes passive placement detail",
+        "centroid_exact_by_construction": false
+      },
+      "features": [
+        1,
+        1.0,
+        2,
+        1,
+        1,
+        0,
+        0.0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "valid": false,
+      "error": null,
+      "objective": null,
+      "fidelity": "full RC + fixed-condition ngspice + analog fixture",
+      "checks": {
+        "physical": false,
+        "analog_measured": true,
+        "required_dummies": true
+      },
+      "qualification_checks": {
+        "bias_found": true,
+        "operating_point": true,
+        "currents": true,
+        "function": true,
+        "bandwidth": true,
+        "power": true,
+        "stability": true,
+        "gain": false,
+        "saturation": false,
+        "settles": true,
+        "cmrr": true
+      },
+      "metrics": {
+        "vin_dc": 0.2875,
+        "vout_dc": 1.47908,
+        "bias_error_v": 0.579082,
+        "gain_db": 49.80350729259701,
+        "cm_gain_db": -2.6294387511603388,
+        "dc_phase_deg": 179.99787776,
+        "power_uw": 309.7998,
+        "ugf_mhz": 7.797312105855327,
+        "pm_deg": 66.35910969239463,
+        "bw_mhz": 0.027016932510547258,
+        "gbw_def_mhz": 8.352402266027664,
+        "gbw_mhz": 7.797312105855327,
+        "fom": 2516.8873917463234,
+        "settle_v": 2.12669e-09,
+        "cmrr_db": 52.43288664487423,
+        "input_noise_rms_v": 0.00017897344659737634,
+        "output_noise_rms_v": 0.04828772867039602,
+        "psrr_min_db": 32.47789410165835,
+        "supply_droop_v": 0.0009845691209999785,
+        "supply_early_droop_v": 0.0009819276244997788,
+        "supply_dc_drop_v": 0.003348579610000124,
+        "input_offset_v": 0.00032261147819318003,
+        "input_offset_abs_v": 0.00032261147819318003,
+        "internal_supply_drop_v": 0.0024335505310000283,
+        "internal_ground_rise_v": 0.001891827937156
+      },
+      "quality": {
+        "area_um2": 9106.0952,
+        "centroid_error_um": 3.1900000000000013,
+        "input_cap_imbalance_ff": 1.4707500000000024
+      },
+      "seconds": 2.7382506980211474
+    },
+    {
+      "index": 5,
+      "action": "shield_inputs",
+      "plan": {
+        "pattern": "interdigitated",
+        "fingers_per_row": 32,
+        "columns": 1,
+        "split": 2,
+        "rail_multiplier": 1,
+        "dummies": true,
+        "shield_inputs": true,
+        "decap_pf": 0.0,
+        "decap_location": "supply"
+      },
+      "plan_id": "14fa2a87e2034e4f",
+      "parent": "394a53d1492bc525",
+      "proxy": {
+        "area_um2_proxy": 8653.34521156111,
+        "fidelity": "uncalibrated geometry proxy; excludes passive placement detail",
+        "centroid_exact_by_construction": false
+      },
+      "features": [
+        1,
+        1.0,
+        2,
+        1,
+        1,
+        1,
+        0.0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "valid": false,
+      "error": null,
+      "objective": null,
+      "fidelity": "full RC + fixed-condition ngspice + analog fixture",
+      "checks": {
+        "physical": false,
+        "analog_measured": true,
+        "required_dummies": true
+      },
+      "qualification_checks": {
+        "bias_found": true,
+        "operating_point": true,
+        "currents": true,
+        "function": true,
+        "bandwidth": true,
+        "power": true,
+        "stability": true,
+        "gain": false,
+        "saturation": false,
+        "settles": true,
+        "cmrr": true
+      },
+      "metrics": {
+        "vin_dc": 0.2875,
+        "vout_dc": 1.46485,
+        "bias_error_v": 0.564845,
+        "gain_db": 50.969175498297844,
+        "cm_gain_db": -1.5007344404231349,
+        "dc_phase_deg": 179.99759554,
+        "power_uw": 310.176,
+        "ugf_mhz": 7.856468060728157,
+        "pm_deg": 66.11936712407297,
+        "bw_mhz": 0.02384081621576387,
+        "gbw_def_mhz": 8.42907454708758,
+        "gbw_mhz": 7.856468060728157,
+        "fom": 2532.906498480913,
+        "settle_v": 2.53906e-09,
+        "cmrr_db": 52.46983366511432,
+        "input_noise_rms_v": 0.00017896780228268076,
+        "output_noise_rms_v": 0.05586238939105057,
+        "psrr_min_db": 32.64331618184587,
+        "supply_droop_v": 0.0009845566790001037,
+        "supply_early_droop_v": 0.000981909682500115,
+        "supply_dc_drop_v": 0.003352452177999954,
+        "input_offset_v": 0.00028025659032274576,
+        "input_offset_abs_v": 0.00028025659032274576,
+        "internal_supply_drop_v": 0.002445529564000015,
+        "internal_ground_rise_v": 0.001732123119496
+      },
+      "quality": {
+        "area_um2": 9106.0952,
+        "centroid_error_um": 3.1900000000000013,
+        "input_cap_imbalance_ff": 1.4647000000000006
+      },
+      "seconds": 2.74302286101738
+    }
+  ],
+  "decisions": [
+    {
+      "seconds": 0.020991919009247795,
+      "probabilities": {
+        "4288830cf791cd46": 0.036,
+        "4270bfad22dc38b3": 0.0001,
+        "a3a675495d5c8fd2": 0.9189,
+        "f1902722f8b21a01": 0.015,
+        "fa499fd26e32faec": 0.0182,
+        "b3d557a7caa32feb": 0.0118
+      },
+      "state": {
+        "goal": {
+          "objective": "area",
+          "minimum": {},
+          "maximum": {},
+          "analog": {
+            "noise_low_hz": 10.0,
+            "noise_high_hz": 1000000.0,
+            "supply_resistance_ohm": 20.0,
+            "load_step_a": 5e-05,
+            "pulse_rise_s": 1e-10,
+            "temperature_c": 27.0
+          },
+          "require_dummies": true
+        },
+        "technology": "sky130-analog-1",
+        "groups": [
+          {
+            "id": "g0",
+            "members": [
+              "m2",
+              "m3"
+            ],
+            "kind": "p",
+            "role": "input_pair",
+            "reason": "Differential gates, common source, equal geometry"
+          },
+          {
+            "id": "g1",
+            "members": [
+              "m8",
+              "m9"
+            ],
+            "kind": "p",
+            "role": "current_mirror",
+            "reason": "Common gate/source with a diode-connected reference"
+          },
+          {
+            "id": "g2",
+            "members": [
+              "m4",
+              "m5"
+            ],
+            "kind": "n",
+            "role": "balanced_load",
+            "reason": "Equal diode loads on the differential branches"
+          },
+          {
+            "id": "g3",
+            "members": [
+              "m1"
+            ],
+            "kind": "p",
+            "role": "bias",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g4",
+            "members": [
+              "m6"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g5",
+            "members": [
+              "m7"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g6",
+            "members": [
+              "m10"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g7",
+            "members": [
+              "m11"
+            ],
+            "kind": "n",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g8",
+            "members": [
+              "m12"
+            ],
+            "kind": "p",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g9",
+            "members": [
+              "m13"
+            ],
+            "kind": "p",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          }
+        ],
+        "fixed_input_bias_v": 0.2875,
+        "remaining_seconds": 35.38457689300412,
+        "history": [
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 2,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.24131,
+              "bias_error_v": 0.34131,
+              "gain_db": 69.14714929245929,
+              "cm_gain_db": 16.388496344718465,
+              "dc_phase_deg": 179.9823735,
+              "power_uw": 297.5706,
+              "ugf_mhz": 8.504524355140612,
+              "pm_deg": 62.68521553273378,
+              "bw_mhz": 0.0032493316811551248,
+              "gbw_def_mhz": 9.314327618988054,
+              "gbw_mhz": 8.504524355140612,
+              "fom": 2857.9854176254685,
+              "settle_v": 2.9505e-08,
+              "cmrr_db": 52.75454660465215,
+              "buffer_gain_error": 0.003207894389999577,
+              "buffer_ringing": 2.599975790218423e-10,
+              "buffer_dc_error_v": 0.0002959954890000005,
+              "input_noise_rms_v": 0.0001714720511417503,
+              "output_noise_rms_v": 0.33991081078175217,
+              "psrr_min_db": 33.49951212510299,
+              "supply_droop_v": 0.000984338277000063,
+              "supply_early_droop_v": 0.0009808391910000047,
+              "supply_dc_drop_v": 0.003217957734999999,
+              "input_offset_v": 2.5837797731866326e-05,
+              "input_offset_abs_v": 2.5837797731866326e-05,
+              "internal_supply_drop_v": 0.0026097619420000218,
+              "internal_ground_rise_v": 0.001856838988928
+            },
+            "quality": {
+              "area_um2": 13195.65185,
+              "centroid_error_um": 3.1899999999999977,
+              "input_cap_imbalance_ff": 1.2567899999999987
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          }
+        ]
+      },
+      "model_state": "Goal area; last feasible=True; failed=none.\narea_um2=1.32e+04; gain_db=69.15; gbw_mhz=8.505; pm_deg=62.69; input_noise_rms_v=0.0001715; psrr_min_db=33.5; internal_supply_drop_v=0.00261; input_cap_imbalance_ff=1.257; centroid_error_um=3.19\nBounds {\"minimum\":{},\"maximum\":{}}\nPlan interdigitated; columns=2; row=20; split=1; rail=1; decap=0.0pF; dummies=True; separator=False.\nRoles {'input_pair': 1, 'current_mirror': 1, 'balanced_load': 1, 'bias': 1, 'gain': 4, 'output': 2}; PDK sky130-analog-1; fixed bias=0.2875V; remaining=35.4s.",
+      "model_state_tokens": 250,
+      "model_state_truncated": false,
+      "policy": "Laya typed action prior; EDA determines acceptance"
+    },
+    {
+      "seconds": 0.009269917994970456,
+      "probabilities": {
+        "54f30487511d2945": 0.0029,
+        "17b5897a2d5dd07e": 0.0242,
+        "363ba824e49e5f2e": 0.3159,
+        "81cba525a323aa73": 0.0954,
+        "f06ef91c3c4318b6": 0.5609,
+        "00f76856881931e1": 0.0007
+      },
+      "state": {
+        "goal": {
+          "objective": "area",
+          "minimum": {},
+          "maximum": {},
+          "analog": {
+            "noise_low_hz": 10.0,
+            "noise_high_hz": 1000000.0,
+            "supply_resistance_ohm": 20.0,
+            "load_step_a": 5e-05,
+            "pulse_rise_s": 1e-10,
+            "temperature_c": 27.0
+          },
+          "require_dummies": true
+        },
+        "technology": "sky130-analog-1",
+        "groups": [
+          {
+            "id": "g0",
+            "members": [
+              "m2",
+              "m3"
+            ],
+            "kind": "p",
+            "role": "input_pair",
+            "reason": "Differential gates, common source, equal geometry"
+          },
+          {
+            "id": "g1",
+            "members": [
+              "m8",
+              "m9"
+            ],
+            "kind": "p",
+            "role": "current_mirror",
+            "reason": "Common gate/source with a diode-connected reference"
+          },
+          {
+            "id": "g2",
+            "members": [
+              "m4",
+              "m5"
+            ],
+            "kind": "n",
+            "role": "balanced_load",
+            "reason": "Equal diode loads on the differential branches"
+          },
+          {
+            "id": "g3",
+            "members": [
+              "m1"
+            ],
+            "kind": "p",
+            "role": "bias",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g4",
+            "members": [
+              "m6"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g5",
+            "members": [
+              "m7"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g6",
+            "members": [
+              "m10"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g7",
+            "members": [
+              "m11"
+            ],
+            "kind": "n",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g8",
+            "members": [
+              "m12"
+            ],
+            "kind": "p",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g9",
+            "members": [
+              "m13"
+            ],
+            "kind": "p",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          }
+        ],
+        "fixed_input_bias_v": 0.2875,
+        "remaining_seconds": 30.780882205988746,
+        "history": [
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 2,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.24131,
+              "bias_error_v": 0.34131,
+              "gain_db": 69.14714929245929,
+              "cm_gain_db": 16.388496344718465,
+              "dc_phase_deg": 179.9823735,
+              "power_uw": 297.5706,
+              "ugf_mhz": 8.504524355140612,
+              "pm_deg": 62.68521553273378,
+              "bw_mhz": 0.0032493316811551248,
+              "gbw_def_mhz": 9.314327618988054,
+              "gbw_mhz": 8.504524355140612,
+              "fom": 2857.9854176254685,
+              "settle_v": 2.9505e-08,
+              "cmrr_db": 52.75454660465215,
+              "buffer_gain_error": 0.003207894389999577,
+              "buffer_ringing": 2.599975790218423e-10,
+              "buffer_dc_error_v": 0.0002959954890000005,
+              "input_noise_rms_v": 0.0001714720511417503,
+              "output_noise_rms_v": 0.33991081078175217,
+              "psrr_min_db": 33.49951212510299,
+              "supply_droop_v": 0.000984338277000063,
+              "supply_early_droop_v": 0.0009808391910000047,
+              "supply_dc_drop_v": 0.003217957734999999,
+              "input_offset_v": 2.5837797731866326e-05,
+              "input_offset_abs_v": 2.5837797731866326e-05,
+              "internal_supply_drop_v": 0.0026097619420000218,
+              "internal_ground_rise_v": 0.001856838988928
+            },
+            "quality": {
+              "area_um2": 13195.65185,
+              "centroid_error_um": 3.1899999999999977,
+              "input_cap_imbalance_ff": 1.2567899999999987
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.66843e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.0032075005800038525,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769031999979,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          }
+        ]
+      },
+      "model_state": "Goal area; last feasible=True; failed=none.\narea_um2=8686; gain_db=69.48; gbw_mhz=8.554; pm_deg=63.69; input_noise_rms_v=0.0001715; psrr_min_db=33.51; internal_supply_drop_v=0.002612; input_cap_imbalance_ff=1.264; centroid_error_um=3.19\nBounds {\"minimum\":{},\"maximum\":{}}\nPlan interdigitated; columns=1; row=20; split=1; rail=1; decap=0.0pF; dummies=True; separator=False.\nRoles {'input_pair': 1, 'current_mirror': 1, 'balanced_load': 1, 'bias': 1, 'gain': 4, 'output': 2}; PDK sky130-analog-1; fixed bias=0.2875V; remaining=30.8s.",
+      "model_state_tokens": 248,
+      "model_state_truncated": false,
+      "policy": "Laya typed action prior; EDA determines acceptance"
+    },
+    {
+      "seconds": 0.009197100007440895,
+      "probabilities": {
+        "54f30487511d2945": 0.0,
+        "fe0e370348ef13e4": 0.0001,
+        "17b5897a2d5dd07e": 0.0261,
+        "19a54c8026f15eb3": 0.0071,
+        "363ba824e49e5f2e": 0.9594,
+        "5cb5caf9187699ef": 0.0072
+      },
+      "state": {
+        "goal": {
+          "objective": "area",
+          "minimum": {},
+          "maximum": {},
+          "analog": {
+            "noise_low_hz": 10.0,
+            "noise_high_hz": 1000000.0,
+            "supply_resistance_ohm": 20.0,
+            "load_step_a": 5e-05,
+            "pulse_rise_s": 1e-10,
+            "temperature_c": 27.0
+          },
+          "require_dummies": true
+        },
+        "technology": "sky130-analog-1",
+        "groups": [
+          {
+            "id": "g0",
+            "members": [
+              "m2",
+              "m3"
+            ],
+            "kind": "p",
+            "role": "input_pair",
+            "reason": "Differential gates, common source, equal geometry"
+          },
+          {
+            "id": "g1",
+            "members": [
+              "m8",
+              "m9"
+            ],
+            "kind": "p",
+            "role": "current_mirror",
+            "reason": "Common gate/source with a diode-connected reference"
+          },
+          {
+            "id": "g2",
+            "members": [
+              "m4",
+              "m5"
+            ],
+            "kind": "n",
+            "role": "balanced_load",
+            "reason": "Equal diode loads on the differential branches"
+          },
+          {
+            "id": "g3",
+            "members": [
+              "m1"
+            ],
+            "kind": "p",
+            "role": "bias",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g4",
+            "members": [
+              "m6"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g5",
+            "members": [
+              "m7"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g6",
+            "members": [
+              "m10"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g7",
+            "members": [
+              "m11"
+            ],
+            "kind": "n",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g8",
+            "members": [
+              "m12"
+            ],
+            "kind": "p",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g9",
+            "members": [
+              "m13"
+            ],
+            "kind": "p",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          }
+        ],
+        "fixed_input_bias_v": 0.2875,
+        "remaining_seconds": 26.221022172976518,
+        "history": [
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 2,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.24131,
+              "bias_error_v": 0.34131,
+              "gain_db": 69.14714929245929,
+              "cm_gain_db": 16.388496344718465,
+              "dc_phase_deg": 179.9823735,
+              "power_uw": 297.5706,
+              "ugf_mhz": 8.504524355140612,
+              "pm_deg": 62.68521553273378,
+              "bw_mhz": 0.0032493316811551248,
+              "gbw_def_mhz": 9.314327618988054,
+              "gbw_mhz": 8.504524355140612,
+              "fom": 2857.9854176254685,
+              "settle_v": 2.9505e-08,
+              "cmrr_db": 52.75454660465215,
+              "buffer_gain_error": 0.003207894389999577,
+              "buffer_ringing": 2.599975790218423e-10,
+              "buffer_dc_error_v": 0.0002959954890000005,
+              "input_noise_rms_v": 0.0001714720511417503,
+              "output_noise_rms_v": 0.33991081078175217,
+              "psrr_min_db": 33.49951212510299,
+              "supply_droop_v": 0.000984338277000063,
+              "supply_early_droop_v": 0.0009808391910000047,
+              "supply_dc_drop_v": 0.003217957734999999,
+              "input_offset_v": 2.5837797731866326e-05,
+              "input_offset_abs_v": 2.5837797731866326e-05,
+              "internal_supply_drop_v": 0.0026097619420000218,
+              "internal_ground_rise_v": 0.001856838988928
+            },
+            "quality": {
+              "area_um2": 13195.65185,
+              "centroid_error_um": 3.1899999999999977,
+              "input_cap_imbalance_ff": 1.2567899999999987
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.66843e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.0032075005800038525,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769031999979,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "clustered",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.65265e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.003207500619999637,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769030000467,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          }
+        ]
+      },
+      "model_state": "Goal area; last feasible=True; failed=none.\narea_um2=8686; gain_db=69.48; gbw_mhz=8.554; pm_deg=63.69; input_noise_rms_v=0.0001715; psrr_min_db=33.51; internal_supply_drop_v=0.002612; input_cap_imbalance_ff=1.264; centroid_error_um=3.19\nBounds {\"minimum\":{},\"maximum\":{}}\nPlan clustered; columns=1; row=20; split=1; rail=1; decap=0.0pF; dummies=True; separator=False.\nRoles {'input_pair': 1, 'current_mirror': 1, 'balanced_load': 1, 'bias': 1, 'gain': 4, 'output': 2}; PDK sky130-analog-1; fixed bias=0.2875V; remaining=26.2s.",
+      "model_state_tokens": 246,
+      "model_state_truncated": false,
+      "policy": "Laya typed action prior; EDA determines acceptance"
+    },
+    {
+      "seconds": 0.009054280002601445,
+      "probabilities": {
+        "394a53d1492bc525": 0.9251,
+        "7a7893d205de18f6": 0.0006,
+        "fe0e370348ef13e4": 0.0019,
+        "17b5897a2d5dd07e": 0.034,
+        "19a54c8026f15eb3": 0.0016,
+        "363ba824e49e5f2e": 0.0369
+      },
+      "state": {
+        "goal": {
+          "objective": "area",
+          "minimum": {},
+          "maximum": {},
+          "analog": {
+            "noise_low_hz": 10.0,
+            "noise_high_hz": 1000000.0,
+            "supply_resistance_ohm": 20.0,
+            "load_step_a": 5e-05,
+            "pulse_rise_s": 1e-10,
+            "temperature_c": 27.0
+          },
+          "require_dummies": true
+        },
+        "technology": "sky130-analog-1",
+        "groups": [
+          {
+            "id": "g0",
+            "members": [
+              "m2",
+              "m3"
+            ],
+            "kind": "p",
+            "role": "input_pair",
+            "reason": "Differential gates, common source, equal geometry"
+          },
+          {
+            "id": "g1",
+            "members": [
+              "m8",
+              "m9"
+            ],
+            "kind": "p",
+            "role": "current_mirror",
+            "reason": "Common gate/source with a diode-connected reference"
+          },
+          {
+            "id": "g2",
+            "members": [
+              "m4",
+              "m5"
+            ],
+            "kind": "n",
+            "role": "balanced_load",
+            "reason": "Equal diode loads on the differential branches"
+          },
+          {
+            "id": "g3",
+            "members": [
+              "m1"
+            ],
+            "kind": "p",
+            "role": "bias",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g4",
+            "members": [
+              "m6"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g5",
+            "members": [
+              "m7"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g6",
+            "members": [
+              "m10"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g7",
+            "members": [
+              "m11"
+            ],
+            "kind": "n",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g8",
+            "members": [
+              "m12"
+            ],
+            "kind": "p",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g9",
+            "members": [
+              "m13"
+            ],
+            "kind": "p",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          }
+        ],
+        "fixed_input_bias_v": 0.2875,
+        "remaining_seconds": 23.439884183986578,
+        "history": [
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 2,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.24131,
+              "bias_error_v": 0.34131,
+              "gain_db": 69.14714929245929,
+              "cm_gain_db": 16.388496344718465,
+              "dc_phase_deg": 179.9823735,
+              "power_uw": 297.5706,
+              "ugf_mhz": 8.504524355140612,
+              "pm_deg": 62.68521553273378,
+              "bw_mhz": 0.0032493316811551248,
+              "gbw_def_mhz": 9.314327618988054,
+              "gbw_mhz": 8.504524355140612,
+              "fom": 2857.9854176254685,
+              "settle_v": 2.9505e-08,
+              "cmrr_db": 52.75454660465215,
+              "buffer_gain_error": 0.003207894389999577,
+              "buffer_ringing": 2.599975790218423e-10,
+              "buffer_dc_error_v": 0.0002959954890000005,
+              "input_noise_rms_v": 0.0001714720511417503,
+              "output_noise_rms_v": 0.33991081078175217,
+              "psrr_min_db": 33.49951212510299,
+              "supply_droop_v": 0.000984338277000063,
+              "supply_early_droop_v": 0.0009808391910000047,
+              "supply_dc_drop_v": 0.003217957734999999,
+              "input_offset_v": 2.5837797731866326e-05,
+              "input_offset_abs_v": 2.5837797731866326e-05,
+              "internal_supply_drop_v": 0.0026097619420000218,
+              "internal_ground_rise_v": 0.001856838988928
+            },
+            "quality": {
+              "area_um2": 13195.65185,
+              "centroid_error_um": 3.1899999999999977,
+              "input_cap_imbalance_ff": 1.2567899999999987
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.66843e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.0032075005800038525,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769031999979,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "clustered",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.65265e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.003207500619999637,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769030000467,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 2,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": false,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.47908,
+              "bias_error_v": 0.579082,
+              "gain_db": 49.80350729259701,
+              "cm_gain_db": -2.6294387511603388,
+              "dc_phase_deg": 179.99787776,
+              "power_uw": 309.7998,
+              "ugf_mhz": 7.7973121059668395,
+              "pm_deg": 66.3591097099259,
+              "bw_mhz": 0.027016932510547258,
+              "gbw_def_mhz": 8.352402266027664,
+              "gbw_mhz": 7.7973121059668395,
+              "fom": 2516.8873917823184,
+              "settle_v": 2.05117e-09,
+              "cmrr_db": 52.43288664487423,
+              "input_noise_rms_v": 0.00017897344659737046,
+              "output_noise_rms_v": 0.04828772867039613,
+              "psrr_min_db": 32.47789410147005,
+              "supply_droop_v": 0.0009845691209999785,
+              "supply_early_droop_v": 0.0009819276249998232,
+              "supply_dc_drop_v": 0.003348579610000124,
+              "input_offset_v": 0.00032261147819318003,
+              "input_offset_abs_v": 0.00032261147819318003,
+              "internal_supply_drop_v": 0.0024335505310000283,
+              "internal_ground_rise_v": 0.001891827937156
+            },
+            "quality": {
+              "area_um2": 9106.0952,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.4707500000000024
+            },
+            "error": null,
+            "checks": {
+              "physical": false,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": false,
+              "saturation": false,
+              "settles": true,
+              "cmrr": true
+            }
+          }
+        ]
+      },
+      "model_state": "Goal area; last feasible=False; failed=physical,gain,saturation.\narea_um2=9106; gain_db=49.8; gbw_mhz=7.797; pm_deg=66.36; input_noise_rms_v=0.000179; psrr_min_db=32.48; internal_supply_drop_v=0.002434; input_cap_imbalance_ff=1.471; centroid_error_um=3.19\nBounds {\"minimum\":{},\"maximum\":{}}\nPlan interdigitated; columns=1; row=20; split=2; rail=1; decap=0.0pF; dummies=True; separator=False.\nRoles {'input_pair': 1, 'current_mirror': 1, 'balanced_load': 1, 'bias': 1, 'gain': 4, 'output': 2}; PDK sky130-analog-1; fixed bias=0.2875V; remaining=23.4s.",
+      "model_state_tokens": 250,
+      "model_state_truncated": false,
+      "policy": "Laya typed action prior; EDA determines acceptance"
+    },
+    {
+      "seconds": 0.009242967003956437,
+      "probabilities": {
+        "14fa2a87e2034e4f": 0.759,
+        "3d945d9f84fc6bd3": 0.1483,
+        "7a7893d205de18f6": 0.0268,
+        "fe0e370348ef13e4": 0.0123,
+        "17b5897a2d5dd07e": 0.0034,
+        "19a54c8026f15eb3": 0.0503
+      },
+      "state": {
+        "goal": {
+          "objective": "area",
+          "minimum": {},
+          "maximum": {},
+          "analog": {
+            "noise_low_hz": 10.0,
+            "noise_high_hz": 1000000.0,
+            "supply_resistance_ohm": 20.0,
+            "load_step_a": 5e-05,
+            "pulse_rise_s": 1e-10,
+            "temperature_c": 27.0
+          },
+          "require_dummies": true
+        },
+        "technology": "sky130-analog-1",
+        "groups": [
+          {
+            "id": "g0",
+            "members": [
+              "m2",
+              "m3"
+            ],
+            "kind": "p",
+            "role": "input_pair",
+            "reason": "Differential gates, common source, equal geometry"
+          },
+          {
+            "id": "g1",
+            "members": [
+              "m8",
+              "m9"
+            ],
+            "kind": "p",
+            "role": "current_mirror",
+            "reason": "Common gate/source with a diode-connected reference"
+          },
+          {
+            "id": "g2",
+            "members": [
+              "m4",
+              "m5"
+            ],
+            "kind": "n",
+            "role": "balanced_load",
+            "reason": "Equal diode loads on the differential branches"
+          },
+          {
+            "id": "g3",
+            "members": [
+              "m1"
+            ],
+            "kind": "p",
+            "role": "bias",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g4",
+            "members": [
+              "m6"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g5",
+            "members": [
+              "m7"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g6",
+            "members": [
+              "m10"
+            ],
+            "kind": "n",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g7",
+            "members": [
+              "m11"
+            ],
+            "kind": "n",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g8",
+            "members": [
+              "m12"
+            ],
+            "kind": "p",
+            "role": "output",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          },
+          {
+            "id": "g9",
+            "members": [
+              "m13"
+            ],
+            "kind": "p",
+            "role": "gain",
+            "reason": "Circuit connectivity; no inferred matching constraint"
+          }
+        ],
+        "fixed_input_bias_v": 0.2875,
+        "remaining_seconds": 20.688152149989037,
+        "history": [
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.66843e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.0032075005800038525,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769031999979,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "clustered",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 1,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": true,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.23014,
+              "bias_error_v": 0.330139,
+              "gain_db": 69.47960843095252,
+              "cm_gain_db": 16.715117385144435,
+              "dc_phase_deg": 179.98168505,
+              "power_uw": 297.62100000000004,
+              "ugf_mhz": 8.554236873412494,
+              "pm_deg": 63.69487149519614,
+              "bw_mhz": 0.0031279589551378925,
+              "gbw_def_mhz": 9.31625714231343,
+              "gbw_mhz": 8.554236873412494,
+              "fom": 2874.2047346835384,
+              "settle_v": 2.65265e-08,
+              "cmrr_db": 52.76005769908946,
+              "buffer_gain_error": 0.003207500619999637,
+              "buffer_ringing": 1.5999979119385443e-10,
+              "buffer_dc_error_v": 0.0002923769030000467,
+              "input_noise_rms_v": 0.00017147084457564055,
+              "output_noise_rms_v": 0.34088517687507924,
+              "psrr_min_db": 33.51181013065593,
+              "supply_droop_v": 0.00098441670799998,
+              "supply_early_droop_v": 0.0009814194834998347,
+              "supply_dc_drop_v": 0.0032184382360000985,
+              "input_offset_v": 2.2251149124865465e-05,
+              "input_offset_abs_v": 2.2251149124865465e-05,
+              "internal_supply_drop_v": 0.0026117373579999104,
+              "internal_ground_rise_v": 0.00186577999203
+            },
+            "quality": {
+              "area_um2": 8685.929,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.2637399999999985
+            },
+            "error": null,
+            "checks": {
+              "physical": true,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": true,
+              "saturation": true,
+              "settles": true,
+              "cmrr": true,
+              "closed_loop": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 20,
+              "columns": 1,
+              "split": 2,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": false,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.47908,
+              "bias_error_v": 0.579082,
+              "gain_db": 49.80350729259701,
+              "cm_gain_db": -2.6294387511603388,
+              "dc_phase_deg": 179.99787776,
+              "power_uw": 309.7998,
+              "ugf_mhz": 7.7973121059668395,
+              "pm_deg": 66.3591097099259,
+              "bw_mhz": 0.027016932510547258,
+              "gbw_def_mhz": 8.352402266027664,
+              "gbw_mhz": 7.7973121059668395,
+              "fom": 2516.8873917823184,
+              "settle_v": 2.05117e-09,
+              "cmrr_db": 52.43288664487423,
+              "input_noise_rms_v": 0.00017897344659737046,
+              "output_noise_rms_v": 0.04828772867039613,
+              "psrr_min_db": 32.47789410147005,
+              "supply_droop_v": 0.0009845691209999785,
+              "supply_early_droop_v": 0.0009819276249998232,
+              "supply_dc_drop_v": 0.003348579610000124,
+              "input_offset_v": 0.00032261147819318003,
+              "input_offset_abs_v": 0.00032261147819318003,
+              "internal_supply_drop_v": 0.0024335505310000283,
+              "internal_ground_rise_v": 0.001891827937156
+            },
+            "quality": {
+              "area_um2": 9106.0952,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.4707500000000024
+            },
+            "error": null,
+            "checks": {
+              "physical": false,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": false,
+              "saturation": false,
+              "settles": true,
+              "cmrr": true
+            }
+          },
+          {
+            "plan": {
+              "pattern": "interdigitated",
+              "fingers_per_row": 32,
+              "columns": 1,
+              "split": 2,
+              "rail_multiplier": 1,
+              "dummies": true,
+              "shield_inputs": false,
+              "decap_pf": 0.0,
+              "decap_location": "supply"
+            },
+            "valid": false,
+            "metrics": {
+              "vin_dc": 0.2875,
+              "vout_dc": 1.47908,
+              "bias_error_v": 0.579082,
+              "gain_db": 49.80350729259701,
+              "cm_gain_db": -2.6294387511603388,
+              "dc_phase_deg": 179.99787776,
+              "power_uw": 309.7998,
+              "ugf_mhz": 7.797312105855327,
+              "pm_deg": 66.35910969239463,
+              "bw_mhz": 0.027016932510547258,
+              "gbw_def_mhz": 8.352402266027664,
+              "gbw_mhz": 7.797312105855327,
+              "fom": 2516.8873917463234,
+              "settle_v": 2.12669e-09,
+              "cmrr_db": 52.43288664487423,
+              "input_noise_rms_v": 0.00017897344659737634,
+              "output_noise_rms_v": 0.04828772867039602,
+              "psrr_min_db": 32.47789410165835,
+              "supply_droop_v": 0.0009845691209999785,
+              "supply_early_droop_v": 0.0009819276244997788,
+              "supply_dc_drop_v": 0.003348579610000124,
+              "input_offset_v": 0.00032261147819318003,
+              "input_offset_abs_v": 0.00032261147819318003,
+              "internal_supply_drop_v": 0.0024335505310000283,
+              "internal_ground_rise_v": 0.001891827937156
+            },
+            "quality": {
+              "area_um2": 9106.0952,
+              "centroid_error_um": 3.1900000000000013,
+              "input_cap_imbalance_ff": 1.4707500000000024
+            },
+            "error": null,
+            "checks": {
+              "physical": false,
+              "analog_measured": true,
+              "required_dummies": true
+            },
+            "qualification_checks": {
+              "bias_found": true,
+              "operating_point": true,
+              "currents": true,
+              "function": true,
+              "bandwidth": true,
+              "power": true,
+              "stability": true,
+              "gain": false,
+              "saturation": false,
+              "settles": true,
+              "cmrr": true
+            }
+          }
+        ]
+      },
+      "model_state": "Goal area; last feasible=False; failed=physical,gain,saturation.\narea_um2=9106; gain_db=49.8; gbw_mhz=7.797; pm_deg=66.36; input_noise_rms_v=0.000179; psrr_min_db=32.48; internal_supply_drop_v=0.002434; input_cap_imbalance_ff=1.471; centroid_error_um=3.19\nBounds {\"minimum\":{},\"maximum\":{}}\nPlan interdigitated; columns=1; row=32; split=2; rail=1; decap=0.0pF; dummies=True; separator=False.\nRoles {'input_pair': 1, 'current_mirror': 1, 'balanced_load': 1, 'bias': 1, 'gain': 4, 'output': 2}; PDK sky130-analog-1; fixed bias=0.2875V; remaining=20.7s.",
+      "model_state_tokens": 250,
+      "model_state_truncated": false,
+      "policy": "Laya typed action prior; EDA determines acceptance"
+    }
+  ],
+  "fixed_input_bias_v": 0.2875,
+  "first_feasible_seconds": 4.6132803480140865,
+  "evaluations": 6,
+  "max_evaluations": 6,
+  "budget_seconds": 40,
+  "wall_seconds": 22.06863780700951,
+  "eda_seconds": 21.99096286407439,
+  "pareto_plan_ids": [
+    "4288830cf791cd46",
+    "f06ef91c3c4318b6"
+  ],
+  "policy": "Laya prior + geometry acquisition",
+  "decision_seconds": 0.05775618401821703,
+  "decision_model": {
+    "model": "aac6fef/laya-multilingual-mlx",
+    "revision": "f2b4faf51023039425946074e2cf1361d2db11d5",
+    "precision": "float16",
+    "runtime": "pytorch-2.14.0+cu130",
+    "device": "cuda (NVIDIA GeForce RTX 4090)",
+    "fine_tuned": {
+      "path": "/home/cgao/.codex/worktrees/analog-layout-loop/ChipJev/experiments/ptm45/typed-decisions.pt",
+      "sha256": "f5df4faaeb1e2721657e5200293f7667ca525b8f86c1c8d3c3ab14193baeb8d5"
+    }
+  },
+  "identity_sha256": "eafe3148cd24a48632ee313375ddcb9a604613adc805f87b18696ec1fc31f6c4"
+}

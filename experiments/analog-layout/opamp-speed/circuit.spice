@@ -1,0 +1,22 @@
+** sch_path: /home/cgao/.codex/worktrees/analog-layout-loop/ChipJev/runs/validated-opamp-speed/circuit.sch
+**.subckt circuit
+VDD vdd 0 1.8
+XM1 t1 s1t vdd vdd sky130_fd_pr__pfet_01v8 L=2.4 W=24.24 nf=1 ad=7.0296 as=7.0296 pd=49.06 ps=49.06 nrd=0.0119637 nrs=0.0119637
++ sa=0 sb=0 sd=0 mult=1
+XM2 x1 inp t1 vdd sky130_fd_pr__pfet_01v8 L=2.4 W=436.77 nf=9 ad=70.3685 as=70.3685 pd=488.2 ps=488.2 nrd=0.000663965
++ nrs=0.000663965 sa=0 sb=0 sd=0 mult=1
+XM3 o1 inn t1 vdd sky130_fd_pr__pfet_01v8 L=2.4 W=436.77 nf=9 ad=70.3685 as=70.3685 pd=488.2 ps=488.2 nrd=0.000663965
++ nrs=0.000663965 sa=0 sb=0 sd=0 mult=1
+XM4 x1 x1 0 0 sky130_fd_pr__nfet_01v8 L=2.4 W=28.08 nf=1 ad=8.1432 as=8.1432 pd=56.74 ps=56.74 nrd=0.0103276 nrs=0.0103276 sa=0
++ sb=0 sd=0 mult=1
+XM5 o1 x1 0 0 sky130_fd_pr__nfet_01v8 L=2.4 W=28.08 nf=1 ad=8.1432 as=8.1432 pd=56.74 ps=56.74 nrd=0.0103276 nrs=0.0103276 sa=0
++ sb=0 sd=0 mult=1
+XM6 out o1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=36.45 nf=1 ad=10.5705 as=10.5705 pd=73.48 ps=73.48 nrd=0.0079561 nrs=0.0079561
++ sa=0 sb=0 sd=0 mult=1
+XM7 out s2ld 0 0 sky130_fd_pr__nfet_01v8 L=0.15 W=3.6 nf=1 ad=1.044 as=1.044 pd=7.78 ps=7.78 nrd=0.0805556 nrs=0.0805556 sa=0 sb=0
++ sd=0 mult=1
+C8 out o1 2e-11
+V_S1T s1t 0 0.4175
+V_S2LD s2ld 0 1.5925
+**.ends
+.end

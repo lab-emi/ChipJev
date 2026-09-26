@@ -39,11 +39,13 @@ _EVALUATE = None  # set in each worker by _worker_init (PTM 45 nm when unset)
 _TOPOLOGIES = {}
 
 
-def _worker_init(technology="ptm45", corner="tt"):
+def _worker_init(technology="ptm45", corner="tt", options=None):
     global _EVALUATE
     for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
         os.environ[name] = "1"
     _EVALUATE = evaluate_function(technology, corner)
+    if options:
+        _EVALUATE = functools.partial(_EVALUATE, **options)
 
 
 def _measure(args):
@@ -111,14 +113,14 @@ class Evaluator:
     "sky130" at `corner`); ``tally`` counts the records of every method (reset with
     ``tally.take()``)."""
 
-    def __init__(self, workers, technology="ptm45", corner="tt"):
+    def __init__(self, workers, technology="ptm45", corner="tt", evaluate_options=None):
         if technology not in TECHNOLOGIES:
             raise ValueError(f"unknown technology {technology!r}")
         self.technology, self.corner = technology, corner
         self.tally = Tally()
         context = multiprocessing.get_context("spawn")
         pool = ProcessPoolExecutor(workers, mp_context=context, initializer=_worker_init,
-                                   initargs=(technology, corner))
+                                   initargs=(technology, corner, evaluate_options))
         list(pool.map(_warm, range(workers)))
         self.pool = _CountingPool(pool, self.tally)
 

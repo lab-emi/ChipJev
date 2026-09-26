@@ -246,7 +246,7 @@ def trainable(model, layers=TRAINABLE_LAYERS):
     return names
 
 
-def train(labels, out_dir, *, seed=0, epochs=3, batch_size=32, lr=5e-5, device="cuda"):
+def train(labels, out_dir, *, seed=0, epochs=3, batch_size=32, lr=5e-5, device="cuda", examples=None):
     """Fine-tune on development examples; saves only the trainable tensors (FP16)."""
     import torch
 
@@ -258,7 +258,9 @@ def train(labels, out_dir, *, seed=0, epochs=3, batch_size=32, lr=5e-5, device="
     base = LayaTorch(offline=True, device=device, dtype="float32")
     model, tok, cfg = base.model, base.tok, base.cfg
     names = trainable(model)
-    examples = build_examples(labels, seed=seed)
+    examples = build_examples(labels, seed=seed) if examples is None else examples
+    if not examples or epochs < 1:
+        raise ValueError("Training requires labeled examples and positive epochs")
     parameters = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(parameters, lr=lr, weight_decay=0.01)
     steps = epochs * math.ceil(len(examples) / batch_size)
@@ -306,7 +308,7 @@ def train(labels, out_dir, *, seed=0, epochs=3, batch_size=32, lr=5e-5, device="
         "train_seconds": time.perf_counter() - start,
         "weights": str(path),
         "sha256": sha256(path),
-        "labels": {"tau": labels["tau"], "uniform": labels["uniform"],
+        "labels": labels["summary"] if "summary" in labels else {"tau": labels["tau"], "uniform": labels["uniform"],
                    "conditions": sorted({(e["vdd"], e["load_pf"]) for e in labels["labels"]})},
     }
     (out_dir / "training.json").write_text(json.dumps(summary, indent=1))

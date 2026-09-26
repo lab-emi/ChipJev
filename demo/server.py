@@ -36,7 +36,8 @@ ARTIFACTS = {"circuit.sch": "text/plain", "circuit.spice": "text/plain",
              "layout.svg": "image/svg+xml", "layout.mag": "text/plain",
              "layout.gds": "application/octet-stream", "pex.spice": "text/plain",
              "physical.json": "application/json", "drc.txt": "text/plain", "lvs.log": "text/plain",
-             "physical-evidence.zip": "application/zip"}
+             "physical-evidence.zip": "application/zip",
+             "layout-intent.svg": "image/svg+xml", "optimization.json": "application/json"}
 DEFAULT_ORIGINS = {"https://chipjev.com", "https://www.chipjev.com",
                    "https://lab-emi.github.io"}
 RUN_TTL = 600

@@ -24,17 +24,21 @@ def render_svg(directory, metadata):
         "metal2": "#bc9aca",
         "metal3": "#58a1cb",
         "metal4": "#d8bd73",
+        "metal5": "#e49757",
         "mimcap": "#73bcbc",
         "mimcapcontact": "#98dede",
         "via": "#eff5ff",
         "via2": "#eff5ff",
         "via3": "#eff5ff",
+        "via4": "#eff5ff",
         "viali": "#c4d4d9",
         "polycont": "#e4a0a0",
         "ndiffc": "#c5d49e",
         "pdiffc": "#e9d3a7",
         "psubdiffcont": "#82a897",
         "nsubdiffcont": "#af99c0",
+        "psubdiff": "#82a897",
+        "nsubdiff": "#af99c0",
     }
     lines = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width + 2 * margin} {height + 4 * margin}" role="img">',
@@ -57,7 +61,21 @@ def render_svg(directory, metadata):
     lines.append(
         f'<text x="{margin}" y="{height + 3.25 * margin}" fill="#a8c1d7" '
         f'font-family="sans-serif" font-size="{font}">'
-        "PDK wells, devices and contacts · M1 access · M2 branches · M3 nets</text>"
+        "PDK wells, devices and contacts · M1–M2 access · M3 buses · M4–M5 routing</text>"
     )
     lines.append("</svg>")
     (directory / "layout.svg").write_text("\n".join(lines))
+    if metadata.get("groups"):
+        overlay = []
+        for group in metadata["groups"]:
+            a, b, c, d = group["bbox"]
+            x = margin + a - x0
+            y = height + 2 * margin + y0 - d
+            overlay += [
+                f'<rect x="{x}" y="{y}" width="{c - a}" height="{d - b}" '
+                'fill="none" stroke="#ffffff" stroke-width="10" stroke-dasharray="35 20"/>',
+                f'<text x="{x}" y="{y - 30}" fill="#ffffff" font-family="monospace" '
+                f'font-size="{font}">{escape(group["role"])}: '
+                f"{escape(', '.join(group['members']))}</text>",
+            ]
+        (directory / "layout-intent.svg").write_text("\n".join(lines[:-1] + overlay + ["</svg>"]))

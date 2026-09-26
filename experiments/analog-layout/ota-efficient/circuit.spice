@@ -1,0 +1,16 @@
+** sch_path: /home/cgao/.codex/worktrees/analog-layout-loop/ChipJev/runs/validated-ota-efficient/circuit.sch
+**.subckt circuit
+VDD vdd 0 1.8
+XM1 t1 s1t vdd vdd sky130_fd_pr__pfet_01v8 L=2.4 W=77.04 nf=2 ad=11.1708 as=22.3416 pd=77.62 ps=155.24 nrd=0.00376428
++ nrs=0.00376428 sa=0 sb=0 sd=0 mult=1
+XM2 x1 inp t1 vdd sky130_fd_pr__pfet_01v8 L=2.4 W=897.66 nf=18 ad=130.161 as=144.623 pd=902.88 ps=1003.2 nrd=0.000323062
++ nrs=0.000323062 sa=0 sb=0 sd=0 mult=1
+XM3 out inn t1 vdd sky130_fd_pr__pfet_01v8 L=2.4 W=897.66 nf=18 ad=130.161 as=144.623 pd=902.88 ps=1003.2 nrd=0.000323062
++ nrs=0.000323062 sa=0 sb=0 sd=0 mult=1
+XM4 x1 x1 0 0 sky130_fd_pr__nfet_01v8 L=2.4 W=18.14 nf=1 ad=5.2606 as=5.2606 pd=36.86 ps=36.86 nrd=0.0159868 nrs=0.0159868 sa=0
++ sb=0 sd=0 mult=1
+XM5 out x1 0 0 sky130_fd_pr__nfet_01v8 L=2.4 W=18.14 nf=1 ad=5.2606 as=5.2606 pd=36.86 ps=36.86 nrd=0.0159868 nrs=0.0159868 sa=0
++ sb=0 sd=0 mult=1
+V_S1T s1t 0 0.61
+**.ends
+.end

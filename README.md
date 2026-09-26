@@ -120,6 +120,12 @@ With those files supplied, reruns execute the original code (`reproduce/frozen.p
 `tests/test_equivalence.py` compares the package with the recorded golden output on the same
 inputs; [experiments/README.md](experiments/README.md) maps the names.
 
+## Goal-driven analog layout
+
+The Magic → distributed RC PEX → ngspice flow now searches explicit layout plans: matching groups, guard domains and taps, current-based rails, unit decomposition, grounded separators and physical decap. Laya proposes legal actions; full DRC/LVS and fixed-bias simulation decide acceptance. The demo shows iteration history, parasitic balance, noise, PSRR and supply measurements. See [commands, coverage and limitations](docs/analog-layout-usage.md).
+
+The [three measured development runs](experiments/analog-layout/report/README.md) include native geometry, every evaluated layout and raw verification evidence. Their complete layout loops take 19.24–38.52 s on the recorded host; area falls by 34.2% and 13.9% for two cases, while the wideband case retains its initial feasible layout. These are development regressions, not held-out success rates or a comparison with dedicated layout tools.
+
 ## Getting started
 
 **Requirements.** Linux x86-64 with git, [uv](https://docs.astral.sh/uv/getting-started/installation/),

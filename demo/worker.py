@@ -22,10 +22,10 @@ import numpy as np
 
 from chipjev import xschem
 from chipjev.circuits.published import lookup
-from chipjev.circuits.sky130_devices import build
-from chipjev.layout.flow import complete as physical_design
+from chipjev.circuits.sky130_devices import build_on_grid as build
 from chipjev.paths import ROOT
 from chipjev.provenance import code_hashes
+from chipjev.search.layout import optimize as physical_design
 from chipjev.simulation.sky130 import evaluate
 from demo import design
 from demo.examples import DEFAULT_EXAMPLE, EXAMPLES
@@ -321,7 +321,8 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
         (directory / "circuit.spice").write_text(netlist)
         stage("simulating", message="Schematic AC sweep + ±10 mV unity-buffer steps", progress=69)
         result = evaluate(topology, selected["values"], directory=directory, strict=True,
-                          keep=True, vdd=example["vdd"], load_pf=example["load_pf"])
+                          keep=True, vdd=example["vdd"], load_pf=example["load_pf"], quantize_geometry=True,
+                          input_bias=selected.get("metrics",{}).get("vin_dc"))
         if result["error"]:
             raise RuntimeError(result["error"])
         def physical_stage(name, data):
@@ -333,7 +334,8 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
 
         physical = physical_design(topology, selected["values"], directory / "physical",
                                    vdd=example["vdd"], load_pf=example["load_pf"],
-                                   observer=physical_stage, prelayout=result)
+                                   observer=physical_stage, prelayout=result, model=model,
+                                   max_evaluations=6, budget_seconds=40)
         screens = [json.loads(p.read_text()) for p in
                    sorted((directory / "physical-search").glob("*/physical.json"))]
         physical["search_screening"] = {
@@ -358,13 +360,13 @@ def run(directory, example_id=DEFAULT_EXAMPLE, device=None):
             result = physical["prelayout"]
             # Regenerate matching schematic waves after an accepted sizing change.
             result = evaluate(topology, selected["values"], directory=directory,
-                              strict=True, keep=True, vdd=example["vdd"], load_pf=example["load_pf"])
+                              strict=True, keep=True, vdd=example["vdd"], load_pf=example["load_pf"], quantize_geometry=True)
         stage("checking", message="Comparing schematic and extracted circuit performance", progress=96)
         waves = waveforms(directory, result)
         postwaves = waveforms(directory / "physical/postlayout", physical["postlayout"])
         emit("waveforms", **waves, postlayout=postwaves)
         plot(directory, waves)
-        for name in ("layout.svg", "layout.mag", "layout.gds", "pex.spice", "physical.json", "drc.txt", "lvs.log"):
+        for name in ("layout.svg", "layout-intent.svg", "layout.mag", "layout.gds", "pex.spice", "physical.json", "optimization.json", "drc.txt", "lvs.log"):
             shutil.copy2(directory / "physical" / name, directory / name)
         with zipfile.ZipFile(directory / "physical-evidence.zip", "w", zipfile.ZIP_DEFLATED) as archive:
             for path in sorted((directory / "physical").rglob("*")):
